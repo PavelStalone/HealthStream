@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "ru.health.stream.ui"
+    namespace = "ru.health.stream.core.ui"
 }

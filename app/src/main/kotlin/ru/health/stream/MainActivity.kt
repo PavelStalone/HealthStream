@@ -30,7 +30,7 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import ru.health.stream.ui.theme.HealthStreamTheme
+import ru.health.stream.core.ui.theme.HealthStreamTheme
 import java.time.Instant
 
 class MainActivity : ComponentActivity() {

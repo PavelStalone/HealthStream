@@ -1,7 +1,7 @@
 plugins {
-    id("java-library")
+    id("health.stream.android.library")
 }
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+
+android {
+    namespace = "ru.health.stream.core.common"
 }
