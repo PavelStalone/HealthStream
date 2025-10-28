@@ -3,9 +3,9 @@ package ru.health.stream
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 import ru.health.stream.ui.theme.HealthStreamTheme
 import java.time.Instant
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     val TAG = "MainActivity"
 
