@@ -8,15 +8,22 @@ internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk = 36
+        compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
 
         defaultConfig {
-            minSdk = 33
+            minSdk = libs.findVersion("minSdk").get().toString().toInt()
+            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
 
         compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_21
-            targetCompatibility = JavaVersion.VERSION_21
+            val javaVersion = libs.findVersion("java")
+                .get()
+                .toString()
+                .toInt()
+                .let { java -> JavaVersion.toVersion(java) }
+
+            sourceCompatibility = javaVersion
+            targetCompatibility = javaVersion
         }
     }
 }

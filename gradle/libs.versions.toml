@@ -1,4 +1,9 @@
 [versions]
+java = "21"
+minSdk = "33"
+targetSdk = "36"
+compileSdk = "36"
+
 agp = "8.13.0"
 kotlin = "2.2.21"
 coreKtx = "1.17.0"
@@ -11,7 +16,6 @@ espressoCore = "3.7.0"
 
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
-androidx-appcompat = "1.7.1"
 composeBom = "2024.09.00"
 com-google-ksp = "2.2.20-2.0.3"
 com-google-dagger= "2.57.2"
@@ -49,7 +53,6 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 # endregion
 
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
 
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }

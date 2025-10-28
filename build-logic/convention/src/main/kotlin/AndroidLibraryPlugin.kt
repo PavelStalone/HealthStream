@@ -8,6 +8,7 @@ import org.gradle.kotlin.dsl.kotlin
 import ru.health.stream.buildlogic.configureKotlinAndroid
 import ru.health.stream.buildlogic.disableUnnecessaryAndroidTests
 import ru.health.stream.buildlogic.disableUnnecessaryUnitTests
+import ru.health.stream.buildlogic.libs
 
 class AndroidLibraryPlugin : Plugin<Project> {
 
@@ -20,12 +21,6 @@ class AndroidLibraryPlugin : Plugin<Project> {
             }
 
             extensions.configure<LibraryExtension> {
-                defaultConfig {
-                    minSdk = 33
-
-                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-                }
-
                 configureKotlinAndroid(this)
             }
 

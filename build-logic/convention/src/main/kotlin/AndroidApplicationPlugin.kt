@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import ru.health.stream.buildlogic.configureAndroidCompose
 import ru.health.stream.buildlogic.configureKotlinAndroid
+import ru.health.stream.buildlogic.libs
 import java.io.File
 
 class AndroidApplicationPlugin : Plugin<Project> {
@@ -22,10 +23,8 @@ class AndroidApplicationPlugin : Plugin<Project> {
                 configureAndroidCompose(this)
 
                 defaultConfig {
-                    targetSdk = 36
-
+                    targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
                     multiDexEnabled = true
-                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 }
 
                 buildFeatures {

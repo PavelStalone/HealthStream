@@ -33,7 +33,6 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
 
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(project(":core:ui"))
