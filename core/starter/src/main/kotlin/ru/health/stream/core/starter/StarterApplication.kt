@@ -2,6 +2,7 @@ package ru.health.stream.core.starter
 
 import android.app.Application
 import javax.inject.Inject
+import javax.inject.Provider
 
 abstract class StarterApplication : Application() {
 

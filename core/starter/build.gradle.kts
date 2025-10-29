@@ -6,3 +6,7 @@ plugins {
 android {
     namespace = "ru.health.stream.core.starter"
 }
+
+dependencies {
+    api(libs.androidx.lifecycle.runtime.ktx)
+}
