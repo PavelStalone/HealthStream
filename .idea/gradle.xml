@@ -32,6 +32,7 @@
             <option value="$PROJECT_DIR$/core/communication/ktor" />
             <option value="$PROJECT_DIR$/core/monitor" />
             <option value="$PROJECT_DIR$/core/monitor/timber" />
+            <option value="$PROJECT_DIR$/core/starter" />
             <option value="$PROJECT_DIR$/core/store" />
             <option value="$PROJECT_DIR$/core/store/datastore" />
             <option value="$PROJECT_DIR$/core/test" />

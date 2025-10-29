@@ -3,7 +3,6 @@ package ru.health.stream
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -28,12 +27,15 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import java.time.Instant
 
-class MainActivity : ComponentActivity() {
+@AndroidEntryPoint
+class MainActivity : StarterActivity() {
 
     val TAG = "MainActivity"
 
@@ -113,6 +115,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        Log.i("MainActivity", "onCreate!!!!!!!!!!!!!!!")
     }
 
     // Create the permissions launcher

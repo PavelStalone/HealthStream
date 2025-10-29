@@ -36,4 +36,5 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(project(":core:ui"))
+    implementation(project(":core:starter"))
 }
