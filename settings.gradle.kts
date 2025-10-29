@@ -39,3 +39,4 @@ include(":core:communication:ktor")
 
 include(":core:test")
 include(":core:monitor")
+include(":core:monitor:timber")

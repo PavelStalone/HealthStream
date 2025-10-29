@@ -27,6 +27,7 @@ jakewharton-timber = "5.0.1"
 kotlinx-datetime = "0.6.2"
 androidx-constraintlayout-compose = "1.1.1"
 androidx-work = "2.10.5"
+jetbrainsKotlinJvm = "2.2.21"
 
 [libraries]
 
@@ -96,3 +97,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 com-google-ksp = { id = "com.google.devtools.ksp", version.ref = "com-google-ksp" }
 com-google-dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "com-google-dagger" }
 org-gradle-android-cache-fix = { id = "org.gradle.android.cache-fix", version.ref = "org-gradle-android-cache-fix" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
