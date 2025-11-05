@@ -29,6 +29,7 @@
             <option value="$PROJECT_DIR$/core/common" />
             <option value="$PROJECT_DIR$/core/communication" />
             <option value="$PROJECT_DIR$/core/communication/ble" />
+            <option value="$PROJECT_DIR$/core/communication/ble/lib" />
             <option value="$PROJECT_DIR$/core/communication/ktor" />
             <option value="$PROJECT_DIR$/core/monitor" />
             <option value="$PROJECT_DIR$/core/monitor/timber" />

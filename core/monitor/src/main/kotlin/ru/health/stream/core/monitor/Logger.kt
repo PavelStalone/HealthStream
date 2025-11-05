@@ -17,7 +17,7 @@ object Logger {
     inline fun logw(message: String, throwable: Throwable? = null, vararg arguments: Any?) =
         log(priority = Log.WARN, message = message, throwable = throwable, arguments)
 
-    inline fun loge(message: String, throwable: Throwable? = null, vararg arguments: Any?) =
+    inline fun loge(throwable: Throwable? = null, message: String, vararg arguments: Any?) =
         log(priority = Log.ERROR, message = message, throwable = throwable, arguments)
 
     inline fun log(priority: Int, message: String, vararg arguments: Any?) =
