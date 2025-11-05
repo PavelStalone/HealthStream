@@ -61,6 +61,7 @@ androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constr
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle-viewmodel-compose" }
 
 jakewharton-timber = { module = "com.jakewharton.timber:timber", version.ref = "jakewharton-timber" }
+
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 google-dagger = { module = "com.google.dagger:dagger", version.ref = "com-google-dagger" }
