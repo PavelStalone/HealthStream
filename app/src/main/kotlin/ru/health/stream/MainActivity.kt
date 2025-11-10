@@ -5,18 +5,20 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.HealthConnectFeatures
@@ -32,6 +34,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.theme.HealthStreamTheme
+import ru.health.stream.feature.chart.api.CubicLine
+import ru.health.stream.feature.chart.api.Line
+import ru.health.stream.feature.chart.api.LineChart
+import ru.health.stream.feature.chart.model.ChartPosition
 import java.time.Instant
 
 @AndroidEntryPoint
@@ -96,22 +102,57 @@ class MainActivity : StarterActivity() {
         enableEdgeToEdge()
         setContent {
             HealthStreamTheme {
-                val h by flow.collectAsState()
+//                val h by flow.collectAsState()
+//
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    LazyColumn(
+//                        modifier = Modifier.padding(innerPadding),
+//                        verticalArrangement = Arrangement.spacedBy(8.dp),
+//                    ) {
+//                        items(h) {
+//                            Card(Modifier.padding(horizontal = 8.dp)) {
+//                                Text(
+//                                    modifier = Modifier.padding(8.dp),
+//                                    text = it.toString()
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LazyColumn(
-                        modifier = Modifier.padding(innerPadding),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(h) {
-                            Card(Modifier.padding(horizontal = 8.dp)) {
-                                Text(
-                                    modifier = Modifier.padding(8.dp),
-                                    text = it.toString()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.Gray)
+                ) {
+                    val width by rememberInfiniteTransition().animateFloat(
+                        initialValue = 1f, targetValue = 20f, infiniteRepeatable(
+                            tween(5000), RepeatMode.Reverse
+                        )
+                    )
+                    LineChart(
+                        modifier = Modifier.fillMaxSize(),
+                        lines = listOf(
+                            Line(
+                                points = listOf(
+                                    ChartPosition.Point(x = 0f, y = 0f, z = 0f),
+                                    ChartPosition.Point(x = 1f, y = 40f, z = 0f),
+                                    ChartPosition.Point(x = 2f, y = 20f, z = 0f),
+                                    ChartPosition.Point(x = 3f, y = 50f, z = 0f),
+                                    ChartPosition.Point(x = 5f, y = 0f, z = 0f),
                                 )
-                            }
-                        }
-                    }
+                            ),
+                            CubicLine(
+                                points = listOf(
+                                    ChartPosition.Point(x = 0f, y = 0f, z = 0f),
+                                    ChartPosition.Point(x = 2f, y = 40f, z = 0f),
+                                    ChartPosition.Point(x = 4f, y = 20f, z = 0f),
+                                    ChartPosition.Point(x = 6f, y = 50f, z = 0f),
+                                    ChartPosition.Point(x = width, y = 0f, z = 0f),
+                                )
+                            )
+                        )
+                    )
                 }
             }
         }

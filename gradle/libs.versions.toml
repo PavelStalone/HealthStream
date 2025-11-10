@@ -7,6 +7,7 @@ compileSdk = "36"
 agp = "8.13.0"
 kotlin = "2.2.21"
 coreKtx = "1.17.0"
+org-jetbrains-coroutines = "1.10.2"
 
 # region Test
 junit = "4.13.2"
@@ -79,6 +80,7 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 jakewharton-timber = { module = "com.jakewharton.timber:timber", version.ref = "jakewharton-timber" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "org-jetbrains-coroutines" }
 
 google-dagger = { module = "com.google.dagger:dagger", version.ref = "com-google-dagger" }
 google-dagger-android = { module = "com.google.dagger:dagger-android", version.ref = "com-google-dagger" }

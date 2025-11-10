@@ -40,3 +40,5 @@ include(":core:communication:ble")
 include(":core:communication:ble:lib")
 include(":core:communication:ktor")
 // endregion
+
+include(":feature:chart")

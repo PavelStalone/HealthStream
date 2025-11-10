@@ -38,6 +38,8 @@
             <option value="$PROJECT_DIR$/core/store/datastore" />
             <option value="$PROJECT_DIR$/core/test" />
             <option value="$PROJECT_DIR$/core/ui" />
+            <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/chart" />
           </set>
         </option>
       </GradleProjectSettings>

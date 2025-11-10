@@ -38,4 +38,5 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:starter"))
     implementation(project(":core:monitor"))
+    implementation(project(":feature:chart"))
 }
