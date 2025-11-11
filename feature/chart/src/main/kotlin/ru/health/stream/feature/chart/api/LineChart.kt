@@ -27,10 +27,12 @@ import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import ru.health.stream.feature.chart.core.AxisDrawable
+import ru.health.stream.feature.chart.core.CubicLine
+import ru.health.stream.feature.chart.core.Drawable
+import ru.health.stream.feature.chart.core.Line
 import ru.health.stream.feature.chart.model.ChartPosition
 import kotlin.math.max
 import kotlin.math.min
@@ -38,6 +40,8 @@ import kotlin.math.min
 @Composable
 fun LineChart(
     lines: List<Drawable>,
+    horizontalLine: AxisDrawable,
+    verticalLine: AxisDrawable,
     modifier: Modifier = Modifier,
     startInitialAnimation: Boolean = true,
 ) {
@@ -103,139 +107,6 @@ fun LineChart(
     }
 }
 
-internal class ChartDrawScope(
-    private val drawScope: DrawScope,
-    widthRange: MutableState<ClosedFloatingPointRange<Float>>,
-    heightRange: MutableState<ClosedFloatingPointRange<Float>>,
-) : DrawScope by drawScope {
-    private var widthRange by widthRange
-    private var heightRange by heightRange
-
-    override fun drawCircle(
-        color: Color,
-        radius: Float,
-        center: Offset,
-        alpha: Float,
-        style: DrawStyle,
-        colorFilter: ColorFilter?,
-        blendMode: BlendMode
-    ) {
-//        if (center.x > widthRange.endInclusive) widthRange = widthRange.start..center.x
-//        if (center.y > heightRange.endInclusive) heightRange = heightRange.start..center.y
-
-        drawScope.drawCircle(
-            color = color,
-            radius = radius,
-            center = Offset(
-                x = center.x * (size.width / widthRange.endInclusive),
-                y = center.y * (size.height / heightRange.endInclusive * -1f)
-            ),
-            alpha,
-            style,
-            colorFilter,
-            blendMode
-        )
-    }
-
-    override fun drawPath(
-        path: Path,
-        color: Color,
-        alpha: Float,
-        style: DrawStyle,
-        colorFilter: ColorFilter?,
-        blendMode: BlendMode
-    ) {
-        val bounds = path.getBounds()
-
-//        if (bounds.width > widthRange.endInclusive) widthRange = widthRange.start..bounds.width
-//        if (bounds.height > heightRange.endInclusive) heightRange = heightRange.start..bounds.height
-
-        val matrix = Matrix().apply {
-            reset()
-            translate(y = size.height)
-            scale(
-                x = size.width / widthRange.endInclusive,
-                y = size.height / heightRange.endInclusive * -1f
-            )
-        }
-
-        path.transform(matrix)
-        drawScope.drawPath(path, color, alpha, style, colorFilter, blendMode)
-//        Log.i("LineChart", "heightRange: $heightRange, class: $this")
-    }
-}
-
-class Line(
-    points: List<ChartPosition.Point>
-) : Drawable {
-
-    private val sortedPoints = points.sortedBy { it.x }
-
-    override val yRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        minOf { point -> point.y }..maxOf { point -> point.y }
-    }
-    override val xRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        first().x..last().x
-    }
-
-    init {
-        require(sortedPoints.size >= 2) { "Line cant have been less 2 points" }
-    }
-
-    private fun createPath(interpolator: Float): Path = Path().apply {
-        sortedPoints.first().let { point -> moveTo(x = point.x, y = point.y * interpolator) }
-        sortedPoints.drop(1).forEach { point -> lineTo(x = point.x, y = point.y * interpolator) }
-    }
-
-    override fun DrawScope.draw(interpolator: Float) {
-        drawPath(path = createPath(interpolator), color = Color.Red, style = Stroke(width = 20f))
-    }
-}
-
-class CubicLine(
-    points: List<ChartPosition.Point>
-) : Drawable {
-
-    private val sortedPoints = points.sortedBy { it.x }
-
-    override val yRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        minOf { point -> point.y }..maxOf { point -> point.y }
-    }
-    override val xRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        first().x..last().x
-    }
-
-    init {
-        require(points.size >= 2) { "Line cant have been less 2 points" }
-    }
-
-    private fun createPath(interpolator: Float): Path = Path().apply {
-        sortedPoints.first().let { point -> moveTo(x = point.x, y = point.y * interpolator) }
-        sortedPoints.zipWithNext { lastPoint, point ->
-            val xCenter = (point.x - lastPoint.x) / 2f
-
-            cubicTo(
-                x1 = lastPoint.x + xCenter, y1 = lastPoint.y * interpolator,
-                x2 = lastPoint.x + xCenter, y2 = point.y * interpolator,
-                x3 = point.x, y3 = point.y * interpolator,
-            )
-        }
-    }
-
-    override fun DrawScope.draw(interpolator: Float) {
-        drawPath(path = createPath(interpolator), color = Color.Blue, style = Stroke(width = 20f))
-    }
-}
-
-interface Drawable {
-    val yRange: ClosedFloatingPointRange<Float>
-    val xRange: ClosedFloatingPointRange<Float>
-
-    fun DrawScope.draw(interpolator: Float)
-}
-
-var state by mutableStateOf(1f)
-
 @Preview
 @Composable
 fun PreviewChart() {
@@ -256,7 +127,7 @@ fun PreviewChart() {
                     Line(
                         points = listOf(
                             ChartPosition.Point(x = 0f, y = 0f, z = 0f),
-                            ChartPosition.Point(x = 1f, y = state, z = 0f),
+                            ChartPosition.Point(x = 1f, y = 40f, z = 0f),
                             ChartPosition.Point(x = 2f, y = 20f, z = 0f),
                             ChartPosition.Point(x = 3f, y = 50f, z = 0f),
                             ChartPosition.Point(x = 5f, y = 0f, z = 0f),
