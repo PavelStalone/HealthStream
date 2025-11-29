@@ -12,23 +12,16 @@ class Line(
 
     private val sortedPoints = points.sortedBy { it.x }
 
-    override val yRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        minOf { point -> point.y }..maxOf { point -> point.y }
-    }
-    override val xRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        first().x..last().x
-    }
-
     init {
         require(sortedPoints.size >= 2) { "Line cant have been less 2 points" }
     }
 
-    private fun createPath(interpolator: Float): Path = Path().apply {
-        sortedPoints.first().let { point -> moveTo(x = point.x, y = point.y * interpolator) }
-        sortedPoints.drop(1).forEach { point -> lineTo(x = point.x, y = point.y * interpolator) }
+    private fun ChartDrawScope.createPath(interpolator: Float): Path = Path().apply {
+        sortedPoints.first().let { point -> moveTo(x = point.x.xChart, y = point.y.yChart * interpolator) }
+        sortedPoints.drop(1).forEach { point -> lineTo(x = point.x.xChart, y = point.y.yChart * interpolator) }
     }
 
-    override fun DrawScope.draw(interpolator: Float) {
+    override fun ChartDrawScope.draw(interpolator: Float) {
         drawPath(path = createPath(interpolator), color = Color.Red, style = Stroke(width = 20f))
     }
 }
@@ -39,31 +32,24 @@ class CubicLine(
 
     private val sortedPoints = points.sortedBy { it.x }
 
-    override val yRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        minOf { point -> point.y }..maxOf { point -> point.y }
-    }
-    override val xRange: ClosedFloatingPointRange<Float> = with(sortedPoints) {
-        first().x..last().x
-    }
-
     init {
         require(points.size >= 2) { "Line cant have been less 2 points" }
     }
 
-    private fun createPath(interpolator: Float): Path = Path().apply {
-        sortedPoints.first().let { point -> moveTo(x = point.x, y = point.y * interpolator) }
+    private fun ChartDrawScope.createPath(interpolator: Float): Path = Path().apply {
+        sortedPoints.first().let { point -> moveTo(x = point.x.xChart, y = point.y.yChart * interpolator) }
         sortedPoints.zipWithNext { lastPoint, point ->
             val xCenter = (point.x - lastPoint.x) / 2f
 
             cubicTo(
-                x1 = lastPoint.x + xCenter, y1 = lastPoint.y * interpolator,
-                x2 = lastPoint.x + xCenter, y2 = point.y * interpolator,
-                x3 = point.x, y3 = point.y * interpolator,
+                x1 = (lastPoint.x + xCenter).xChart, y1 = lastPoint.y.yChart * interpolator,
+                x2 = (lastPoint.x + xCenter).xChart, y2 = point.y.yChart * interpolator,
+                x3 = point.x.xChart, y3 = point.y.yChart * interpolator,
             )
         }
     }
 
-    override fun DrawScope.draw(interpolator: Float) {
-        drawPath(path = createPath(interpolator), color = Color.Blue, style = Stroke(width = 20f))
+    override fun ChartDrawScope.draw(interpolator: Float) {
+        drawPath(path = createPath(interpolator), color = Color.Red, style = Stroke(width = 20f))
     }
 }

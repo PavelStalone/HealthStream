@@ -2,105 +2,239 @@ package ru.health.stream.feature.chart.api
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.LayoutScopeMarker
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Matrix
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.layout.HorizontalAlignmentLine
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.ParentDataModifierNode
+import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.delay
-import ru.health.stream.feature.chart.core.AxisDrawable
-import ru.health.stream.feature.chart.core.CubicLine
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastRoundToInt
+import ru.health.stream.feature.chart.core.ChartDrawScopeImpl
 import ru.health.stream.feature.chart.core.Drawable
-import ru.health.stream.feature.chart.core.Line
-import ru.health.stream.feature.chart.model.ChartPosition
 import kotlin.math.max
-import kotlin.math.min
+
+@Immutable
+@LayoutScopeMarker
+interface DescriptionScope {
+
+    @Stable
+    fun Modifier.bindChartValue(
+        xValue: Float = Float.NaN,
+        yValue: Float = Float.NaN,
+        alignment: Alignment = Alignment.Center,
+    ): Modifier
+}
+
+internal object DescriptionScopeInstance : DescriptionScope {
+
+    @Stable
+    override fun Modifier.bindChartValue(
+        xValue: Float,
+        yValue: Float,
+        alignment: Alignment
+    ): Modifier = then(
+        ChartDataElement(
+            xValue = xValue,
+            yValue = yValue,
+            alignment = alignment,
+            inspectorInfo = debugInspectorInfo {
+                name = "bindChartValue"
+                properties["xValue"] = xValue
+                properties["yValue"] = yValue
+                properties["alignment"] = alignment
+            }
+        )
+    )
+}
+
+private val Measurable.chartDataNode: ChartDataNode?
+    get() = parentData as? ChartDataNode
+
+private data class ChartDataElement(
+    val xValue: Float,
+    val yValue: Float,
+    val alignment: Alignment,
+    val inspectorInfo: InspectorInfo.() -> Unit,
+) : ModifierNodeElement<ChartDataNode>() {
+
+    override fun create(): ChartDataNode = ChartDataNode(
+        xValue = xValue,
+        yValue = yValue,
+        alignment = alignment,
+    )
+
+    override fun update(node: ChartDataNode) {
+        node.xValue = xValue
+        node.yValue = yValue
+        node.alignment = alignment
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        inspectorInfo()
+    }
+}
+
+private class ChartDataNode(
+    var xValue: Float,
+    var yValue: Float,
+    var alignment: Alignment,
+) : ParentDataModifierNode, Modifier.Node() {
+
+    override fun Density.modifyParentData(parentData: Any?) = this@ChartDataNode
+}
+
+private val LeftChartBoundOffset = HorizontalAlignmentLine(::max)
+private val RightChartBoundOffset = HorizontalAlignmentLine(::max)
+private val TopChartBoundOffset = HorizontalAlignmentLine(::max)
+private val BottomChartBoundOffset = HorizontalAlignmentLine(::max)
 
 @Composable
-fun LineChart(
-    lines: List<Drawable>,
-    horizontalLine: AxisDrawable,
-    verticalLine: AxisDrawable,
-    modifier: Modifier = Modifier,
-    startInitialAnimation: Boolean = true,
+fun Chart(
+    modifier: Modifier,
+    xRange: ClosedFloatingPointRange<Float>,
+    yRange: ClosedFloatingPointRange<Float>,
+    chartDrawables: List<Drawable> = emptyList(),
+    animation: Boolean = true,
+    descriptionContent: @Composable DescriptionScope.() -> Unit,
 ) {
-    var animationStarted by remember { mutableStateOf(!startInitialAnimation) }
-
-    val animatedY = List(lines.size) { index ->
-        animateFloatAsState(
-            targetValue = if (animationStarted) 1f else 0f,
-            animationSpec = tween(
-                durationMillis = 600 + (lines.size - index) * 100,
-                delayMillis = index * 100,
-            ),
-            label = "line animation",
-        )
-    }
-
-    LaunchedEffect(Unit) {
-        delay(500)
-        animationStarted = true
-    }
-
     val infinite = rememberInfiniteTransition()
     val anim by infinite.animateFloat(
-        initialValue = 0f,
+        initialValue = 0f.takeIf { animation } ?: 1f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse),
     )
 
-    lines.map { it.yRange }
-        .reduce { acc, range ->
-            min(acc.start, range.start)..max(acc.endInclusive, range.endInclusive)
+    Layout(
+        modifier = modifier,
+        content = {
+            DescriptionScopeInstance.descriptionContent()
+
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Blue)
+            ) {
+                ChartDrawScopeImpl(
+                    drawScope = this,
+                    widthRange = xRange,
+                    heightRange = yRange,
+                ).run {
+                    chartDrawables.map { chart ->
+                        with(chart) { draw(anim) }
+                    }
+                }
+            }
+        },
+    ) { measurables, constraints ->
+        var topLeftOffset = IntOffset(x = 0, y = 0)
+        var bottomRightOffset = IntOffset(x = 0, y = 0)
+
+        val descriptionsPlaceable = measurables.filter { it.parentData is ChartDataNode }
+            .map { it.measure(constraints.copy(minWidth = 0, minHeight = 0)) }
+        val chartMeasurables = measurables.filterNot { it.parentData is ChartDataNode }
+
+        descriptionsPlaceable
+            .forEach {
+                with(topLeftOffset) {
+                    topLeftOffset = copy(
+                        x = max(x, it[LeftChartBoundOffset]),
+                        y = max(y, it[TopChartBoundOffset]),
+                    )
+                }
+                with(bottomRightOffset) {
+                    bottomRightOffset = copy(
+                        x = max(x, it[RightChartBoundOffset]),
+                        y = max(y, it[BottomChartBoundOffset]),
+                    )
+                }
+            }
+
+        val chartSize = IntSize(
+            width = constraints.maxWidth - topLeftOffset.x - bottomRightOffset.x,
+            height = constraints.maxHeight - topLeftOffset.y - bottomRightOffset.y,
+        )
+
+        val chartConstraints = Constraints.fixed(
+            width = chartSize.width,
+            height = chartSize.height,
+        )
+
+        val chartsPlaceable = chartMeasurables.map {
+            it.measure(chartConstraints)
         }
-    val widthRange = remember(lines) {
-        mutableStateOf(
-            lines.map { it.xRange }
-                .reduce { acc, range ->
-                    min(acc.start, range.start)..max(acc.endInclusive, range.endInclusive)
-                }
-        )
-    }
-    val heightRange = remember(lines) {
-        mutableStateOf(
-            lines.map { it.yRange }
-                .reduce { acc, range ->
-                    min(acc.start, range.start)..max(acc.endInclusive, range.endInclusive)
-                }
-        )
-    }
 
-    Canvas(modifier = modifier) {
-        ChartDrawScope(
-            drawScope = this,
-            widthRange = widthRange,
-            heightRange = heightRange,
-        ).run {
+        fun xConverter(xValue: Float): Int {
+            val koef = chartSize.width / (xRange.endInclusive - xRange.start)
 
-            lines.mapIndexed { index, drawablePath ->
-                with(drawablePath) {
-                    draw(anim)
+            if (xValue.isNaN()) return 0
+            return ((xValue - xRange.start) * koef).fastRoundToInt()
+        }
+
+        fun yConverter(yValue: Float): Int {
+            val koef = (chartSize.height / (yRange.endInclusive - yRange.start)) * -1f
+
+            if (yValue.isNaN()) return chartSize.height
+            return chartSize.height + ((yValue - yRange.start) * koef).fastRoundToInt()
+        }
+
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            chartsPlaceable.forEach { placeable ->
+                placeable.place(topLeftOffset)
+            }
+            descriptionsPlaceable.forEach { placeable ->
+                val chartNode = placeable.parentData as? ChartDataNode
+
+                if (chartNode != null) {
+                    val xPos = topLeftOffset.x + xConverter(chartNode.xValue)
+                    val yPos = topLeftOffset.y + yConverter(chartNode.yValue)
+
+                    val spaceWidth = placeable.width * 2
+//                        min(placeable.width, min(constraints.maxWidth - xPos, xPos)) * 2
+                    val spaceHeight = placeable.height * 2
+//                        min(placeable.height, min(constraints.maxHeight - yPos, yPos)) * 2
+
+                    val alignOffset = chartNode.alignment.align(
+                        size = IntSize(0, 0),
+                        space = IntSize(spaceWidth, spaceHeight),
+                        layoutDirection = layoutDirection
+                    )
+
+                    placeable.place(
+                        IntOffset(x = xPos, y = yPos) - IntOffset(
+                            x = spaceWidth / 2,
+                            y = spaceHeight / 2,
+                        ) + (alignOffset / 2f)
+                    )
+                } else {
+                    placeable.place(0, 0)
                 }
             }
         }
@@ -116,33 +250,43 @@ fun PreviewChart() {
                 .fillMaxSize()
                 .background(color = Color.Gray)
         ) {
-            val width by rememberInfiniteTransition().animateFloat(
-                initialValue = 1f, targetValue = 100f, infiniteRepeatable(
-                    tween(5000), RepeatMode.Reverse
+            val transition = rememberInfiniteTransition()
+            val anim by transition.animateFloat(
+                initialValue = 0f,
+                targetValue = 10f,
+                animationSpec = infiniteRepeatable(
+                    tween(1000), RepeatMode.Reverse
                 )
             )
-            LineChart(
+
+            Chart(
                 modifier = Modifier.fillMaxSize(),
-                lines = listOf(
-                    Line(
-                        points = listOf(
-                            ChartPosition.Point(x = 0f, y = 0f, z = 0f),
-                            ChartPosition.Point(x = 1f, y = 40f, z = 0f),
-                            ChartPosition.Point(x = 2f, y = 20f, z = 0f),
-                            ChartPosition.Point(x = 3f, y = 50f, z = 0f),
-                            ChartPosition.Point(x = 5f, y = 0f, z = 0f),
-                        )
-                    ),
-                    CubicLine(
-                        points = listOf(
-                            ChartPosition.Point(x = 0f, y = 0f, z = 0f),
-                            ChartPosition.Point(x = 2f, y = 40f, z = 0f),
-                            ChartPosition.Point(x = 4f, y = 20f, z = 0f),
-                            ChartPosition.Point(x = 6f, y = 50f, z = 0f),
-                            ChartPosition.Point(x = width, y = 0f, z = 0f),
-                        )
-                    )
-                )
+                xRange = 0f..10f,
+                yRange = 0f..10f,
+                descriptionContent = {
+                    Column(
+                        Modifier
+                            .bindChartValue(xValue = anim, alignment = Alignment.Center)
+                            .background(Color.Green)
+                            .padding(vertical = 20.dp)
+                    ) {
+                        Text(text = "-|-", style = TextStyle.Default.copy(fontSize = 30.sp))
+                    }
+                    Column(
+                        Modifier
+                            .bindChartValue(xValue = anim, alignment = Alignment.CenterStart)
+                            .background(Color.Green)
+                    ) {
+                        Text(text = "-|-", style = TextStyle.Default.copy(fontSize = 30.sp))
+                    }
+                    Column(
+                        Modifier
+                            .bindChartValue(xValue = anim, alignment = Alignment.CenterEnd)
+                            .background(Color.Green)
+                    ) {
+                        Text(text = "-|-", style = TextStyle.Default.copy(fontSize = 30.sp))
+                    }
+                }
             )
         }
     }

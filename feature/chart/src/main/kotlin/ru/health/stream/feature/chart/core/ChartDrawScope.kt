@@ -1,8 +1,5 @@
 package ru.health.stream.feature.chart.core
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -16,16 +13,25 @@ interface ChartDrawScope : DrawScope {
 
     val widthRange: ClosedFloatingPointRange<Float>
     val heightRange: ClosedFloatingPointRange<Float>
+
+    val Float.xChart: Float
+    val Float.yChart: Float
 }
 
 internal class ChartDrawScopeImpl(
     private val drawScope: DrawScope,
-    widthRange: MutableState<ClosedFloatingPointRange<Float>>,
-    heightRange: MutableState<ClosedFloatingPointRange<Float>>,
+    override val widthRange: ClosedFloatingPointRange<Float>,
+    override val heightRange: ClosedFloatingPointRange<Float>,
 ) : ChartDrawScope, DrawScope by drawScope {
 
-    override var widthRange by widthRange
-    override var heightRange by heightRange
+    private val width = widthRange.endInclusive - widthRange.start
+    private val height = heightRange.endInclusive - heightRange.start
+
+    private val xKoef = (size.width / width)
+    private val yKoef = (size.height / height)
+
+    override val Float.xChart: Float get() = (this - widthRange.start) * xKoef
+    override val Float.yChart: Float get() = (this - heightRange.start) * yKoef
 
     override fun drawCircle(
         color: Color,
@@ -62,8 +68,8 @@ internal class ChartDrawScopeImpl(
             reset()
             translate(y = size.height)
             scale(
-                x = size.width / widthRange.endInclusive,
-                y = size.height / heightRange.endInclusive * -1f
+                x = 1f,
+                y = -1f
             )
         }
 
