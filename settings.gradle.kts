@@ -41,4 +41,10 @@ include(":core:communication:ble:lib")
 include(":core:communication:ktor")
 // endregion
 
+// region Feature module
 include(":feature:chart")
+include(":feature:vitals")
+include(":feature:vitals:data")
+include(":feature:vitals:source")
+include(":feature:vitals:integration")
+// endregion
