@@ -22,6 +22,7 @@ nordic-android-common-uiscanner = "1.0.11"
 com-polidea-rxandroidble = "1.19.1"
 # endregion
 
+healthConnect = "1.1.0"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2024.09.00"
@@ -72,6 +73,7 @@ com-polidea-rxandroidble = { module = "com.polidea.rxandroidble2:rxandroidble", 
 # endregion
 
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
+androidx-health-connect-client = { module = "androidx.health.connect:connect-client", version.ref = "healthConnect" }
 
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidx-constraintlayout-compose" }

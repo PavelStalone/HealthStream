@@ -11,3 +11,9 @@ kotlin {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
 }
+
+dependencies {
+    api(project(":feature:vitals:data"))
+
+    implementation(libs.kotlinx.datetime)
+}

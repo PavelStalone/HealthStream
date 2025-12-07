@@ -30,6 +30,9 @@ class AndroidLibraryPlugin : Plugin<Project> {
             }
 
             dependencies {
+                add("implementation", libs.findLibrary("kotlinx.coroutines.android").get())
+                add("implementation", libs.findLibrary("kotlinx.datetime").get())
+
                 add("testImplementation", kotlin("test"))
                 add("androidTestImplementation", kotlin("test"))
             }
