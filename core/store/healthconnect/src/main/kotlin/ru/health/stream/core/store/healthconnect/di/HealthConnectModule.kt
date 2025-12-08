@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import ru.health.stream.core.store.healthconnect.store.HealthConnectHeartRateStore
-import ru.health.stream.core.store.heartrate.HeartRateStore
+import ru.health.stream.core.store.measurement.HeartRateStore
 import javax.inject.Singleton
 
 @Module

@@ -4,7 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.health.stream.core.store.heartrate.LocalHeartRateStoreImpl
+import ru.health.stream.core.store.measurement.LocalHeartRateStoreImpl
 import ru.health.stream.feature.vitals.source.local.LocalHeartRateStore
 import javax.inject.Singleton
 

@@ -16,7 +16,7 @@ import kotlinx.datetime.toKotlinInstant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.core.store.healthconnect.HealthConnectManager
-import ru.health.stream.core.store.heartrate.HeartRateStore
+import ru.health.stream.core.store.measurement.HeartRateStore
 import ru.health.stream.feature.vitals.data.model.Resource
 import ru.health.stream.feature.vitals.data.model.Resource.WithManufacturer.BloodPressure
 import ru.health.stream.feature.vitals.data.model.Resource.WithManufacturer.PulseOximeter

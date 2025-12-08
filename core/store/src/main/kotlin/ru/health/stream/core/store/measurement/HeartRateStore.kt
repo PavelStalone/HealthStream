@@ -1,4 +1,4 @@
-package ru.health.stream.core.store.heartrate
+package ru.health.stream.core.store.measurement
 
 import kotlinx.datetime.Instant
 import ru.health.stream.core.monitor.logD
