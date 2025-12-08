@@ -7,8 +7,8 @@ import kotlin.time.Duration
 interface LocalHeartRateStore {
 
     suspend fun getHeartRateByRange(
-        from: Instant,
-        to: Instant,
+        start: Instant,
+        end: Instant,
     ): List<HeartRate>
 
     suspend fun getHeartRateByDuration(

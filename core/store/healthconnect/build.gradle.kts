@@ -12,4 +12,5 @@ dependencies {
     implementation(libs.androidx.health.connect.client)
 
     implementation(project(":core:store"))
+    implementation(project(":core:monitor"))
 }

@@ -33,8 +33,15 @@ dependencies {
 
     implementation(libs.androidx.work.runtime.ktx)
 
+    implementation(libs.androidx.health.connect.client)
+
     implementation(project(":core:ui"))
     implementation(project(":core:starter"))
     implementation(project(":core:monitor"))
+
+    implementation(project(":core:store"))
+    implementation(project(":core:store:healthconnect"))
+    
     implementation(project(":feature:chart"))
+    implementation(project(":feature:vitals"))
 }

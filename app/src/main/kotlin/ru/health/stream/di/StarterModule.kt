@@ -10,7 +10,6 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import ru.health.stream.core.starter.ActivityStarter
 import ru.health.stream.core.starter.AppStarter
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)

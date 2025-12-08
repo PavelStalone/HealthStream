@@ -9,4 +9,6 @@ android {
 
 dependencies {
     api(project(":feature:vitals:source"))
+
+    implementation(project(":core:monitor"))
 }
