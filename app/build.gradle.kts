@@ -40,8 +40,9 @@ dependencies {
     implementation(project(":core:monitor"))
 
     implementation(project(":core:store"))
+    implementation(project(":core:store:room"))
     implementation(project(":core:store:healthconnect"))
-    
+
     implementation(project(":feature:chart"))
     implementation(project(":feature:vitals"))
 }

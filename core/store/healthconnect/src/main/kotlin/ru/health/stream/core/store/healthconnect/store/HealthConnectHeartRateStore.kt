@@ -26,8 +26,8 @@ import javax.inject.Inject
 import kotlin.time.Duration
 
 internal class HealthConnectHeartRateStore @Inject constructor(
-    private val healthConnectManager: HealthConnectManager,
     @ApplicationContext private val context: Context,
+    private val healthConnectManager: HealthConnectManager,
 ) : HeartRateStore {
 
     private val PERMISSIONS = setOf(

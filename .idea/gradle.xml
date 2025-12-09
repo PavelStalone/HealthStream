@@ -36,10 +36,15 @@
             <option value="$PROJECT_DIR$/core/starter" />
             <option value="$PROJECT_DIR$/core/store" />
             <option value="$PROJECT_DIR$/core/store/datastore" />
+            <option value="$PROJECT_DIR$/core/store/healthconnect" />
+            <option value="$PROJECT_DIR$/core/store/room" />
             <option value="$PROJECT_DIR$/core/test" />
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/chart" />
+            <option value="$PROJECT_DIR$/feature/vitals" />
+            <option value="$PROJECT_DIR$/feature/vitals/data" />
+            <option value="$PROJECT_DIR$/feature/vitals/source" />
           </set>
         </option>
       </GradleProjectSettings>
