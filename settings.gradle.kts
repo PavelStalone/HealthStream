@@ -37,6 +37,7 @@ include(":core:monitor")
 include(":core:monitor:timber")
 
 include(":core:store")
+include(":core:store:room")
 include(":core:store:datastore")
 include(":core:store:healthconnect")
 

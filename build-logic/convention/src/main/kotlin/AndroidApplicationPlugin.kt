@@ -2,6 +2,8 @@ import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.kotlin
 import ru.health.stream.buildlogic.configureAndroidCompose
 import ru.health.stream.buildlogic.configureKotlinAndroid
 import ru.health.stream.buildlogic.libs
@@ -30,6 +32,11 @@ class AndroidApplicationPlugin : Plugin<Project> {
                 buildFeatures {
                     buildConfig = true
                 }
+            }
+
+            dependencies {
+                add("implementation", libs.findLibrary("kotlinx.coroutines.android").get())
+                add("implementation", libs.findLibrary("kotlinx.datetime").get())
             }
         }
     }
