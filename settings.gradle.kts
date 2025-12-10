@@ -48,6 +48,7 @@ include(":core:communication:ble:lib")
 
 // region Feature module
 include(":feature:chart")
+include(":feature:settings")
 include(":feature:vitals")
 include(":feature:vitals:data")
 include(":feature:vitals:source")

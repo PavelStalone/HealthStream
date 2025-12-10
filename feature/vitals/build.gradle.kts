@@ -7,7 +7,7 @@ android {
     namespace = "ru.health.stream.feature.vitals"
 }
 
-dependencies{
+dependencies {
     api(project(":feature:vitals:data"))
 
     implementation(project(":feature:vitals:source"))
