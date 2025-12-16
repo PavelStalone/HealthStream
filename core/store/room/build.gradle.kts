@@ -19,4 +19,7 @@ dependencies {
 
     implementation(project(":core:store"))
     implementation(project(":core:monitor"))
+
+    implementation(project(":automapper:annotation"))
+    ksp(project(":automapper:processor"))
 }

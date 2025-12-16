@@ -8,8 +8,8 @@ import ru.health.stream.core.store.measurement.HeartRateStore
 import ru.health.stream.feature.vitals.source.local.model.HeartRate
 import ru.health.stream.room.dao.HeartRateDao
 import ru.health.stream.room.entity.HeartRateEntity
-import ru.health.stream.room.mapper.asEntity
-import ru.health.stream.room.mapper.asSource
+import ru.health.stream.room.mapper.asHeartRate
+import ru.health.stream.room.mapper.asHeartRateEntity
 import javax.inject.Inject
 import kotlin.time.Duration
 
@@ -26,7 +26,7 @@ internal class RoomHeartRateStore @Inject constructor(
             val response = heartRateDao.getHeartRateByRange(start = start, end = end)
             logV("Founded heart rate entities: $response")
 
-            response.map(HeartRateEntity::asSource)
+            response.map(HeartRateEntity::asHeartRate)
         }.onFailure { exception ->
             logW(exception, "Error while getHeartRateByRange running")
         }.getOrElse { emptyList() }
@@ -42,7 +42,7 @@ internal class RoomHeartRateStore @Inject constructor(
     override suspend fun writeHeartRate(heartRate: HeartRate): Result<HeartRate> = runCatching {
         logV("writeHeartRate called: heartRate=$heartRate")
 
-        heartRateDao.insertHeartRate(heartRate.asEntity())
+        heartRateDao.insertHeartRate(heartRate.asHeartRateEntity())
         heartRate
     }.onFailure { exception ->
         logW(exception, "Error while writeHeartRate running")

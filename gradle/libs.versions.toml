@@ -41,6 +41,8 @@ androidx-constraintlayout-compose = "1.1.1"
 androidx-work = "2.10.5"
 jetbrainsKotlinJvm = "2.2.21"
 
+com-squareup-kotlinpoet = "2.2.0"
+
 [libraries]
 
 # region Test
@@ -75,9 +77,9 @@ nordic-android-common-uiscanner = { module = "no.nordicsemi.android.common:uisca
 com-polidea-rxandroidble = { module = "com.polidea.rxandroidble2:rxandroidble", version.ref = "com-polidea-rxandroidble" }
 # endregion
 
-androidx-room-runtime = { group = "androidx.room", name ="room-runtime", version.ref = "room" }
-androidx-room-compiler = { group = "androidx.room", name ="room-compiler", version.ref = "room" }
-androidx-room-ktx = { group = "androidx.room", name ="room-ktx", version.ref = "room" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
@@ -107,6 +109,12 @@ androidx-hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", 
 google-dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "com-google-dagger" } # instrumentation testing
 google-dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "com-google-dagger" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt-navigation-compose" }
+
+# region Code Generation by KSP
+com-squareup-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "com-squareup-kotlinpoet" }
+com-squareup-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "com-squareup-kotlinpoet" }
+google-devtools-ksp-processor-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "com-google-ksp" }
+# endregion
 
 # region Gradle plugins
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
