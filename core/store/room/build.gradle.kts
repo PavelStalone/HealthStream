@@ -20,6 +20,6 @@ dependencies {
     implementation(project(":core:store"))
     implementation(project(":core:monitor"))
 
-    implementation(project(":automapper:annotation"))
-    ksp(project(":automapper:processor"))
+    implementation(libs.io.github.automapper.annotation)
+    ksp(libs.io.github.automapper.processor)
 }

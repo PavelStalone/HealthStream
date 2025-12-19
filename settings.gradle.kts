@@ -52,8 +52,3 @@ include(":feature:vitals")
 include(":feature:vitals:data")
 include(":feature:vitals:source")
 // endregion
-
-// region Automapper module
-include(":automapper:annotation")
-include(":automapper:processor")
-// endregion

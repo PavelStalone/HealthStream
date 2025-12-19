@@ -23,9 +23,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/automapper" />
-            <option value="$PROJECT_DIR$/automapper/annotation" />
-            <option value="$PROJECT_DIR$/automapper/processor" />
             <option value="$PROJECT_DIR$/build-logic" />
             <option value="$PROJECT_DIR$/build-logic/convention" />
             <option value="$PROJECT_DIR$/core" />
