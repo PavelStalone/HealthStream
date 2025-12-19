@@ -41,9 +41,11 @@ androidx-constraintlayout-compose = "1.1.1"
 androidx-work = "2.10.5"
 jetbrainsKotlinJvm = "2.2.21"
 
-com-squareup-kotlinpoet = "2.2.0"
+io-github-automapper = "0.1.0"
 
 [libraries]
+io-github-automapper-processor = { group = "io.github.jacksever.automapper", name = "processor", version.ref = "io-github-automapper" }
+io-github-automapper-annotation = { group = "io.github.jacksever.automapper", name = "annotation", version.ref = "io-github-automapper" }
 
 # region Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -109,12 +111,6 @@ androidx-hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", 
 google-dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "com-google-dagger" } # instrumentation testing
 google-dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "com-google-dagger" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt-navigation-compose" }
-
-# region Code Generation by KSP
-com-squareup-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "com-squareup-kotlinpoet" }
-com-squareup-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "com-squareup-kotlinpoet" }
-google-devtools-ksp-processor-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "com-google-ksp" }
-# endregion
 
 # region Gradle plugins
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }

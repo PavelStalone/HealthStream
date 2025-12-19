@@ -1,7 +1,7 @@
 package ru.health.stream.room.mapper
 
-import ru.health.stream.automapper.annotation.AutoMapper
-import ru.health.stream.automapper.annotation.AutoMapperModule
+import io.github.jacksever.automapper.annotation.AutoMapper
+import io.github.jacksever.automapper.annotation.AutoMapperModule
 import ru.health.stream.feature.vitals.data.model.Resource
 import ru.health.stream.feature.vitals.source.local.model.HeartRate
 import ru.health.stream.room.entity.HeartRateEntity
