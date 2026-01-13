@@ -45,4 +45,5 @@ dependencies {
 
     implementation(project(":feature:chart"))
     implementation(project(":feature:vitals"))
+    implementation(project(":feature:settings"))
 }
