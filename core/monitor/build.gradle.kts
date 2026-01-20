@@ -1,5 +1,5 @@
 plugins {
-    id("health.stream.android.library")
+    id("android.library")
 }
 
 android {
@@ -7,5 +7,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:monitor:timber"))
+    implementation(project(":monitor:timber"))
 }

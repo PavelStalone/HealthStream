@@ -1,6 +1,5 @@
 package ru.health.stream.core.communication.ble.lib.packet
 
-import ru.health.stream.core.communication.ble.lib.structure.asBitReader
 import no.nordicsemi.android.ble.data.Data
 import ru.health.stream.core.communication.ble.lib.packet.model.FilledPacket
 import ru.health.stream.core.communication.ble.lib.packet.model.PacketStructure
@@ -9,9 +8,10 @@ import ru.health.stream.core.communication.ble.lib.packet.model.ValueSize.Compan
 import ru.health.stream.core.communication.ble.lib.packet.model.ValueStructure
 import ru.health.stream.core.communication.ble.lib.packet.model.fillOrNull
 import ru.health.stream.core.communication.ble.lib.packet.validation.ValidationSetting
-import ru.health.stream.core.monitor.Logger.logd
-import ru.health.stream.core.monitor.Logger.logv
-import ru.health.stream.core.monitor.Logger.logw
+import ru.health.stream.core.communication.ble.lib.structure.asBitReader
+import ru.health.stream.core.monitor.logD
+import ru.health.stream.core.monitor.logV
+import ru.health.stream.core.monitor.logW
 
 /**
  * Splits continuous byte stream into structured packets
@@ -41,11 +41,11 @@ class PacketSplitter(
      * @param incomingData data object containing bytes to be processed
      */
     fun pushData(incomingData: Data) {
-        logv("pushData called: $incomingData")
+        logV("pushData called: $incomingData")
 
         incomingData.value?.let { bytes ->
             byteBuffer.addAll(bytes.toList())
-            logv("Buffer updated with ${bytes.size} bytes, new size: ${byteBuffer.size}")
+            logV("Buffer updated with ${bytes.size} bytes, new size: ${byteBuffer.size}")
 
             processBuffer() // TODO: Add initial process of incomingData to speed up the packet parsing process - shoplikpavel 2025.06.30
         }
@@ -69,7 +69,7 @@ class PacketSplitter(
                 val bitOffset = byteOffset * Byte.SIZE_BITS
 
                 if (tryExtractPacketAt(bitOffset)) {
-                    logd("Successfully identified packet at byte offset $byteOffset")
+                    logD("Successfully identified packet at byte offset $byteOffset")
 
                     packetsFound = true
                     break
@@ -78,7 +78,7 @@ class PacketSplitter(
         } while (packetsFound && byteBuffer.isNotEmpty())
 
         if (!packetsFound) {
-            logd("No valid packets found in current buffer of ${byteBuffer.size} bytes")
+            logD("No valid packets found in current buffer of ${byteBuffer.size} bytes")
         }
     }
 
@@ -110,7 +110,7 @@ class PacketSplitter(
             // Remove consumed bytes from buffer
             val consumedBytes = bitReader.bitOffset / Byte.SIZE_BITS
             repeat(consumedBytes) { byteBuffer.removeFirstOrNull() }
-            logv("Removed $consumedBytes bytes from buffer, new size: ${byteBuffer.size}")
+            logV("Removed $consumedBytes bytes from buffer, new size: ${byteBuffer.size}")
 
             // Notify consumer about the packet
             consumer(filledPacket)
@@ -137,7 +137,7 @@ class PacketSplitter(
         return runCatching {
             require(filledPacket.satisfiesAllValidations(packetStructure.validations))
         }.onFailure { error ->
-            logw("Validation failed: ${error.javaClass.simpleName}: ${error.message}")
+            logW("Validation failed: ${error.javaClass.simpleName}: ${error.message}")
         }.isSuccess
     }
 

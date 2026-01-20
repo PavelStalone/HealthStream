@@ -1,5 +1,6 @@
 plugins {
-    id("health.stream.android.library.compose")
+    id("android.library")
+    id("android.compose")
 }
 
 android {

@@ -2,7 +2,7 @@ package ru.health.stream.core.communication.ble.lib.packet.model
 
 import ru.health.stream.core.communication.ble.lib.structure.BitReader
 import ru.health.stream.core.communication.ble.lib.structure.IntBasedBitAccumulator
-import ru.health.stream.core.monitor.Logger.logw
+import ru.health.stream.core.monitor.logW
 
 /**
  * Attempts to fill a packet structure with data from the bit reader
@@ -21,7 +21,7 @@ fun PacketStructure.fillOrNull(
 
     fill(bitReader)
 }.onFailure { throwable ->
-    logw("Failed to fill packet: ${throwable.javaClass.simpleName}: ${throwable.message}")
+    logW("Failed to fill packet: ${throwable.javaClass.simpleName}: ${throwable.message}")
 }.getOrNull()
 
 /**

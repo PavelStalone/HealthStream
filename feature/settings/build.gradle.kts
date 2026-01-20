@@ -1,6 +1,6 @@
 plugins {
-    id("health.stream.android.feature")
-    id("health.stream.android.library.compose")
+    id("android.feature")
+    id("android.compose")
 }
 
 android {
@@ -8,5 +8,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:ui"))
+    implementation(project(":ui"))
 }

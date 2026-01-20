@@ -1,6 +1,6 @@
 plugins {
-    id("health.stream.android.feature")
-    id("health.stream.android.library.compose")
+    id("android.feature")
+    id("android.compose")
 }
 
 android {
@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    api(project(":feature:vitals:data"))
+    api(project(":vitals:data"))
 
-    implementation(project(":feature:vitals:source"))
+    implementation(project(":vitals:source"))
 }

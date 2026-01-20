@@ -85,7 +85,7 @@ internal class HealthConnectHeartRateStore @Inject constructor(
                 }
             }
     }.onFailure { exception ->
-        logW(exception, "Error while getHeartRateByRange running")
+        logW("Error while getHeartRateByRange running", exception)
     }.getOrElse { emptyList() }
 
     override suspend fun getHeartRateByDuration(duration: Duration): List<HeartRate> {
@@ -129,6 +129,6 @@ internal class HealthConnectHeartRateStore @Inject constructor(
         healthConnectManager.healthConnectClient.insertRecords(records = listOf(heartRateRecord))
         heartRate
     }.onFailure { exception ->
-        logW(exception, "Error while writeHeartRate running")
+        logW("Error while writeHeartRate running", exception)
     }
 }

@@ -1,6 +1,6 @@
 plugins {
-    id("health.stream.android.library")
-    id("health.stream.android.hilt")
+    id("android.library")
+    id("android.hilt")
 }
 
 android {
@@ -11,6 +11,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.health.connect.client)
 
-    implementation(project(":core:store"))
-    implementation(project(":core:monitor"))
+    implementation(project(":store"))
+    implementation(project(":monitor"))
 }

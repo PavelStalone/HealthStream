@@ -11,9 +11,9 @@ import ru.health.stream.core.communication.ble.lib.packet.PacketSplitter
 import ru.health.stream.core.communication.ble.lib.packet.model.FilledPacket
 import ru.health.stream.core.communication.ble.lib.packet.model.asBytes
 import no.nordicsemi.android.ble.BleManager
-import ru.health.stream.core.monitor.Logger.logd
-import ru.health.stream.core.monitor.Logger.logi
-import ru.health.stream.core.monitor.Logger.logw
+import ru.health.stream.core.monitor.logD
+import ru.health.stream.core.monitor.logI
+import ru.health.stream.core.monitor.logW
 import java.util.UUID
 
 /**
@@ -42,18 +42,18 @@ internal class NordicBleManager(
      * @return True if all required services and characteristics are available
      */
     override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-        logd("Checking required services support")
+        logD("Checking required services support")
 
         services = ConfigurationScopeImpl(nordicBleManager = this@NordicBleManager)
             .apply { with(bleDevice) { init() } }
             .build()
-        logd("Device profile requires ${services.size} services")
+        logD("Device profile requires ${services.size} services")
 
         val isInitialize = services.all { service ->
             val nativeService = gatt.getService(service.uuid)
             service.gattService = nativeService
 
-            logd("Found service ${service.uuid}")
+            logD("Found service ${service.uuid}")
 
             service.gattCharacteristics.all { characteristic ->
                 val nativeCharacteristic = nativeService.getCharacteristic(characteristic.uuid)
@@ -61,12 +61,12 @@ internal class NordicBleManager(
 
                 val isSupported = nativeCharacteristic != null || !characteristic.isRequired
 
-                if (!isSupported) logw("Required characteristic not found: ${characteristic.uuid}")
+                if (!isSupported) logW("Required characteristic not found: ${characteristic.uuid}")
                 isSupported
             }
         }
 
-        logi("Device support check result: $isInitialize")
+        logI("Device support check result: $isInitialize")
         return isInitialize
     }
 
@@ -77,17 +77,17 @@ internal class NordicBleManager(
      * Sets up notification handlers and enables notifications for characteristics
      */
     override fun initialize() {
-        logd("Initializing device connections")
+        logD("Initializing device connections")
 
         services.forEach { service ->
-            logd("Setting up service ${service.uuid}")
+            logD("Setting up service ${service.uuid}")
 
             service.gattCharacteristics.forEach { characteristic ->
                 setupCharacteristic(characteristic)
             }
         }
 
-        logi("Device initialization complete with ${services.size} services")
+        logI("Device initialization complete with ${services.size} services")
     }
 
     /**
@@ -97,7 +97,7 @@ internal class NordicBleManager(
      * the device profile that the connection has been invalidated
      */
     override fun onServicesInvalidated() {
-        logd("Services invalidated, cleaning up")
+        logD("Services invalidated, cleaning up")
 
         services.forEach { service ->
             service.gattService = null
@@ -108,10 +108,10 @@ internal class NordicBleManager(
             }
         }
 
-        logd("Cleared ${services.size} services")
+        logD("Cleared ${services.size} services")
         services = emptyList()
 
-        logi("Notifying device profile of invalidation")
+        logI("Notifying device profile of invalidation")
         bleDevice.onInvalidated()
     }
 
@@ -121,7 +121,7 @@ internal class NordicBleManager(
      * @param characteristic characteristic to set up
      */
     private fun setupCharacteristic(characteristic: GattCharacteristicImpl) {
-        logd("Setting up characteristic ${characteristic.uuid} with ${characteristic.callbacks.size} notifications")
+        logD("Setting up characteristic ${characteristic.uuid} with ${characteristic.callbacks.size} notifications")
 
         if (characteristic.callbacks.isNotEmpty()) {
             characteristic.callbacks.forEach { (type, callbacks) ->
@@ -130,23 +130,23 @@ internal class NordicBleManager(
                 when (type) {
                     CallbackType.NOTIFICATION -> {
                         setNotificationCallback(characteristic.gattCharacteristic).with { _, data ->
-                            logd("Notification received for ${characteristic.uuid} (${data.value?.size ?: 0} bytes)")
+                            logD("Notification received for ${characteristic.uuid} (${data.value?.size ?: 0} bytes)")
 
                             packetSplitter.pushData(data)
                         }
 
-                        logd("Enabling notifications for ${characteristic.uuid}")
+                        logD("Enabling notifications for ${characteristic.uuid}")
                         enableNotifications(characteristic.gattCharacteristic).enqueue()
                     }
 
                     CallbackType.INDICATION -> {
                         setIndicationCallback(characteristic.gattCharacteristic).with { _, data ->
-                            logd("Indication received for ${characteristic.uuid} (${data.value?.size ?: 0} bytes)")
+                            logD("Indication received for ${characteristic.uuid} (${data.value?.size ?: 0} bytes)")
 
                             packetSplitter.pushData(data)
                         }
 
-                        logd("Enabling indications for ${characteristic.uuid}")
+                        logD("Enabling indications for ${characteristic.uuid}")
                         enableIndications(characteristic.gattCharacteristic).enqueue()
                     }
                 }
@@ -154,7 +154,7 @@ internal class NordicBleManager(
         }
 
         characteristic.isReady = true
-        logd("Characteristic ${characteristic.uuid} ready")
+        logD("Characteristic ${characteristic.uuid} ready")
     }
 
     /**
@@ -201,7 +201,7 @@ internal class NordicBleManager(
                 field = value
 
                 if (value && pendingCommands.isNotEmpty()) {
-                    logd("Executing ${pendingCommands.size} pending commands for $uuid")
+                    logD("Executing ${pendingCommands.size} pending commands for $uuid")
 
                     pendingCommands.removeIf { command ->
                         command()
@@ -225,14 +225,14 @@ internal class NordicBleManager(
             packet: BlePacket.Definition<T>,
             consumer: (packet: T) -> Unit,
         ) {
-            logd("Request to read packet from $uuid")
+            logD("Request to read packet from $uuid")
 
             enqueueOrExecute {
-                logd("Reading characteristic $uuid")
+                logD("Reading characteristic $uuid")
 
                 readCharacteristic(nativeCharacteristic)
                     .with { _, data ->
-                        logd(
+                        logD(
                             "Read response for $uuid: ${data.value?.size ?: 0} bytes: ${
                                 data.value?.joinToString(" ") { byte -> byte.toHexString() }
                             }"
@@ -258,10 +258,10 @@ internal class NordicBleManager(
          */
         override fun <T : BlePacket.Convertible> writePacket(packet: T, writeType: Int) {
             val packetBytes = packet.rawPacket.asBytes()
-            logd("Request to write ${packetBytes.size} bytes to $uuid (type: $writeType)")
+            logD("Request to write ${packetBytes.size} bytes to $uuid (type: $writeType)")
 
             enqueueOrExecute {
-                logd("Writing to characteristic $uuid: $packet")
+                logD("Writing to characteristic $uuid: $packet")
 
                 writeCharacteristic(
                     nativeCharacteristic,
@@ -279,11 +279,11 @@ internal class NordicBleManager(
          */
         private fun enqueueOrExecute(command: () -> Unit) {
             if (isReady) {
-                logd("Executing command immediately for $uuid")
+                logD("Executing command immediately for $uuid")
 
                 command()
             } else {
-                logd("Queuing command for later execution on $uuid")
+                logD("Queuing command for later execution on $uuid")
 
                 pendingCommands.add(command)
             }
@@ -312,7 +312,7 @@ internal class ConfigurationScopeImpl(
      * @return Configured service instance
      */
     override fun service(uuid: UUID, block: GattServiceScope.() -> Unit): GattService {
-        logd("Configuring service $uuid")
+        logD("Configuring service $uuid")
 
         return GattServiceScopeImpl(serviceUUID = uuid, nordicBleManager = nordicBleManager)
             .apply(block)
@@ -320,7 +320,7 @@ internal class ConfigurationScopeImpl(
             .also { service ->
                 services.add(service)
 
-                logd("Added service $uuid with ${service.gattCharacteristics.size} characteristics")
+                logD("Added service $uuid with ${service.gattCharacteristics.size} characteristics")
             }
     }
 
@@ -360,10 +360,10 @@ internal class GattServiceScopeImpl(
         isRequired: Boolean,
         block: GattCharacteristicScope.() -> Unit
     ): GattCharacteristic {
-        logd("Configuring characteristic $uuid for service $serviceUUID")
+        logD("Configuring characteristic $uuid for service $serviceUUID")
 
         val callbacks = GattCharacteristicScopeImpl().apply(block).build()
-        logd("Characteristic $uuid has ${callbacks.size} handlers")
+        logD("Characteristic $uuid has ${callbacks.size} handlers")
 
         return nordicBleManager.GattCharacteristicImpl(
             uuid = uuid,
@@ -372,7 +372,7 @@ internal class GattServiceScopeImpl(
         ).also { gattCharacteristic ->
             characteristics.add(gattCharacteristic)
 
-            logd("Added characteristic $uuid to service $serviceUUID")
+            logD("Added characteristic $uuid to service $serviceUUID")
         }
     }
 
@@ -385,7 +385,7 @@ internal class GattServiceScopeImpl(
         uuid = serviceUUID,
         gattCharacteristics = characteristics.toList(),
     ).also {
-        logd("Built service $serviceUUID with ${characteristics.size} characteristics")
+        logD("Built service $serviceUUID with ${characteristics.size} characteristics")
     }
 }
 
@@ -456,6 +456,6 @@ internal class GattCharacteristicScopeImpl : GattCharacteristicScope {
      * @return Map of packet definitions to callback handlers
      */
     fun build() = callbacks.toMap().mapValues { (_, map) -> map.toMap() }.also {
-        logd("Built characteristic with ${callbacks.size} notification handlers")
+        logD("Built characteristic with ${callbacks.size} notification handlers")
     }
 }

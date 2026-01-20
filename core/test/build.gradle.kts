@@ -1,5 +1,5 @@
 plugins {
-    id("health.stream.android.library")
+    id("android.library")
 }
 
 android {

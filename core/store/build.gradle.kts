@@ -1,6 +1,6 @@
 plugins {
-    id("health.stream.android.library")
-    id("health.stream.android.hilt")
+    id("android.library")
+    id("android.hilt")
 }
 
 android {
@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    api(project(":feature:vitals:source"))
+    api(project(":vitals:source"))
 
-    implementation(project(":core:monitor"))
+    implementation(project(":monitor"))
 }

@@ -17,17 +17,17 @@ import no.nordicsemi.android.support.v18.scanner.ScanFilter
 import no.nordicsemi.android.support.v18.scanner.ScanResult
 import no.nordicsemi.android.support.v18.scanner.ScanSettings
 import no.nordicsemi.ui.scanner.scanner.repository.DevicesDataStore
-import ru.health.stream.core.monitor.Logger.logd
-import ru.health.stream.core.monitor.Logger.logi
-import ru.health.stream.core.monitor.Logger.logv
-import ru.health.stream.core.monitor.Logger.logw
+import ru.health.stream.core.monitor.logD
+import ru.health.stream.core.monitor.logI
+import ru.health.stream.core.monitor.logV
+import ru.health.stream.core.monitor.logW
 
 /**
  * Repository for scanning and tracking BLE devices
  *
  * This class manages BLE scanning operations, processes scan results, and tracks
  * discovered devices. It provides a Flow-based API that emits discovered devices
- * as they are found during scanning, with built-in error handling and retry logic
+ * as they are found during scanning, with built-in error handling and retry _root_ide_package_.ru.health.stream.core.monitor.logI()c
  *
  * The repository coordinates between the Bluetooth scanner and the device data store
  * to maintain a record of all discovered devices
@@ -55,23 +55,23 @@ class ScannerRepository(
      * @return Flow of discovered Bluetooth devices
      */
     fun startScan() = callbackFlow {
-        logv("Start scanning using a callback")
+        logV("Start scanning using a callback")
 
         val scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
-                logd("Emitting scanResult: $result")
+                logD("Emitting scanResult: $result")
 
                 trackScan(scanResult = result)
             }
 
             override fun onBatchScanResults(results: MutableList<ScanResult>) {
-                logw("onBatchScanResults received with ${results.size} results")
+                logW("onBatchScanResults received with ${results.size} results")
 
                 results.forEach(::trackScan)
             }
 
             override fun onScanFailed(errorCode: Int) {
-                logw("onScanFailed: $errorCode")
+                logW("onScanFailed: $errorCode")
             }
 
             private fun trackScan(scanResult: ScanResult) {
@@ -87,17 +87,17 @@ class ScannerRepository(
         scanner.startScan(scanFilters, scanSettings, scanCallback)
 
         awaitClose {
-            logi("Stopping Scan, channel closed")
+            logI("Stopping Scan, channel closed")
 
             scanner.stopScan(scanCallback)
         }
     }.retry(retries = 3) { throwable ->
         // TODO: does this restart the entire flow?
-        logw("Error, retrying device scan", throwable)
+        logW("Error, retrying device scan", throwable)
 
         true
     }.catch { throwable ->
-        logw("Error performing device scan", throwable)
+        logW("Error performing device scan", throwable)
 
         emitAll(emptyFlow())
     }
@@ -116,7 +116,7 @@ class ScannerRepository(
         requestCode: Int,
         pendingIntent: PendingIntent,
     ) {
-        logv("Start scanning using pendingIntent. requestCode: $requestCode")
+        logV("Start scanning using pendingIntent. requestCode: $requestCode")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {

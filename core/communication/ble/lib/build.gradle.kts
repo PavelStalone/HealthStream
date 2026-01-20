@@ -1,5 +1,5 @@
 plugins {
-    id("health.stream.android.library")
+    id("android.library")
 }
 
 android {
@@ -11,5 +11,5 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.health.stream.ble)
-    implementation(project(":core:monitor"))
+    implementation(project(":monitor"))
 }

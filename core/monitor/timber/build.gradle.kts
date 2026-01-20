@@ -1,6 +1,6 @@
 plugins {
-    id("health.stream.android.library")
-    id("health.stream.android.hilt")
+    id("android.library")
+    id("android.hilt")
 }
 
 android {
@@ -10,5 +10,5 @@ android {
 dependencies {
     api(libs.jakewharton.timber)
 
-    implementation(project(":core:starter"))
+    implementation(project(":starter"))
 }

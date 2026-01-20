@@ -14,10 +14,10 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import ru.health.stream.core.communication.ble.lib.device.BleDevice
 import ru.health.stream.core.communication.ble.lib.device.NordicBleManager
-import ru.health.stream.core.monitor.Logger.logd
-import ru.health.stream.core.monitor.Logger.logi
-import ru.health.stream.core.monitor.Logger.logv
-import ru.health.stream.core.monitor.Logger.logw
+import ru.health.stream.core.monitor.logD
+import ru.health.stream.core.monitor.logI
+import ru.health.stream.core.monitor.logV
+import ru.health.stream.core.monitor.logW
 
 /**
  * Service for scanning and connecting to BLE devices
@@ -48,7 +48,7 @@ class ScanService(
      * @param source identifier for the scan source, used for logging
      */
     suspend fun observe(flow: Flow<DiscoveredBluetoothDevice>, source: String) {
-        logv("Starting device observation from source: $source")
+        logV("Starting device observation from source: $source")
 
         flow.collect { device -> handleDevice(device = device, source = source) }
     }
@@ -64,32 +64,32 @@ class ScanService(
      * @param source identifier for the scan source, used for logging
      */
     fun handleDevice(device: DiscoveredBluetoothDevice, source: String) {
-        logv("Processing device: ${device.name} from source: $source")
+        logV("Processing device: ${device.name} from source: $source")
 
         coroutineScope.launch(coroutineDispatcher) {
             if (deviceConnectionManager.registerConnection(discoveredDevice = device)) {
-                logi("Connection registered for device: ${device.name}")
+                logI("Connection registered for device: ${device.name}")
 
                 val deviceProfile = bleDevices
                     .firstOrNull { deviceProfile -> deviceProfile.isDeviceSupported(discoveredDevice = device) }
 
                 if (deviceProfile != null) {
-                    logd("Found matching profile for device: ${device.name}, profile: ${deviceProfile.javaClass.simpleName}")
+                    logD("Found matching profile for device: ${device.name}, profile: ${deviceProfile.javaClass.simpleName}")
 
                     NordicBleManager(
                         context = context,
                         bleDevice = deviceProfile,
                     ).apply {
                         launch {
-                            logd("Starting connection state monitoring for device: ${device.name}")
+                            logD("Starting connection state monitoring for device: ${device.name}")
 
                             stateAsFlow()
                                 .drop(1) // always starts disconnected
                                 .onCompletion {
-                                    logi("Connection state flow completed for device: ${device.name}")
+                                    logI("Connection state flow completed for device: ${device.name}")
                                 }
                                 .collect { connectionState ->
-                                    logd("Device ${device.name} state changed: ${connectionState.display()}")
+                                    logD("Device ${device.name} state changed: ${connectionState.display()}")
 
                                     if (connectionState is ConnectionState.Disconnected &&
                                         !connectionState.isLinkLoss
@@ -99,18 +99,18 @@ class ScanService(
                                             discoveredDevice = device
                                         )
 
-                                        logd("Connection released for device: ${device.name}")
+                                        logD("Connection released for device: ${device.name}")
                                     }
                                 }
                         }
                         launch {
-                            logi("Initiating connection to device: ${device.name}")
+                            logI("Initiating connection to device: ${device.name}")
 
                             specialConnect(device = device)
                         }
                     }
                 } else {
-                    logd("Not found profile for device: ${device.name}")
+                    logD("Not found profile for device: ${device.name}")
 
                     deviceConnectionManager.unregisterConnection(discoveredDevice = device)
                 }
@@ -119,37 +119,37 @@ class ScanService(
     }
 
     private suspend fun BleManager.specialConnect(device: DiscoveredBluetoothDevice) {
-        logv("Attempting connection to device: ${device.name}")
+        logV("Attempting connection to device: ${device.name}")
 
         runCatching {
             connect(device.device)
                 .before {
-                    logi("Manager connect before to device: ${device.name}")
+                    logI("Manager connect before to device: ${device.name}")
                 }
                 .done {
                     // Won't be called when using suspend
-                    logi("Manager connect done to device: ${device.name}")
+                    logI("Manager connect done to device: ${device.name}")
                 }
                 .then {
-                    logi("Manager connect then to device: ${device.name}")
+                    logI("Manager connect then to device: ${device.name}")
                 }
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .suspend()
         }.onFailure { throwable ->
-            logw("Connection failed for device: ${device.name}", throwable)
+            logW("Connection failed for device: ${device.name}", throwable)
 
             specialClose()
         }
     }
 
     private fun BleManager.specialClose() {
-        logd("Closing BLE manager")
+        logD("Closing BLE manager")
 
         disconnect().enqueue()
         close()
 
-        logd("BLE manager closed")
+        logD("BLE manager closed")
     }
 
     private fun ConnectionState.display(): String = when (this) {
