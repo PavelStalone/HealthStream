@@ -8,8 +8,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":monitor"))
+    implementation(project(":core:monitor"))
 
-    testImplementation(project(":test"))
-    androidTestImplementation(project(":test"))
+    testImplementation(project(":core:test"))
+    androidTestImplementation(project(":core:test"))
 }

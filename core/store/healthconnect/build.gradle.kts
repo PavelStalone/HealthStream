@@ -11,6 +11,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.health.connect.client)
 
-    implementation(project(":store"))
-    implementation(project(":monitor"))
+    implementation(project(":core:store"))
+    implementation(project(":core:monitor"))
 }

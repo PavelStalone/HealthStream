@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    api(project(":vitals:data"))
+    api(project(":feature:vitals:data"))
 
-    implementation(project(":vitals:source"))
+    implementation(project(":feature:vitals:source"))
 }

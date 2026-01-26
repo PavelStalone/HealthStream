@@ -31,15 +31,14 @@ dependencies {
 
     implementation(libs.androidx.health.connect.client)
 
-    implementation(project(":ui"))
-    implementation(project(":starter"))
-    implementation(project(":monitor"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:store"))
+    implementation(project(":core:store:room"))
+    implementation(project(":core:store:healthconnect"))
+    implementation(project(":core:starter"))
+    implementation(project(":core:monitor"))
 
-    implementation(project(":store"))
-    implementation(project(":store:room"))
-    implementation(project(":store:healthconnect"))
-
-    implementation(project(":chart"))
-    implementation(project(":vitals"))
-    implementation(project(":settings"))
+    implementation(project(":feature:chart"))
+    implementation(project(":feature:vitals"))
+    implementation(project(":feature:settings"))
 }

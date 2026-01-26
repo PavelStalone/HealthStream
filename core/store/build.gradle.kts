@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    api(project(":vitals:source"))
+    api(project(":feature:vitals:source"))
 
-    implementation(project(":monitor"))
+    implementation(project(":core:monitor"))
 }

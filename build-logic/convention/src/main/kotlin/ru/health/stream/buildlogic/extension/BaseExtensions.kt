@@ -11,7 +11,6 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import org.gradle.accessors.dm.LibrariesForLibs
-import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.findByType
@@ -40,9 +39,6 @@ private val Project.applicationExtension: ApplicationExtension
 
 val Project.libs
     get() = the<LibrariesForLibs>()
-
-val Project.projectJavaVersion: JavaVersion
-    get() = JavaVersion.toVersion(libs.versions.java.get().toInt())
 
 fun Project.java(block: JavaPluginExtension.() -> Unit): Unit = block(javaExtension)
 fun Project.android(block: AndroidExtensions.() -> Unit): Unit = block(androidExtension)
