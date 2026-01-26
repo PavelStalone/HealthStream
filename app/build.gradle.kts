@@ -1,6 +1,6 @@
 plugins {
-    id("health.stream.android.application")
-    id("health.stream.android.hilt")
+    id("android.application")
+    id("android.hilt")
 }
 
 android {
@@ -25,23 +25,18 @@ android {
 }
 
 dependencies {
-
-    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    implementation(libs.androidx.activity.compose)
 
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.androidx.health.connect.client)
 
     implementation(project(":core:ui"))
-    implementation(project(":core:starter"))
-    implementation(project(":core:monitor"))
-
     implementation(project(":core:store"))
     implementation(project(":core:store:room"))
     implementation(project(":core:store:healthconnect"))
+    implementation(project(":core:starter"))
+    implementation(project(":core:monitor"))
 
     implementation(project(":feature:chart"))
     implementation(project(":feature:vitals"))

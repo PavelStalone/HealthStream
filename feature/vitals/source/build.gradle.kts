@@ -1,5 +1,5 @@
 plugins {
-    id("health.stream.android.library")
+    id("android.library")
 }
 
 android {
@@ -8,6 +8,4 @@ android {
 
 dependencies {
     api(project(":feature:vitals:data"))
-
-    implementation(libs.kotlinx.datetime)
 }

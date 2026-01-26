@@ -28,7 +28,7 @@ internal class RoomHeartRateStore @Inject constructor(
 
             response.map(HeartRateEntity::asHeartRate)
         }.onFailure { exception ->
-            logW(exception, "Error while getHeartRateByRange running")
+            logW("Error while getHeartRateByRange running", exception)
         }.getOrElse { emptyList() }
 
     override suspend fun getHeartRateByDuration(duration: Duration): List<HeartRate> {
@@ -45,6 +45,6 @@ internal class RoomHeartRateStore @Inject constructor(
         heartRateDao.insertHeartRate(heartRate.asHeartRateEntity())
         heartRate
     }.onFailure { exception ->
-        logW(exception, "Error while writeHeartRate running")
+        logW("Error while writeHeartRate running", exception)
     }
 }

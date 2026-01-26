@@ -15,7 +15,7 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
 
     repositories {
         google()
@@ -29,27 +29,24 @@ include(":app")
 
 // region Core module
 include(":core:ui")
+include(":core:ble")
+include(":core:ble:lib")
+include(":core:ktor")
 include(":core:test")
-include(":core:common")
-include(":core:starter")
-
-include(":core:monitor")
-include(":core:monitor:timber")
-
 include(":core:store")
 include(":core:store:room")
 include(":core:store:datastore")
 include(":core:store:healthconnect")
-
-include(":core:communication:ble")
-include(":core:communication:ktor")
-include(":core:communication:ble:lib")
+include(":core:common")
+include(":core:starter")
+include(":core:monitor")
+include(":core:monitor:timber")
 // endregion
 
 // region Feature module
 include(":feature:chart")
-include(":feature:settings")
 include(":feature:vitals")
 include(":feature:vitals:data")
 include(":feature:vitals:source")
+include(":feature:settings")
 // endregion

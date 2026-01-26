@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
-import ru.health.stream.core.monitor.Logger.logd
-import ru.health.stream.core.monitor.Logger.logi
-import ru.health.stream.core.monitor.Logger.logv
-import ru.health.stream.core.monitor.Logger.logw
+import ru.health.stream.core.monitor.logD
+import ru.health.stream.core.monitor.logI
+import ru.health.stream.core.monitor.logV
+import ru.health.stream.core.monitor.logW
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.seconds
 
@@ -62,17 +62,17 @@ val TimeBasedDeviceConnectionManager = object : DeviceConnectionManager {
     private val deviceConnectionTimeMap = ConcurrentHashMap<String, Instant>()
 
     override fun registerConnection(discoveredDevice: DiscoveredBluetoothDevice): Boolean {
-        logv("registerConnection called: ${discoveredDevice.name}")
+        logV("registerConnection called: ${discoveredDevice.name}")
 
         val scanResult = discoveredDevice.lastScanResult ?: discoveredDevice.scanResult
 
-        logd("Collected scan result: $scanResult")
+        logD("Collected scan result: $scanResult")
 
         val bluetoothDevice = discoveredDevice.device
 
         @SuppressLint("MissingPermission")
         if (bluetoothDevice.name == null) {
-            logw("Encountered device with null name")
+            logW("Encountered device with null name")
 
             return false
         }
@@ -86,7 +86,7 @@ val TimeBasedDeviceConnectionManager = object : DeviceConnectionManager {
             val currentTimestamp = Clock.System.now()
 
             if (connectedTime == null) {
-                logi("Connecting to device $address for the first time")
+                logI("Connecting to device $address for the first time")
 
                 shouldConnect = true
                 currentTimestamp
@@ -94,12 +94,12 @@ val TimeBasedDeviceConnectionManager = object : DeviceConnectionManager {
                 val connectedFor = currentTimestamp - connectedTime
 
                 if (connectedFor > connectedDeviceTimeout) {
-                    logw("Reconnecting to device $address, stale connection with duration: $connectedFor")
+                    logW("Reconnecting to device $address, stale connection with duration: $connectedFor")
 
                     shouldConnect = true
                     currentTimestamp
                 } else {
-                    logi("Skip connecting to device $address, already connected for duration $connectedFor")
+                    logI("Skip connecting to device $address, already connected for duration $connectedFor")
 
                     connectedTime
                 }
@@ -110,7 +110,7 @@ val TimeBasedDeviceConnectionManager = object : DeviceConnectionManager {
     }
 
     override fun unregisterConnection(discoveredDevice: DiscoveredBluetoothDevice) {
-        logi("unregisterConnection called: ${discoveredDevice.device.address}")
+        logI("unregisterConnection called: ${discoveredDevice.device.address}")
 
         deviceConnectionTimeMap.remove(discoveredDevice.device.address)
     }

@@ -1,6 +1,6 @@
 plugins {
-    id("health.stream.android.library")
-    id("health.stream.android.hilt")
+    id("android.library")
+    id("android.hilt")
 
     kotlin("plugin.serialization") version libs.versions.kotlin
 }

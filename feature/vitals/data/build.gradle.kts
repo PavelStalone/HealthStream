@@ -1,11 +1,7 @@
 plugins {
-    id("health.stream.android.library")
-}
-
-android {
-    namespace = "ru.health.stream.feature.vitals.data"
+    id("kotlin.library")
 }
 
 dependencies {
-    implementation(libs.kotlinx.datetime)
+    api(libs.kotlinx.datetime)
 }

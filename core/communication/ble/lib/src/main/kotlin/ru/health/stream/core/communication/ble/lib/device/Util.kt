@@ -4,8 +4,8 @@ import android.Manifest
 import androidx.annotation.RequiresPermission
 import no.nordicsemi.android.support.v18.scanner.ScanFilter
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
-import ru.health.stream.core.monitor.Logger.logd
-import ru.health.stream.core.monitor.Logger.loge
+import ru.health.stream.core.monitor.logD
+import ru.health.stream.core.monitor.logE
 import java.util.Locale
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
@@ -24,7 +24,7 @@ import kotlin.uuid.toJavaUuid
  */
 @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
 fun DiscoveredBluetoothDevice.matchesAnyPrefix(prefixList: List<String>): Boolean {
-    logd("Local name: ${name}, device name: ${device.name}")
+    logD("Local name: ${name}, device name: ${device.name}")
 
     val deviceNameLowercase = device.name.lowercase(Locale.ROOT)
     return prefixList.any { deviceNamePrefix ->
@@ -45,7 +45,7 @@ fun DiscoveredBluetoothDevice.matchesAnyPrefix(prefixList: List<String>): Boolea
 fun createUUID(uuid: String): UUID = runCatching {
     Uuid.parse(uuidString = uuid)
 }.getOrElse { exception ->
-    loge(exception, "Invalid UUID format: $uuid, using fallback UUID")
+    logE(exception, "Invalid UUID format: $uuid, using fallback UUID")
 
     Uuid.NIL
 }.toJavaUuid()

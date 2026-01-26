@@ -12,7 +12,7 @@ inline fun logD(message: String, vararg arguments: Any?) =
 inline fun logI(message: String, vararg arguments: Any?) =
     log(priority = Log.INFO, message = message, throwable = null, arguments)
 
-inline fun logW(throwable: Throwable? = null, message: String, vararg arguments: Any?) =
+inline fun logW(message: String, throwable: Throwable? = null, vararg arguments: Any?) =
     log(priority = Log.WARN, message = message, throwable = throwable, arguments)
 
 inline fun logE(throwable: Throwable? = null, message: String, vararg arguments: Any?) =
