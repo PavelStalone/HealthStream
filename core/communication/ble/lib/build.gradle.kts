@@ -11,5 +11,6 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.bundles.health.stream.ble)
-    implementation(project(":monitor"))
+
+    implementation(project(":core:monitor"))
 }

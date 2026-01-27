@@ -41,7 +41,8 @@ androidx-constraintlayout-compose = "1.1.1"
 androidx-work = "2.10.5"
 jetbrainsKotlinJvm = "2.2.21"
 
-io-github-automapper = "0.1.0"
+com-github-movisens-smart-gatt = "3.6.0"
+io-github-automapper = "0.8.0"
 
 [libraries]
 io-github-automapper-processor = { group = "io.github.jacksever.automapper", name = "processor", version.ref = "io-github-automapper" }
@@ -98,6 +99,8 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "org-jetbrains-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "org-jetbrains-coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+com-github-movisens-smart-gatt = { module = "com.github.movisens:SmartGattLib", version.ref = "com-github-movisens-smart-gatt" }
 
 google-dagger = { module = "com.google.dagger:dagger", version.ref = "com-google-dagger" }
 google-dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "com-google-dagger" }

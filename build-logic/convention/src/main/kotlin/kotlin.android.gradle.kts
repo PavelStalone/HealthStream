@@ -22,6 +22,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.kotlinx.datetime)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
 }
