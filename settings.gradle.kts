@@ -1,3 +1,5 @@
+import java.net.URI
+
 pluginManagement {
     includeBuild("build-logic")
 
@@ -20,6 +22,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = URI.create("https://jitpack.io")}
     }
 }
 
@@ -29,9 +32,6 @@ include(":app")
 
 // region Core module
 include(":core:ui")
-include(":core:ble")
-include(":core:ble:lib")
-include(":core:ktor")
 include(":core:test")
 include(":core:store")
 include(":core:store:room")
@@ -41,6 +41,9 @@ include(":core:common")
 include(":core:starter")
 include(":core:monitor")
 include(":core:monitor:timber")
+include(":core:communication:ble")
+include(":core:communication:ble:lib")
+include(":core:communication:ktor")
 // endregion
 
 // region Feature module

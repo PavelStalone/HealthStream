@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
+    <application>
+        <receiver
+            android:name="ru.health.stream.core.communication.ble.domain.BackgroundBleScanReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ru.health.stream.ble.ACTION_FOUND" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
