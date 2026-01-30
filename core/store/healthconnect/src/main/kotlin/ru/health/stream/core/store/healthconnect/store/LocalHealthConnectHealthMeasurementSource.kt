@@ -16,19 +16,21 @@ import kotlinx.datetime.toKotlinInstant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.core.store.healthconnect.HealthConnectManager
-import ru.health.stream.core.store.measurement.HeartRateStore
+import ru.health.stream.core.store.measurement.HealthMeasurementSource
 import ru.health.stream.feature.vitals.data.model.Resource
 import ru.health.stream.feature.vitals.data.model.Resource.WithManufacturer.BloodPressure
 import ru.health.stream.feature.vitals.data.model.Resource.WithManufacturer.PulseOximeter
 import ru.health.stream.feature.vitals.data.model.Resource.WithManufacturer.WeightScale
-import ru.health.stream.feature.vitals.source.local.model.HeartRate
 import javax.inject.Inject
 import kotlin.time.Duration
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
-internal class HealthConnectHeartRateStore @Inject constructor(
+@OptIn(ExperimentalUuidApi::class)
+internal class LocalHealthConnectHealthMeasurementSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val healthConnectManager: HealthConnectManager,
-) : HeartRateStore {
+) : HealthMeasurementSource {
 
     private val PERMISSIONS = setOf(
         HealthPermission.getReadPermission(HeartRateRecord::class),
@@ -58,6 +60,7 @@ internal class HealthConnectHeartRateStore @Inject constructor(
         response.records.map { record -> record.metadata to record.samples }
             .flatMap { (metadata, records) ->
                 val packageName = metadata.dataOrigin.packageName
+                val recordId = Uuid.parse(metadata.id).toLongs(Long::to)
                 val resource = if (packageName.equals(context.packageName, ignoreCase = true)) {
                     runCatching {
                         require(metadata.recordingMethod != RECORDING_METHOD_MANUAL_ENTRY)
@@ -73,11 +76,15 @@ internal class HealthConnectHeartRateStore @Inject constructor(
                         }
                     }.getOrElse { Resource.Manual }
                 } else {
-                    Resource.FromApp(packageName = packageName)
+                    Resource.App(packageName = packageName)
                 }
 
-                records.map { record ->
+                records.mapIndexed { index, record ->
+                    val (mostSignificantBits, leastSignificantBits) = recordId
+
                     HeartRate(
+                        id = Uuid.fromLongs(mostSignificantBits, leastSignificantBits + index)
+                            .toString(),
                         resource = resource,
                         pulse = record.beatsPerMinute.toInt(),
                         createdAt = record.time.toKotlinInstant(),
@@ -109,7 +116,7 @@ internal class HealthConnectHeartRateStore @Inject constructor(
                 )
             )
 
-            is Resource.FromApp -> throw IllegalArgumentException("Write data from other app not supported")
+            is Resource.App -> throw IllegalArgumentException("Write data from other app not supported")
         }
         val instant = heartRate.createdAt.toJavaInstant()
         val heartRateRecord = HeartRateRecord(

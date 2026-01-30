@@ -1,9 +1,5 @@
 plugins {
-    id("android.library")
-}
-
-android {
-    namespace = "ru.health.stream.feature.vitals.source"
+    id("kotlin.library")
 }
 
 dependencies {

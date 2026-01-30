@@ -5,13 +5,14 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.datetime.Instant
+import kotlin.uuid.Uuid
 
 @Entity(
     tableName = "heartRate",
     indices = [Index(value = ["created_at"], unique = false)],
 )
 internal data class HeartRateEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey val id: String,
     @ColumnInfo(name = "pulse_rate") val pulse: Int,
     @ColumnInfo(name = "created_at") val createdAt: Instant,
     @ColumnInfo(name = "resource") val resource: ResourceEntity,

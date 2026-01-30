@@ -11,4 +11,8 @@ dependencies {
     api(project(":feature:vitals:data"))
 
     implementation(project(":feature:vitals:source"))
+
+    implementation(libs.io.github.automapper.annotation)
+
+    ksp(libs.io.github.automapper.processor)
 }

@@ -130,6 +130,8 @@ health-stream-compose = ["androidx-compose-material3", "androidx-compose-ui", "a
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 
+androidx-room = { id = "androidx.room", version.ref = "room" }
+
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
