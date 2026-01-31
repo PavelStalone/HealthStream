@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":core:monitor"))
     implementation(project(":core:starter"))
     implementation(project(":core:communication:ble:lib"))

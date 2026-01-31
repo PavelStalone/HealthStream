@@ -1,10 +1,10 @@
-package ru.health.stream.room.store
+package ru.health.stream.room.source
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
-import ru.health.stream.core.store.measurement.HealthMeasurementSource
+import ru.health.stream.core.store.vitals.HealthMeasurementSource
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 import ru.health.stream.room.MeasurementTable
 import javax.inject.Inject
@@ -13,7 +13,7 @@ import kotlin.time.Duration
 
 @Suppress("UNCHECKED_CAST")
 internal class RoomHealthMeasurementSource @Inject constructor(
-    private val tables: List<MeasurementTable<HealthMeasurement, *>>,
+    private val tables: List<@JvmSuppressWildcards MeasurementTable<HealthMeasurement, *>>,
 ) : HealthMeasurementSource {
 
     override suspend fun isActive(): Boolean = true

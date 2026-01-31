@@ -32,5 +32,12 @@ sealed interface Device : Resource {
     enum class Status {
         ATTACHED,
         REJECTED,
+        UNKNOWN,
     }
+}
+
+fun Device.copy(id: String, lastMeasured: Instant): Device = when (this) {
+    is Device.BloodPressure -> copy(id = id, lastMeasured = lastMeasured)
+    is Device.PulseOximeter -> copy(id = id, lastMeasured = lastMeasured)
+    is Device.WeightScale -> copy(id = id, lastMeasured = lastMeasured)
 }

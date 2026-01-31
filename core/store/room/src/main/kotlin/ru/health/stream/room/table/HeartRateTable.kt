@@ -12,9 +12,10 @@ import kotlin.reflect.KClass
 
 internal class HeartRateTable @Inject constructor(
     private val heartRateDao: HeartRateDao,
-    override val kClass: KClass<HealthMeasurement.HeartRate> = HealthMeasurement.HeartRate::class,
 ) : MeasurementDao<HeartRateEntity> by heartRateDao,
     MeasurementTable<HealthMeasurement.HeartRate, HeartRateEntity>() {
+
+    override val kClass: KClass<HealthMeasurement.HeartRate> = HealthMeasurement.HeartRate::class
 
     override fun mapToMeasurement(entity: Any?): HealthMeasurement.HeartRate =
         (entity as HeartRateEntity).asHeartRate()

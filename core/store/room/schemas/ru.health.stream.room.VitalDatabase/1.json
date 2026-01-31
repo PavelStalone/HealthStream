@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2295d5e527c1ddb1763314fc2ae8c0af",
+    "identityHash": "af3f267ccc0379221eacd411857b372f",
     "entities": [
       {
         "tableName": "heartRate",
@@ -50,11 +50,53 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_heartRate_created_at` ON `${TABLE_NAME}` (`created_at`)"
           }
         ]
+      },
+      {
+        "tableName": "device",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `mac_address` TEXT NOT NULL, `last_measured` INTEGER NOT NULL, `status` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "macAddress",
+            "columnName": "mac_address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastMeasured",
+            "columnName": "last_measured",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2295d5e527c1ddb1763314fc2ae8c0af')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'af3f267ccc0379221eacd411857b372f')"
     ]
   }
 }

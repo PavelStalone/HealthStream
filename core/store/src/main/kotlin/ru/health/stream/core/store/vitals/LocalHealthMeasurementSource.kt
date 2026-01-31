@@ -1,4 +1,4 @@
-package ru.health.stream.core.store.measurement
+package ru.health.stream.core.store.vitals
 
 import kotlinx.datetime.Instant
 import ru.health.stream.core.monitor.logD
@@ -70,8 +70,8 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
 
             store.isActive()
         }
-            .fold(initial = Result.failure(NotAvailableStoreException())) { acc, heartRateStore ->
-                val result = heartRateStore.writeMeasurement(measurement)
+            .fold(initial = Result.failure(NotAvailableStoreException())) { acc, healthMeasurementSource ->
+                val result = healthMeasurementSource.writeMeasurement(measurement)
 
                 if (acc.isSuccess) return@fold acc
                 result

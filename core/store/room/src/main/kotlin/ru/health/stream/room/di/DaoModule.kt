@@ -14,4 +14,8 @@ internal object DaoModule {
     @Provides
     @Singleton
     fun provideHeartRateDao(db: VitalDatabase) = db.heartRateDao()
+
+    @Provides
+    @Singleton
+    fun provideDeviceDao(db: VitalDatabase) = db.deviceDao()
 }
