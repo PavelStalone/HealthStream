@@ -10,12 +10,12 @@ interface LocalHealthMeasurementSource {
     suspend fun <T : HealthMeasurement> getMeasurementByRange(
         start: Instant,
         end: Instant,
-        kClass: KClass<T>,
+        type: KClass<T>,
     ): List<T>
 
     suspend fun <T : HealthMeasurement> getMeasurementByDuration(
         duration: Duration,
-        kClass: KClass<T>,
+        type: KClass<T>,
     ): List<T>
 
     suspend fun <T: HealthMeasurement> writeMeasurement(measurement: T): Result<T>

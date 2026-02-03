@@ -1,6 +1,7 @@
 package ru.health.stream.feature.vitals.data.model
 
 import kotlinx.datetime.Instant
+import ru.health.stream.feature.vitals.data.mapper.asHeartRate
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -29,18 +30,13 @@ sealed interface SimpleHealthMeasurement {
     }
 }
 
-fun SimpleHealthMeasurement.addResource(resource: Resource): HealthMeasurement = when (this) {
-    // TODO: Change mapping to code generation after the release of a new version - shoplikpavel 2026-01-31
-    is SimpleHealthMeasurement.HeartRateData -> HealthMeasurement.HeartRate(
-        id = id,
-        pulse = pulse,
-        resource = resource,
-        createdAt = createdAt,
-    )
+fun SimpleHealthMeasurement.addResource(resource: Resource): HealthMeasurement =
+    when (val measurement = this) {
+        is SimpleHealthMeasurement.SimpleHeartRate -> measurement.asHeartRate(resource = resource)
 
-    // Needed to skip unnecessary branches with already filled data (HealthMeasurement.HeartRate, etc.)
-    else -> error("Measurements already have a resource")
-}
+        // Needed to skip unnecessary branches with already filled data (HealthMeasurement.HeartRate, etc.)
+        else -> error("Measurements already have a resource")
+    }
 
 /**
  * Measurements with general information

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import ru.health.stream.core.common.di.ApplicationCoroutineScope
+import ru.health.stream.core.monitor.logV
 import ru.health.stream.feature.vitals.source.remote.RemoteDeviceSource
 import ru.health.stream.feature.vitals.source.remote.model.DeviceWithSimpleMeasurements
 
@@ -26,6 +27,8 @@ class RemoteDeviceSourceImpl @Inject constructor(
     override val flow: Flow<DeviceWithSimpleMeasurements> = _flow.asSharedFlow()
 
     internal fun sendMeasurements(measurements: DeviceWithSimpleMeasurements) {
+        logV("sendMeasurements called: $measurements")
+
         applicationScope.launch { _flow.emit(measurements) }
     }
 }

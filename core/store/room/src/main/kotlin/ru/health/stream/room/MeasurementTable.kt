@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 
 internal abstract class MeasurementTable<T : HealthMeasurement, E>() : MeasurementDao<E> {
 
-    abstract val kClass: KClass<T>
+    abstract val type: KClass<T>
 
     abstract fun mapToMeasurement(entity: Any?): T
     abstract fun mapToEntity(measurement: T): E

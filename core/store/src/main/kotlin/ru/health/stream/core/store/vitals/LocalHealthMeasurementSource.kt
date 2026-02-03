@@ -6,7 +6,7 @@ import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.store.NotAvailableStoreException
 import ru.health.stream.core.store.Store
 import ru.health.stream.core.store.checkAvailable
-import ru.health.stream.core.store.mergeByTime
+import ru.health.stream.core.store.mergeByTimeAndId
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 import ru.health.stream.feature.vitals.source.local.LocalHealthMeasurementSource
 import javax.inject.Inject
@@ -24,9 +24,9 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
     override suspend fun <T : HealthMeasurement> getMeasurementByRange(
         start: Instant,
         end: Instant,
-        kClass: KClass<T>
+        type: KClass<T>
     ): List<T> {
-        logV("getMeasurementByRange called: start=$start, end=$end, kClass=$kClass")
+        logV("getMeasurementByRange called: start=$start, end=$end, kClass=$type")
 
         checkAvailable()
 
@@ -35,16 +35,16 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
 
             store.isActive()
         }
-            .map { store -> store.getMeasurementByRange(start = start, end = end, kClass = kClass) }
-            .mergeByTime(HealthMeasurement::createdAt)
+            .map { store -> store.getMeasurementByRange(start = start, end = end, type = type) }
+            .mergeByTimeAndId()
             .toList()
     }
 
     override suspend fun <T : HealthMeasurement> getMeasurementByDuration(
         duration: Duration,
-        kClass: KClass<T>
+        type: KClass<T>
     ): List<T> {
-        logV("getMeasurementByDuration called: duration=$duration, kClass=$kClass")
+        logV("getMeasurementByDuration called: duration=$duration, kClass=$type")
 
         checkAvailable()
 
@@ -53,8 +53,8 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
 
             store.isActive()
         }
-            .map { store -> store.getMeasurementByDuration(duration = duration, kClass = kClass) }
-            .mergeByTime(HealthMeasurement::createdAt)
+            .map { store -> store.getMeasurementByDuration(duration = duration, type = type) }
+            .mergeByTimeAndId()
             .toList()
     }
 
