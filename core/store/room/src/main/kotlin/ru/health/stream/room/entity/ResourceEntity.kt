@@ -1,5 +1,6 @@
 package ru.health.stream.room.entity
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,18 +12,47 @@ internal sealed interface ResourceEntity {
     data object Manual : ResourceEntity
 
     @Serializable
-    @SerialName("FromApp")
-    data class FromApp(val packageName: String) : ResourceEntity
+    @SerialName("App")
+    data class App(val packageName: String) : ResourceEntity
 
-    @Serializable
-    @SerialName("WeightScale")
-    data class WeightScale(val manufacturer: String? = null) : ResourceEntity
+    sealed interface DeviceEntity : ResourceEntity {
+        val id: String
+        val status: Status
+        val macAddress: String
+        val lastMeasured: Instant
 
-    @Serializable
-    @SerialName("BloodPressure")
-    data class BloodPressure(val manufacturer: String? = null) : ResourceEntity
+        @Serializable
+        @SerialName("WeightScale")
+        data class WeightScale(
+            override val id: String,
+            override val status: Status,
+            override val macAddress: String,
+            override val lastMeasured: Instant
+        ) : DeviceEntity
 
-    @Serializable
-    @SerialName("PulseOximeter")
-    data class PulseOximeter(val manufacturer: String? = null) : ResourceEntity
+        @Serializable
+        @SerialName("BloodPressure")
+        data class BloodPressure(
+            override val id: String,
+            override val status: Status,
+            override val macAddress: String,
+            override val lastMeasured: Instant
+        ) : DeviceEntity
+
+        @Serializable
+        @SerialName("PulseOximeter")
+        data class PulseOximeter(
+            override val id: String,
+            override val status: Status,
+            override val macAddress: String,
+            override val lastMeasured: Instant
+        ) : DeviceEntity
+
+        @Serializable
+        enum class Status {
+            ATTACHED,
+            REJECTED,
+            UNKNOWN,
+        }
+    }
 }

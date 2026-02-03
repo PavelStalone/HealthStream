@@ -46,10 +46,12 @@ internal data class FilledPacketImpl(
     override val values: List<FilledValue<*>>
 ) : FilledPacket {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T> findByName(name: String): FilledValue<T> = values
         .first { value -> value.name == name }
         .let { value -> value as FilledValue<T> }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T> findByNameOrNull(name: String): FilledValue<T>? = values
         .firstOrNull { value -> value.name == name }
         ?.let { value -> value as FilledValue<T> }

@@ -8,6 +8,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":core:monitor"))
 
     testImplementation(project(":core:test"))

@@ -5,11 +5,13 @@ import android.os.ParcelUuid
 import androidx.annotation.RequiresPermission
 import no.nordicsemi.android.support.v18.scanner.ScanFilter
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
+import ru.health.stream.core.communication.ble.domain.builder.PulseOxMeasurementBuilder
 import ru.health.stream.core.communication.ble.lib.device.BleDevice
 import ru.health.stream.core.communication.ble.lib.device.ConfigurationScope
 import ru.health.stream.core.communication.ble.lib.device.buildScanFilter
 import ru.health.stream.core.communication.ble.lib.device.createUUID
 import ru.health.stream.core.communication.ble.lib.device.matchesAnyPrefix
+import ru.health.stream.core.communication.ble.source.RemoteDeviceSourceImpl
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.monitor.logV
 import java.util.UUID
@@ -17,7 +19,9 @@ import java.util.UUID
 /**
  * BLE implementation for PC-60F pulse oximeter device
  */
-class PulseOx : BleDevice() {
+internal class PulseOx(
+    private val remoteDeviceSource: RemoteDeviceSourceImpl,
+) : BleDevice() {
 
     private val DEVICE_NAMES = listOf("pc-60f")
 
@@ -27,6 +31,8 @@ class PulseOx : BleDevice() {
         createUUID(uuid = "6e400002-b5a3-f393-e0a9-e50e24dcca9e") // writeNoResp / write
     private val UART_TX_CHARACTERISTIC_UUID: UUID =
         createUUID(uuid = "6e400003-b5a3-f393-e0a9-e50e24dcca9e") // notify
+
+    private var measurementBuilder: PulseOxMeasurementBuilder? = null
 
     override val scanFilters: List<ScanFilter> = listOf(
         buildScanFilter { setServiceUuid(ParcelUuid(NORDIC_UART_SERVICE_UUID)) }
@@ -39,6 +45,8 @@ class PulseOx : BleDevice() {
                     packet = PulsePacket.Definition,
                     callback = { pulse ->
                         logI("Pulse packet receive: $pulse")
+
+                        measurementBuilder?.receive(pulse)
                     },
                 )
             }
@@ -52,6 +60,10 @@ class PulseOx : BleDevice() {
 
     override fun onInvalidated() {
         logI("onInvalidated called")
+
+        measurementBuilder?.build()
+            ?.let { measurements -> remoteDeviceSource.sendMeasurements(measurements) }
+        measurementBuilder = null
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -59,5 +71,8 @@ class PulseOx : BleDevice() {
         logV("isDeviceSupported called: ${discoveredDevice.device.name}")
 
         return discoveredDevice.matchesAnyPrefix(prefixList = DEVICE_NAMES)
+            .also { result ->
+                if (result) measurementBuilder = PulseOxMeasurementBuilder(discoveredDevice.device)
+            }
     }
 }

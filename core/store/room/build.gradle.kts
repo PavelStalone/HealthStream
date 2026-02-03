@@ -2,11 +2,17 @@ plugins {
     id("android.library")
     id("android.hilt")
 
+    alias(libs.plugins.androidx.room)
+
     kotlin("plugin.serialization") version libs.versions.kotlin
 }
 
 android {
     namespace = "ru.health.stream.core.store.room"
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {

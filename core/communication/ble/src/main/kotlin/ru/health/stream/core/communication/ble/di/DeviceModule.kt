@@ -9,15 +9,20 @@ import ru.health.stream.core.communication.ble.domain.device.GBS2012B
 import ru.health.stream.core.communication.ble.domain.device.PulseOx
 import ru.health.stream.core.communication.ble.domain.device.TMB2084
 import ru.health.stream.core.communication.ble.lib.device.BleDevice
+import ru.health.stream.core.communication.ble.source.RemoteDeviceSourceImpl
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object DeviceModule {
 
     @Provides
+    @Singleton
     @ElementsIntoSet
-    fun provideBleDevices(): Set<BleDevice> = setOf(
-        PulseOx(),
+    fun provideBleDevices(
+        remoteDeviceSource: RemoteDeviceSourceImpl
+    ): Set<BleDevice> = setOf(
+        PulseOx(remoteDeviceSource = remoteDeviceSource),
         TMB2084(),
         GBS2012B(),
     )
