@@ -2,10 +2,12 @@ package ru.health.stream.feature.chart.core
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.copy
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 
@@ -73,7 +75,32 @@ internal class ChartDrawScopeImpl(
             )
         }
 
-        path.transform(matrix)
-        drawScope.drawPath(path, color, alpha, style, colorFilter, blendMode)
+        path.copy().also { path ->
+            path.transform(matrix)
+            drawScope.drawPath(path, color, alpha, style, colorFilter, blendMode)
+        }
+    }
+
+    override fun drawPath(
+        path: Path,
+        brush: Brush,
+        alpha: Float,
+        style: DrawStyle,
+        colorFilter: ColorFilter?,
+        blendMode: BlendMode
+    ) {
+        val matrix = Matrix().apply {
+            reset()
+            translate(y = size.height)
+            scale(
+                x = 1f,
+                y = -1f
+            )
+        }
+
+        path.copy().also { path ->
+            path.transform(matrix)
+            drawScope.drawPath(path, brush, alpha, style, colorFilter, blendMode)
+        }
     }
 }
