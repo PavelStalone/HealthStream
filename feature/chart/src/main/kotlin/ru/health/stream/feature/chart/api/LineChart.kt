@@ -25,7 +25,7 @@ import androidx.compose.ui.util.fastRoundToInt
 import ru.health.stream.feature.chart.core.ChartDrawScopeImpl
 import ru.health.stream.feature.chart.core.ChartScope
 import ru.health.stream.feature.chart.core.ChartScopeInstance
-import ru.health.stream.feature.chart.core.CubicLine
+import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.Drawable
 import ru.health.stream.feature.chart.core.XAxisSide
 import ru.health.stream.feature.chart.core.YAxisSide
@@ -38,11 +38,11 @@ import kotlin.math.max
 
 @Composable
 fun LineChart(
-    modifier: Modifier,
     xRange: ClosedFloatingPointRange<Float>,
     yRange: ClosedFloatingPointRange<Float>,
-    chartDrawables: List<Drawable> = emptyList(),
+    modifier: Modifier = Modifier,
     animation: Boolean = true,
+    chartDrawables: List<Drawable> = emptyList(),
     chartContent: @Composable ChartScope.() -> Unit = {},
 ) {
     val infinite = rememberInfiniteTransition()
