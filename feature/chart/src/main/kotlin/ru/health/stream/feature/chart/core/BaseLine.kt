@@ -3,11 +3,14 @@ package ru.health.stream.feature.chart.core
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import ru.health.stream.feature.chart.model.ChartPosition
 
 class Line(
-    points: List<ChartPosition.Point>
+    points: List<ChartPosition.Point>,
+    private val color: Color = Color.White,
+    private val style: DrawStyle = Stroke(width = 20f),
 ) : Drawable {
 
     private val sortedPoints = points.sortedBy { it.x }
@@ -22,12 +25,14 @@ class Line(
     }
 
     override fun ChartDrawScope.draw(interpolator: Float) {
-        drawPath(path = createPath(interpolator), color = Color.Red, style = Stroke(width = 20f))
+        drawPath(path = createPath(interpolator), color = color, style = style)
     }
 }
 
 class CubicLine(
-    points: List<ChartPosition.Point>
+    points: List<ChartPosition.Point>,
+    private val color: Color = Color.White,
+    private val style: DrawStyle = Stroke(width = 20f),
 ) : Drawable {
 
     private val sortedPoints = points.sortedBy { it.x }
@@ -50,6 +55,6 @@ class CubicLine(
     }
 
     override fun ChartDrawScope.draw(interpolator: Float) {
-        drawPath(path = createPath(interpolator), color = Color.Red, style = Stroke(width = 20f))
+        drawPath(path = createPath(interpolator), color = color, style = style)
     }
 }
