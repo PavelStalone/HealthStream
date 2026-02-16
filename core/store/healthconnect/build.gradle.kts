@@ -1,6 +1,8 @@
 plugins {
     id("android.library")
+    id("android.compose")
     id("android.hilt")
+    id("android.navigation")
 }
 
 android {
@@ -13,4 +15,8 @@ dependencies {
 
     implementation(project(":core:store"))
     implementation(project(":core:monitor"))
+    implementation(project(":core:starter"))
+    implementation(project(":core:navigation"))
+
+    implementation(project(":feature:settings"))
 }

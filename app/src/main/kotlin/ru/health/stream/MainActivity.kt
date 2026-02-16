@@ -18,12 +18,12 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.arttttt.nav3router.Nav3Host
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import ru.health.stream.core.monitor.logI
+import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement
@@ -91,7 +91,7 @@ class MainActivity : StarterActivity() {
                 val backStack = rememberNavBackStack(MainVitalsScreen)
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Nav3Host(
+                    NavHost(
                         backStack = backStack,
                         router = navigationRouter,
                     ) { backStack, onBack, _ ->
