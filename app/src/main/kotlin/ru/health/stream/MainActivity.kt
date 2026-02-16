@@ -1,40 +1,34 @@
 package ru.health.stream
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.request.ReadRecordsRequest
-import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.arttttt.nav3router.Nav3Host
+import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import ru.health.stream.core.monitor.logD
-import ru.health.stream.core.monitor.logE
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.navigation.MainVitalsScreen
 import ru.health.stream.feature.vitals.data.repository.MeasurementRepository
-import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
 
@@ -42,7 +36,13 @@ import kotlin.time.Duration.Companion.days
 class MainActivity : StarterActivity() {
 
     @Inject
+    lateinit var navigationRouter: Router<NavKey>
+
+    @Inject
     lateinit var measurementRepository: MeasurementRepository
+
+    @Inject
+    lateinit var entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
 
     val flow = MutableStateFlow(listOf<HealthMeasurement.HeartRate>())
 
@@ -77,52 +77,32 @@ class MainActivity : StarterActivity() {
 //            )
 //            return
 //        }
-//
-//        val healthConnectClient = HealthConnectClient.getOrCreate(this)
-//
+
         lifecycleScope.launch {
             flow.value = measurementRepository.getMeasurementsByDuration(
                 duration = 200.days,
                 type = HealthMeasurement.HeartRate::class,
             )
-//            if (healthConnectClient.features.getFeatureStatus(
-//                    feature = HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_IN_BACKGROUND
-//                ) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
-//            ) {
-//                Log.i(TAG, "Check permission")
-//
-//                checkPermissionsAndRun(healthConnectClient)
-//
-//                Log.i(TAG, "readHeartrate")
-//                readHeartRateByTimeRange(
-//                    healthConnectClient,
-//                    startTime = Instant.now().minusSeconds(3600 * 24 * 10L),
-//                    endTime = Instant.now()
-//                )
-//            } else {
-//                Log.d(TAG, "FEATURE_READ_HEALTH_DATA_IN_BACKGROUND is not available")
-//            }
-
         }
 
         enableEdgeToEdge()
         setContent {
             HealthStreamTheme {
-                val h by flow.collectAsState()
+                val backStack = rememberNavBackStack(MainVitalsScreen)
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LazyColumn(
-                        modifier = Modifier.padding(innerPadding),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(h) {
-                            Card(Modifier.padding(horizontal = 8.dp)) {
-                                Text(
-                                    modifier = Modifier.padding(8.dp),
-                                    text = it.toString()
-                                )
-                            }
-                        }
+                    Nav3Host(
+                        backStack = backStack,
+                        router = navigationRouter,
+                    ) { backStack, onBack, _ ->
+                        NavDisplay(
+                            modifier = Modifier.padding(innerPadding),
+                            backStack = backStack,
+                            onBack = onBack,
+                            entryProvider = entryProvider {
+                                entryBuilders.forEach { builder -> this.builder() }
+                            },
+                        )
                     }
                 }
             }
@@ -150,28 +130,4 @@ class MainActivity : StarterActivity() {
             requestPermissions.launch(PERMISSIONS)
         }
     }
-
-//    suspend fun readHeartRateByTimeRange(
-//        healthConnectClient: HealthConnectClient,
-//        startTime: Instant,
-//        endTime: Instant
-//    ) {
-//        try {
-//            val response = healthConnectClient.readRecords(
-//                ReadRecordsRequest(
-//                    HeartRateRecord::class,
-//                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
-//                )
-//            )
-//
-//            logI("Records found: ${response.records.size} - ${response.records}")
-//            flow.value = response.records
-//            for (record in response.records) {
-//                logD("Record:")
-//                logD(record.toString())
-//            }
-//        } catch (e: Exception) {
-//            logE(e, "Error while read")
-//        }
-//    }
 }

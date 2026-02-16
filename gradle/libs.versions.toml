@@ -9,20 +9,25 @@ kotlin = "2.2.21"
 coreKtx = "1.17.0"
 org-jetbrains-coroutines = "1.10.2"
 
-# region Test
+nav3Core = "1.0.0"
+lifecycleViewmodelNav3 = "2.10.0"
+material3AdaptiveNav3 = "1.3.0-alpha06"
+
+#region Test
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-# endregion
+#endregion
 
-# region Bluetooth
+#region Bluetooth
 nordic-ble = "2.11.0"
 nordic-support-ble-scanner = "1.6.0"
 nordic-android-common-uiscanner = "1.0.11"
 com-polidea-rxandroidble = "1.19.1"
-# endregion
+#endregion
 
 room = "2.8.4"
+navRouter = "1.0.3"
 datastore = "1.2.0"
 healthConnect = "1.1.0"
 lifecycleRuntimeKtx = "2.9.4"
@@ -47,18 +52,18 @@ io-github-automapper = "0.10.0"
 io-github-automapper-processor = { group = "io.github.jacksever.automapper", name = "processor", version.ref = "io-github-automapper" }
 io-github-automapper-annotation = { group = "io.github.jacksever.automapper", name = "annotation", version.ref = "io-github-automapper" }
 
-# region Test
+#region Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-# endregion
+#endregion
 
-# region Android base libraries
+#region Android base libraries
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-# endregion
+#endregion
 
-# region Compose libraries
+#region Compose libraries
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -68,25 +73,32 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-# endregion
+#endregion
 
-# region BLE libraries
+#region BLE libraries
 nordic-ble = { group = "no.nordicsemi.android", name = "ble-common", version.ref = "nordic-ble" }
 nordic-ble-ktx = { group = "no.nordicsemi.android", name = "ble-ktx", version.ref = "nordic-ble" }
 nordic-support-ble-scanner = { module = "no.nordicsemi.android.support.v18:scanner", version.ref = "nordic-support-ble-scanner" }
 nordic-android-common-uiscanner = { module = "no.nordicsemi.android.common:uiscanner", version.ref = "nordic-android-common-uiscanner" }
 
 com-polidea-rxandroidble = { module = "com.polidea.rxandroidble2:rxandroidble", version.ref = "com-polidea-rxandroidble" }
-# endregion
+#endregion
 
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
+androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
+
 androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
 androidx-health-connect-client = { module = "androidx.health.connect:connect-client", version.ref = "healthConnect" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+
+navigation-router = { module = "io.github.arttttt.nav3router:nav3router", version.ref = "navRouter" }
 
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidx-constraintlayout-compose" }
@@ -101,25 +113,25 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 com-github-movisens-smart-gatt = { module = "com.github.movisens:SmartGattLib", version.ref = "com-github-movisens-smart-gatt" }
 
-google-dagger = { module = "com.google.dagger:dagger", version.ref = "com-google-dagger" }
-google-dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "com-google-dagger" }
-
 google-dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "com-google-dagger" }
 androidx-hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidx-hilt-ext" }
 androidx-hilt-ext-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "androidx-hilt-ext" }
 androidx-hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidx-hilt-ext" }
 google-dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "com-google-dagger" } # instrumentation testing
-google-dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "com-google-dagger" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt-navigation-compose" }
 
-# region Gradle plugins
+dagger-hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "com-google-dagger" }
+dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "com-google-dagger" }
+
+#region Gradle plugins
+gradlePlugin-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-compose = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-hilt = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "com-google-dagger" }
 gradlePlugin-ksp = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "com-google-ksp" }
 gradlePlugin-cache-fix = { group = "org.gradle.android.cache-fix", name = "org.gradle.android.cache-fix.gradle.plugin", version.ref = "org-gradle-android-cache-fix" }
-# endregion
+#endregion
 
 [bundles]
 health-stream-ble = ["nordic-ble", "nordic-ble-ktx", "nordic-support-ble-scanner", "nordic-android-common-uiscanner", "com-polidea-rxandroidble"]
@@ -132,7 +144,9 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
 
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 com-google-ksp = { id = "com.google.devtools.ksp", version.ref = "com-google-ksp" }
 com-google-dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "com-google-dagger" }

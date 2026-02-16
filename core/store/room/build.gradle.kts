@@ -1,10 +1,9 @@
 plugins {
     id("android.library")
     id("android.hilt")
+    id("kotlin.serialization")
 
     alias(libs.plugins.androidx.room)
-
-    kotlin("plugin.serialization") version libs.versions.kotlin
 }
 
 android {
@@ -20,8 +19,6 @@ dependencies {
 
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
-
-    implementation(libs.kotlinx.serialization.json)
 
     implementation(project(":core:store"))
     implementation(project(":core:monitor"))
