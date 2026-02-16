@@ -15,7 +15,6 @@ import ru.health.stream.core.starter.AppStarter
 @InstallIn(SingletonComponent::class)
 object StarterModule {
 
-
     @IntoSet
     @Provides
     fun testAppStarter() = object : AppStarter {

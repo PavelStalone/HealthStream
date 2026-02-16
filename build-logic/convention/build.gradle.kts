@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.gradlePlugin.android)
     implementation(libs.gradlePlugin.compose)
     implementation(libs.gradlePlugin.cache.fix)
+    implementation(libs.gradlePlugin.kotlin.serialization)
 
     implementation(files(libs::class.java.superclass.protectionDomain.codeSource.location))
 }

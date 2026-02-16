@@ -27,7 +27,7 @@ import androidx.health.connect.client.records.metadata.Device as DeviceData
 
 @OptIn(ExperimentalUuidApi::class)
 internal class HeartRateSource @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val localDeviceSource: LocalDeviceSource,
     private val healthConnectManager: HealthConnectManager,
 ) : MeasurementSource<HealthMeasurement.HeartRate>() {

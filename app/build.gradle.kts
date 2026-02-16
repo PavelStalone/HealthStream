@@ -1,5 +1,6 @@
 plugins {
     id("android.application")
+    id("android.navigation")
     id("android.hilt")
 }
 
