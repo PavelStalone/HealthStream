@@ -11,7 +11,7 @@ import ru.health.stream.feature.vitals.ui.screen.featureEntryBuilder
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object NavigationModule {
+internal object NavigationModule {
 
     @IntoSet
     @Provides

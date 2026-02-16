@@ -13,7 +13,7 @@ import ru.health.stream.core.starter.AppStarter
 
 @Module
 @InstallIn(SingletonComponent::class)
-object StarterModule {
+internal object StarterModule {
 
     @IntoSet
     @Provides

@@ -18,7 +18,7 @@ import ru.health.stream.feature.vitals.source.remote.RemoteDeviceSource
 
 @Module
 @InstallIn(SingletonComponent::class)
-object VitalsModule {
+internal object VitalsModule {
 
     @IntoSet
     @Provides

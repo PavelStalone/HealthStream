@@ -15,7 +15,7 @@ import ru.health.stream.feature.vitals.source.remote.model.DeviceWithSimpleMeasu
 
 @Singleton
 class RemoteDeviceSourceImpl @Inject constructor(
-    @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
+    @ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : RemoteDeviceSource {
 
     private val _flow = MutableSharedFlow<DeviceWithSimpleMeasurements>(

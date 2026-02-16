@@ -8,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class HealthConnectManager @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+    @ApplicationContext private val context: Context,
 ) {
 
     val healthConnectClient by lazy { HealthConnectClient.getOrCreate(context) }
