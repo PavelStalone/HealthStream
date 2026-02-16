@@ -1,6 +1,5 @@
 import java.net.URI
 
-
 pluginManagement {
     includeBuild("build-logic")
 

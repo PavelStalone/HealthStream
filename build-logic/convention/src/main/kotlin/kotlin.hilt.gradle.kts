@@ -8,7 +8,6 @@ plugins {
 
 dependencies {
     ksp(libs.dagger.hilt.compiler)
-    ksp(libs.androidx.hilt.ext.compiler)
 
     implementation(libs.dagger.hilt.core)
 }
