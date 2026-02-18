@@ -27,12 +27,13 @@ internal data object SettingsCell : Settings.Cell {
     override fun Content() {
         val router = LocalRouter.current
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable(onClick = {
-                router.push(HealthConnectSettings)
-            })
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .clickable(onClick = {
+                    router.push(HealthConnectSettings)
+                })
         ) {
             Icon(
                 imageVector = Icons.Rounded.AccountCircle,
