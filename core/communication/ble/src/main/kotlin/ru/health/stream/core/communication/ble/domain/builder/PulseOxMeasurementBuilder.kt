@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice
 import kotlinx.datetime.Clock
 import ru.health.stream.core.communication.ble.domain.device.PulsePacket
 import ru.health.stream.feature.vitals.data.model.Device
-import ru.health.stream.feature.vitals.data.model.SimpleHealthMeasurement
+import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 import ru.health.stream.feature.vitals.source.remote.model.DeviceWithSimpleMeasurements
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -31,7 +31,7 @@ internal class PulseOxMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
         resource = device,
         measurements = lastMeasurePacket?.let { measure ->
             listOf(
-                SimpleHealthMeasurement.SimpleHeartRate(
+                HealthMeasurement.SimpleHeartRate(
                     id = Uuid.random().toString(),
                     createdAt = Clock.System.now(),
                     pulse = measure.pulse

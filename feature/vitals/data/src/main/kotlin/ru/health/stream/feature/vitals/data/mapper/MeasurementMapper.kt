@@ -5,7 +5,6 @@ import io.github.jacksever.automapper.annotation.AutoMapperModule
 import io.github.jacksever.automapper.annotation.DefaultValue
 import io.github.jacksever.automapper.annotation.DefaultValueSource
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement
-import ru.health.stream.feature.vitals.data.model.SimpleHealthMeasurement
 
 @AutoMapperModule
 internal interface MeasurementMapper {
@@ -19,5 +18,5 @@ internal interface MeasurementMapper {
             )
         ],
     )
-    fun heartRateMapper(simpleHeartRate: SimpleHealthMeasurement.SimpleHeartRate): HealthMeasurement.HeartRate
+    fun heartRateMapper(simpleHeartRate: HealthMeasurement.SimpleHeartRate): HealthMeasurement.HeartRate
 }
