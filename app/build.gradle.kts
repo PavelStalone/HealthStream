@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":core:store:healthconnect"))
     implementation(project(":core:starter"))
     implementation(project(":core:monitor"))
+    implementation(project(":core:navigation"))
     implementation(project(":core:communication:ble"))
 
     implementation(project(":feature:chart"))
