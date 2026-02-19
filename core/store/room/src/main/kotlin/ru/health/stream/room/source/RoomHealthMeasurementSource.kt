@@ -18,7 +18,7 @@ internal class RoomHealthMeasurementSource @Inject constructor(
 
     override suspend fun isActive(): Boolean = true
 
-    override suspend fun <T : HealthMeasurement> getMeasurementByRange(
+    override suspend fun <T : HealthMeasurement.WithResource> getMeasurementByRange(
         start: Instant,
         end: Instant,
         type: KClass<T>
@@ -39,7 +39,7 @@ internal class RoomHealthMeasurementSource @Inject constructor(
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
 
-    override suspend fun <T : HealthMeasurement> getMeasurementByDuration(
+    override suspend fun <T : HealthMeasurement.WithResource> getMeasurementByDuration(
         duration: Duration,
         type: KClass<T>
     ): List<T> {
@@ -50,17 +50,16 @@ internal class RoomHealthMeasurementSource @Inject constructor(
         return getMeasurementByRange(start = now - duration, end = now, type = type)
     }
 
-    override suspend fun <T : HealthMeasurement> writeMeasurement(
-        measurement: T
-    ): Result<T> = runCatching {
-        logV("writeMeasurement called: measurement=$measurement")
+    override suspend fun <T : HealthMeasurement.WithResource> writeMeasurement(measurement: T): Result<T> =
+        runCatching {
+            logV("writeMeasurement called: measurement=$measurement")
 
-        val measurementClass = measurement::class
-        val table = tables.first { table -> measurementClass == table.type }
+            val measurementClass = measurement::class
+            val table = tables.first { table -> measurementClass == table.type }
 
-        table.insert(measurement)
-        measurement
-    }.onFailure { exception ->
-        logW("Error while writeMeasurement running", exception)
-    }
+            table.insert(measurement)
+            measurement
+        }.onFailure { exception ->
+            logW("Error while writeMeasurement running", exception)
+        }
 }

@@ -16,7 +16,7 @@ import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.core.store.healthconnect.HealthConnectManager
 import ru.health.stream.feature.vitals.data.model.Device
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.HeartRate
 import ru.health.stream.feature.vitals.data.model.Resource
 import ru.health.stream.feature.vitals.source.local.LocalDeviceSource
 import kotlin.reflect.KClass
@@ -30,14 +30,14 @@ internal class HeartRateSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val localDeviceSource: LocalDeviceSource,
     private val healthConnectManager: HealthConnectManager,
-) : MeasurementSource<HealthMeasurement.HeartRate>() {
+) : MeasurementSource<HeartRate.WithResource>() {
 
-    override val type: KClass<HealthMeasurement.HeartRate> = HealthMeasurement.HeartRate::class
+    override val type: KClass<HeartRate.WithResource> = HeartRate.WithResource::class
 
     override suspend fun getMeasurementByRange(
         start: Instant,
         end: Instant,
-    ): List<HealthMeasurement.HeartRate> = runCatching {
+    ): List<HeartRate.WithResource> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end")
 
         val response = healthConnectManager.healthConnectClient.readRecords(
@@ -72,12 +72,14 @@ internal class HeartRateSource @Inject constructor(
                 records.mapIndexed { index, record ->
                     val (mostSignificantBits, leastSignificantBits) = recordId
 
-                    HealthMeasurement.HeartRate(
-                        id = Uuid.fromLongs(mostSignificantBits, leastSignificantBits + index)
-                            .toString(),
+                    HeartRate.WithResource(
+                        heartRate = HeartRate.Simple(
+                            id = Uuid.fromLongs(mostSignificantBits, leastSignificantBits + index)
+                                .toString(),
+                            createdAt = record.time.toKotlinInstant(),
+                            pulse = record.beatsPerMinute.toInt()
+                        ),
                         resource = resource,
-                        pulse = record.beatsPerMinute.toInt(),
-                        createdAt = record.time.toKotlinInstant(),
                     )
                 }
             }
@@ -87,7 +89,7 @@ internal class HeartRateSource @Inject constructor(
 
     override suspend fun getMeasurementByDuration(
         duration: Duration,
-    ): List<HealthMeasurement.HeartRate> {
+    ): List<HeartRate.WithResource> {
         logV("getMeasurementByRange called: duration=$type")
 
         val now = Clock.System.now()
@@ -95,7 +97,7 @@ internal class HeartRateSource @Inject constructor(
         return getMeasurementByRange(start = now - duration, end = now)
     }
 
-    override suspend fun writeMeasurement(measurement: HealthMeasurement.HeartRate): Result<HealthMeasurement.HeartRate> =
+    override suspend fun writeMeasurement(measurement: HeartRate.WithResource): Result<HeartRate.WithResource> =
         runCatching {
             logV("writeHeartRate called: measurement=$measurement")
 
@@ -135,5 +137,4 @@ internal class HeartRateSource @Inject constructor(
         }.onFailure { exception ->
             logW("Error while writeHeartRate running", exception)
         }
-
 }

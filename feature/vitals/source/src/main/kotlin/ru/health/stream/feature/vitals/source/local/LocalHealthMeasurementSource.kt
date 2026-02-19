@@ -7,16 +7,16 @@ import kotlin.time.Duration
 
 interface LocalHealthMeasurementSource {
 
-    suspend fun <T : HealthMeasurement> getMeasurementByRange(
+    suspend fun <T : HealthMeasurement.WithResource> getMeasurementByRange(
         start: Instant,
         end: Instant,
         type: KClass<T>,
     ): List<T>
 
-    suspend fun <T : HealthMeasurement> getMeasurementByDuration(
+    suspend fun <T : HealthMeasurement.WithResource> getMeasurementByDuration(
         duration: Duration,
         type: KClass<T>,
     ): List<T>
 
-    suspend fun <T: HealthMeasurement> writeMeasurement(measurement: T): Result<T>
+    suspend fun <T: HealthMeasurement.WithResource> writeMeasurement(measurement: T): Result<T>
 }

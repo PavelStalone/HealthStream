@@ -9,8 +9,8 @@ sealed interface HeartRate : HealthMeasurement {
 
     data class Simple(
         override val id: String = Uuid.random().toString(),
-        override val createdAt: Instant,
         override val pulse: Int,
+        override val createdAt: Instant,
     ) : HeartRate {
 
         init {
@@ -19,7 +19,13 @@ sealed interface HeartRate : HealthMeasurement {
     }
 
     data class WithResource(
-        private val simple: Simple,
+        private val heartRate: Simple,
         override val resource: Resource,
-    ) : HeartRate by simple, HealthMeasurement.WithResource
+    ) : HeartRate by heartRate, HealthMeasurement.WithResource
 }
+
+fun HeartRate.Simple.addResource(resource: Resource): HeartRate.WithResource =
+    HeartRate.WithResource(
+        heartRate = this,
+        resource = resource,
+    )

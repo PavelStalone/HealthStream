@@ -28,7 +28,7 @@ internal class PulseOxMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
     }
 
     fun build(): DeviceWithSimpleMeasurements = DeviceWithSimpleMeasurements(
-        resource = device,
+        device = device,
         measurements = lastMeasurePacket?.let { measure ->
             listOf(
                 HealthMeasurement.SimpleHeartRate(

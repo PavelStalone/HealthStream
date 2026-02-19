@@ -1,7 +1,6 @@
 package ru.health.stream.feature.vitals.data.model
 
 import kotlinx.datetime.Instant
-import ru.health.stream.feature.vitals.data.mapper.asHeartRate
 
 /**
  * Measurements with main information
@@ -19,8 +18,8 @@ sealed interface HealthMeasurement {
 
 fun HealthMeasurement.addResource(resource: Resource): HealthMeasurement.WithResource =
     when (val measurement = this) {
-        is HeartRate -> measurement.asHeartRate(resource = resource)
+        is HealthMeasurement.WithResource -> this
+        is HeartRate.Simple -> measurement.addResource(resource = resource)
 
-        // Needed to skip unnecessary branches with already filled data (HealthMeasurement.HeartRate, etc.)
-        else -> error("Measurements already have a resource")
+        else -> error("This measurements can`t be have resource")
     }
