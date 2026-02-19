@@ -17,3 +17,9 @@ sealed interface RespirationRate : HealthMeasurement {
         private val respirationRate: RespirationRate,
     ) : RespirationRate by respirationRate, HealthMeasurement.WithResource
 }
+
+fun RespirationRate.Simple.addResource(resource: Resource): RespirationRate.WithResource =
+    RespirationRate.WithResource(
+        resource = resource,
+        respirationRate = this,
+    )

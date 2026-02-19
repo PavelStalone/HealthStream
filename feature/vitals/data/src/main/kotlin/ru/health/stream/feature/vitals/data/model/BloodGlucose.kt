@@ -17,3 +17,9 @@ sealed interface BloodGlucose : HealthMeasurement {
         private val bloodGlucose: BloodGlucose,
     ) : BloodGlucose by bloodGlucose, HealthMeasurement.WithResource
 }
+
+fun BloodGlucose.Simple.addResource(resource: Resource): BloodGlucose.WithResource =
+    BloodGlucose.WithResource(
+        resource = resource,
+        bloodGlucose = this,
+    )

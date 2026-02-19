@@ -20,6 +20,11 @@ fun HealthMeasurement.addResource(resource: Resource): HealthMeasurement.WithRes
     when (val measurement = this) {
         is HealthMeasurement.WithResource -> this
         is HeartRate.Simple -> measurement.addResource(resource = resource)
+        is BodyWeight.Simple -> measurement.addResource(resource = resource)
+        is BloodGlucose.Simple -> measurement.addResource(resource = resource)
+        is BloodPressure.Simple -> measurement.addResource(resource = resource)
+        is RespirationRate.Simple -> measurement.addResource(resource = resource)
+        is OxygenSaturation.Simple -> measurement.addResource(resource = resource)
 
         else -> error("This measurements can`t be have resource")
     }

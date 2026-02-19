@@ -26,3 +26,9 @@ sealed interface BloodPressure : HealthMeasurement, SystolicPressure, DiastolicP
         private val bloodPressure: BloodPressure,
     ) : BloodPressure by bloodPressure, HealthMeasurement.WithResource
 }
+
+fun BloodPressure.Simple.addResource(resource: Resource): BloodPressure.WithResource =
+    BloodPressure.WithResource(
+        resource = resource,
+        bloodPressure = this,
+    )

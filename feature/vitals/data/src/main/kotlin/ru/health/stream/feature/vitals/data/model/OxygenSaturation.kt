@@ -17,3 +17,9 @@ sealed interface OxygenSaturation : HealthMeasurement {
         private val oxygenSaturation: OxygenSaturation,
     ) : OxygenSaturation by oxygenSaturation, HealthMeasurement.WithResource
 }
+
+fun OxygenSaturation.Simple.addResource(resource: Resource): OxygenSaturation.WithResource =
+    OxygenSaturation.WithResource(
+        resource = resource,
+        oxygenSaturation = this,
+    )
