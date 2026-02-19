@@ -21,7 +21,10 @@ kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
 
     compilerOptions {
-        freeCompilerArgs.add("-Xannotation-default-target=param-property") // https://youtrack.jetbrains.com/issue/KT-73255
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.uuid.ExperimentalUuidApi", // For Kotlin Uuid
+            "-Xannotation-default-target=param-property", // https://youtrack.jetbrains.com/issue/KT-73255
+        )
     }
 }
 

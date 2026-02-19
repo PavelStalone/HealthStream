@@ -1,9 +1,9 @@
 package ru.health.stream.core.store
 
-import ru.health.stream.feature.vitals.data.model.SimpleHealthMeasurement
+import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 import java.util.SortedSet
 
-internal fun <T : SimpleHealthMeasurement> List<List<T>>.mergeByTimeAndId(): Set<T> {
+internal fun <T : HealthMeasurement> List<List<T>>.mergeByTimeAndId(): Set<T> {
     val mapById: MutableMap<String, T> = HashMap()
     forEach { values -> mapById.putAll(values.associateBy { value -> value.id }) }
 

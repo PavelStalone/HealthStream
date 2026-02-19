@@ -21,7 +21,7 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
 
     private var isChecked = false
 
-    override suspend fun <T : HealthMeasurement> getMeasurementByRange(
+    override suspend fun <T : HealthMeasurement.WithResource> getMeasurementByRange(
         start: Instant,
         end: Instant,
         type: KClass<T>
@@ -40,7 +40,7 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
             .toList()
     }
 
-    override suspend fun <T : HealthMeasurement> getMeasurementByDuration(
+    override suspend fun <T : HealthMeasurement.WithResource> getMeasurementByDuration(
         duration: Duration,
         type: KClass<T>
     ): List<T> {
@@ -58,9 +58,7 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
             .toList()
     }
 
-    override suspend fun <T : HealthMeasurement> writeMeasurement(
-        measurement: T
-    ): Result<T> {
+    override suspend fun <T : HealthMeasurement.WithResource> writeMeasurement(measurement: T): Result<T> {
         logV("writeMeasurement called: measurement=$measurement")
 
         checkAvailable()

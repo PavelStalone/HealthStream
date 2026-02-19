@@ -1,9 +1,9 @@
 package ru.health.stream.feature.vitals.source.remote.model
 
 import ru.health.stream.feature.vitals.data.model.Device
-import ru.health.stream.feature.vitals.data.model.SimpleHealthMeasurement
+import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 
 data class DeviceWithSimpleMeasurements(
-    val resource: Device,
-    val measurements: List<SimpleHealthMeasurement>,
+    val device: Device,
+    val measurements: List<HealthMeasurement>,
 )

@@ -4,7 +4,7 @@ import kotlinx.datetime.Instant
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 import kotlin.time.Duration
 
-interface MeasurementSourceContract<T : HealthMeasurement> {
+interface MeasurementSourceContract<T : HealthMeasurement.WithResource> {
 
     suspend fun getMeasurementByRange(
         start: Instant,
