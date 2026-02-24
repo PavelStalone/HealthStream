@@ -12,6 +12,7 @@ import androidx.compose.ui.res.painterResource
 
 @Immutable
 sealed interface UiIcon {
+
     val contentDescription: UiText?
 
     data class Resource(

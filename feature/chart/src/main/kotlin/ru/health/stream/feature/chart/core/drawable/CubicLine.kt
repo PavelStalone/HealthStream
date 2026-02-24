@@ -16,10 +16,6 @@ class CubicLine(
 
     private val sortedPoints = points.sortedBy { it.x }
 
-    init {
-//        require(points.size >= 2) { "Line cant have been less 2 points" }
-    }
-
     private fun ChartDrawScope.createPath(interpolator: Float): Path = Path().apply {
         sortedPoints.first()
             .let { point ->
