@@ -46,7 +46,7 @@ androidx-constraintlayout-compose = "1.1.1"
 androidx-work = "2.10.5"
 
 com-github-movisens-smart-gatt = "3.6.0"
-io-github-automapper = "0.10.0"
+io-github-automapper = "0.11.0"
 
 [libraries]
 io-github-automapper-processor = { group = "io.github.jacksever.automapper", name = "processor", version.ref = "io-github-automapper" }
