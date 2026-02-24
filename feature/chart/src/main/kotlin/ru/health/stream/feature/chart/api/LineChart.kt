@@ -1,9 +1,6 @@
 package ru.health.stream.feature.chart.api
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -12,7 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,10 +23,10 @@ import androidx.compose.ui.util.fastRoundToInt
 import ru.health.stream.feature.chart.core.ChartDrawScopeImpl
 import ru.health.stream.feature.chart.core.ChartScope
 import ru.health.stream.feature.chart.core.ChartScopeInstance
-import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.Drawable
 import ru.health.stream.feature.chart.core.XAxisSide
 import ru.health.stream.feature.chart.core.YAxisSide
+import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.modifier.PointDataNode
 import ru.health.stream.feature.chart.core.modifier.XAxisDataNode
 import ru.health.stream.feature.chart.core.modifier.YAxisDataNode
@@ -45,12 +43,14 @@ fun LineChart(
     chartDrawables: List<Drawable> = emptyList(),
     chartContent: @Composable ChartScope.() -> Unit = {},
 ) {
-    val infinite = rememberInfiniteTransition()
-    val anim by infinite.animateFloat(
-        initialValue = 0f.takeIf { animation } ?: 1f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse),
-    )
+    val anim = remember(animation) { Animatable(initialValue = 0f.takeIf { animation } ?: 1f) }
+
+    LaunchedEffect(animation) {
+        anim.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(2000),
+        )
+    }
 
     Layout(
         modifier = modifier,
@@ -64,7 +64,7 @@ fun LineChart(
                     heightRange = yRange,
                 ).run {
                     chartDrawables.forEach { chart ->
-                        chart.run { draw(anim) }
+                        chart.run { draw(anim.value) }
                     }
                 }
             }

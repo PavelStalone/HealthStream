@@ -1,7 +1,9 @@
-package ru.health.stream.core.store.healthconnect.store
+package ru.health.stream.core.store.healthconnect.source
 
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ru.health.stream.core.monitor.logV
@@ -13,13 +15,11 @@ import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 @Suppress("UNCHECKED_CAST")
 internal class HealthConnectMeasurementSource @Inject constructor(
     private val healthConnectManager: HealthConnectManager,
-    private val measurementsSources: List<@JvmSuppressWildcards MeasurementSource<HealthMeasurement.WithResource>>
+    private val measurementsSources: List<@JvmSuppressWildcards MeasurementSource<HealthMeasurement>>
 ) : HealthMeasurementSource {
 
     private val PERMISSIONS = setOf(
@@ -27,20 +27,20 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         HealthPermission.getWritePermission(HeartRateRecord::class),
     )
 
-    override suspend fun isActive(): Boolean = healthConnectManager.hasAllPermissions(PERMISSIONS)
+    override val isActive: Flow<Boolean> = flow {
+        emit(healthConnectManager.hasAllPermissions(PERMISSIONS))
+    }
 
-    override suspend fun <T : HealthMeasurement.WithResource> getMeasurementByRange(
+    override suspend fun <T : HealthMeasurement> getMeasurementByRange(
         start: Instant,
         end: Instant,
         type: KClass<T>
     ): List<T> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end, kClass=$type")
 
-        val response =
-            measurementsSources.filter { record -> type.java.isAssignableFrom(record.type.java) }
-                .flatMap { record ->
-                    record.getMeasurementByRange(start = start, end = end)
-                }
+        val response = measurementsSources
+            .filter { record -> type.java.isAssignableFrom(record.type.java) }
+            .flatMap { record -> record.getMeasurementByRange(start = start, end = end) }
 
         logV("Founded measurements: $response")
 
@@ -49,7 +49,7 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
 
-    override suspend fun <T : HealthMeasurement.WithResource> getMeasurementByDuration(
+    override suspend fun <T : HealthMeasurement> getMeasurementByDuration(
         duration: Duration,
         type: KClass<T>
     ): List<T> {
@@ -60,7 +60,16 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         return getMeasurementByRange(start = now - duration, end = now, type = type)
     }
 
-    override suspend fun <T : HealthMeasurement.WithResource> writeMeasurement(
+    override fun <T : HealthMeasurement> getMeasurementFlowByDuration(
+        duration: Duration,
+        type: KClass<T>
+    ): Flow<List<T>> {
+        logV("getMeasurementFlowByDuration called: duration=$duration, type=$type")
+
+        return flow { emit(getMeasurementByDuration(duration = duration, type = type)) }
+    }
+
+    override suspend fun <T : HealthMeasurement> writeMeasurement(
         measurement: T
     ): Result<T> = runCatching {
         logV("writeMeasurement called: measurement=$measurement")

@@ -44,16 +44,6 @@ class MainActivity : StarterActivity() {
     @Inject
     lateinit var entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
 
-    val flow = MutableStateFlow(listOf<HealthMeasurement.HeartRate>())
-
-    val PERMISSIONS =
-        setOf(
-            HealthPermission.getReadPermission(HeartRateRecord::class),
-            HealthPermission.getWritePermission(HeartRateRecord::class),
-            HealthPermission.getReadPermission(StepsRecord::class),
-            HealthPermission.getWritePermission(StepsRecord::class)
-        )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -77,13 +67,6 @@ class MainActivity : StarterActivity() {
 //            )
 //            return
 //        }
-
-        lifecycleScope.launch {
-            flow.value = measurementRepository.getMeasurementsByDuration(
-                duration = 200.days,
-                type = HealthMeasurement.HeartRate::class,
-            )
-        }
 
         enableEdgeToEdge()
         setContent {
@@ -110,24 +93,24 @@ class MainActivity : StarterActivity() {
     }
 
     // Create the permissions launcher
-    val requestPermissionActivityContract =
-        PermissionController.createRequestPermissionResultContract()
-
-    val requestPermissions =
-        registerForActivityResult(requestPermissionActivityContract) { granted ->
-            if (granted.containsAll(PERMISSIONS)) {
-                // Permissions successfully granted
-            } else {
-                // Lack of required permissions
-            }
-        }
-
-    suspend fun checkPermissionsAndRun(healthConnectClient: HealthConnectClient) {
-        val granted = healthConnectClient.permissionController.getGrantedPermissions()
-        if (granted.containsAll(PERMISSIONS)) {
-            // Permissions already granted; proceed with inserting or reading data
-        } else {
-            requestPermissions.launch(PERMISSIONS)
-        }
-    }
+//    val requestPermissionActivityContract =
+//        PermissionController.createRequestPermissionResultContract()
+//
+//    val requestPermissions =
+//        registerForActivityResult(requestPermissionActivityContract) { granted ->
+//            if (granted.containsAll(PERMISSIONS)) {
+//                // Permissions successfully granted
+//            } else {
+//                // Lack of required permissions
+//            }
+//        }
+//
+//    suspend fun checkPermissionsAndRun(healthConnectClient: HealthConnectClient) {
+//        val granted = healthConnectClient.permissionController.getGrantedPermissions()
+//        if (granted.containsAll(PERMISSIONS)) {
+//            // Permissions already granted; proceed with inserting or reading data
+//        } else {
+//            requestPermissions.launch(PERMISSIONS)
+//        }
+//    }
 }

@@ -1,5 +1,7 @@
 package ru.health.stream.room.source
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import ru.health.stream.core.store.vitals.DeviceSource
 import ru.health.stream.feature.vitals.data.model.Device
 import ru.health.stream.room.dao.DeviceDao
@@ -11,7 +13,7 @@ internal class RoomDeviceSource @Inject constructor(
     private val deviceDao: DeviceDao,
 ) : DeviceSource {
 
-    override suspend fun isActive(): Boolean = true
+    override val isActive: Flow<Boolean> = flowOf(true)
 
     override suspend fun getDeviceById(id: String): Result<Device> = runCatching {
         val entity = deviceDao.getDeviceById(id = id)

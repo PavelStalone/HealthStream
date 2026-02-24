@@ -1,6 +1,8 @@
 package ru.health.stream.core.store
 
+import kotlinx.coroutines.flow.Flow
+
 interface Store {
 
-    suspend fun isActive(): Boolean
+    val isActive: Flow<Boolean>
 }
