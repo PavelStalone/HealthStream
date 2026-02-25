@@ -126,7 +126,6 @@ fun MainWeekCard(
                             x = 1f / 7f * index.toFloat(),
                             alignment = when (index) {
                                 0 -> Alignment.End
-                                week.size - 1 -> Alignment.Start
                                 else -> Alignment.CenterHorizontally
                             }
                         ),
