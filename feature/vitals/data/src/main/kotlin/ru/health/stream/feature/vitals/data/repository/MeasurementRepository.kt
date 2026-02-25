@@ -1,5 +1,6 @@
 package ru.health.stream.feature.vitals.data.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement
 import kotlin.reflect.KClass
@@ -17,6 +18,11 @@ interface MeasurementRepository {
         duration: Duration,
         type: KClass<T>
     ): List<T>
+
+    fun <T : HealthMeasurement> getMeasurementsFlowByDuration(
+        duration: Duration,
+        type: KClass<T>
+    ): Flow<List<T>>
 
     suspend fun <T : HealthMeasurement> createMeasurement(measurement: T): Result<T>
 }

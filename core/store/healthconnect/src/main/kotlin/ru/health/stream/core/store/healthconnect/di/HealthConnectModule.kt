@@ -12,7 +12,7 @@ import ru.health.stream.core.store.StoreCategory
 import ru.health.stream.core.store.healthconnect.record.HeartRateSource
 import ru.health.stream.core.store.healthconnect.record.MeasurementSource
 import ru.health.stream.core.store.healthconnect.settings.SettingsCell
-import ru.health.stream.core.store.healthconnect.store.HealthConnectMeasurementSource
+import ru.health.stream.core.store.healthconnect.source.HealthConnectMeasurementSource
 import ru.health.stream.core.store.vitals.HealthMeasurementSource
 import ru.health.stream.feature.settings.GeneralSettings
 import ru.health.stream.feature.vitals.data.model.HealthMeasurement

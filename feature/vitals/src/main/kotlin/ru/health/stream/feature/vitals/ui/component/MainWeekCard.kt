@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,33 +20,44 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.DayOfWeek
+import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.layout.RowByFirstBaseLine
+import ru.health.stream.core.ui.model.UiIcon
+import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.feature.chart.api.LineChart
 import ru.health.stream.feature.chart.core.ChartScope
-import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.Drawable
+import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.model.ChartPosition
 import java.lang.Math.random
+import java.time.format.TextStyle
 
 @Composable
 fun MainWeekCard(
     measurementUnit: String,
-    measurementValue: String,
+    measurementValue: String?,
     measurementTitle: String,
-    measurementIcon: ImageVector,
+    measurementIcon: UiIcon,
     yRange: ClosedFloatingPointRange<Float>,
     modifier: Modifier = Modifier,
     animation: Boolean = true,
     chartDrawables: List<Drawable> = emptyList(),
+    startDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
     chartContent: @Composable ChartScope.() -> Unit = {},
 ) {
-    // TODO: Change this on string resources - shoplikpavel 2026-02-06
-    val week = remember { listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa") }
+
+    val locale = LocalLocale.current
+
+    val week = remember(startDayOfWeek) {
+        List(7) { index ->
+            startDayOfWeek.plus(index.toLong()).getDisplayName(TextStyle.SHORT, locale)
+        }
+    }
 
     Card(modifier = modifier) {
         Box(
@@ -59,10 +69,8 @@ fun MainWeekCard(
                 modifier = Modifier.align(Alignment.CenterStart),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Icon(
-                    contentDescription = null,
-                    imageVector = measurementIcon,
-                    tint = MaterialTheme.colorScheme.primary,
+                measurementIcon.drawIcon(
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = measurementTitle,
@@ -87,42 +95,55 @@ fun MainWeekCard(
             )
         }
 
-        RowByFirstBaseLine(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = measurementValue,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            Text(
-                text = measurementUnit,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
-
-        LineChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            animation = animation,
-            xRange = 0f..6f,
-            yRange = yRange,
-            chartDrawables = chartDrawables,
-        ) {
-            chartContent()
-            week.forEachIndexed { index, day ->
+        if (chartDrawables.isNotEmpty() && measurementValue != null) {
+            RowByFirstBaseLine(modifier = Modifier.padding(8.dp)) {
                 Text(
-                    modifier = Modifier.bindXAxis(
-                        x = index.toFloat(),
-                        alignment = when (index) {
-                            0 -> Alignment.End
-                            week.size - 1 -> Alignment.Start
-                            else -> Alignment.CenterHorizontally
-                        }
-                    ),
-                    text = day,
-                    style = MaterialTheme.typography.titleSmall
+                    text = measurementValue,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall,
+                )
+                Text(
+                    text = measurementUnit,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+
+            LineChart(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                animation = animation,
+                xRange = 0f..6f,
+                yRange = yRange,
+                chartDrawables = chartDrawables,
+            ) {
+                chartContent()
+                week.forEachIndexed { index, day ->
+                    Text(
+                        modifier = Modifier.bindXAxis(
+                            x = index.toFloat(),
+                            alignment = when (index) {
+                                0 -> Alignment.End
+                                week.size - 1 -> Alignment.Start
+                                else -> Alignment.CenterHorizontally
+                            }
+                        ),
+                        text = day,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth(),
+                    text = "Please take measurements",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineSmall,
                 )
             }
         }
@@ -153,7 +174,8 @@ private fun PreviewMainWeekCards() {
                         .padding(horizontal = 8.dp),
                     measurementUnit = "bpm",
                     measurementTitle = "Pulse",
-                    measurementIcon = Icons.Rounded.FavoriteBorder,
+                    startDayOfWeek = DayOfWeek.MONDAY,
+                    measurementIcon = UiIcon.Vector(Icons.Rounded.FavoriteBorder),
                     measurementValue = points.maxOf { it.y.toInt() }.toString(),
                     yRange = 40f..90f,
                     chartDrawables = listOf(
@@ -165,6 +187,20 @@ private fun PreviewMainWeekCards() {
                     )
                 )
             }
+
+            MainWeekCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .padding(horizontal = 8.dp),
+                measurementUnit = "bpm",
+                measurementTitle = "Pulse",
+                startDayOfWeek = DayOfWeek.MONDAY,
+                measurementIcon = UiIcon.Vector(Icons.Rounded.FavoriteBorder),
+                measurementValue = null,
+                yRange = 40f..90f,
+                chartDrawables = emptyList()
+            )
         }
     }
 }

@@ -42,8 +42,8 @@ value class Weight(val value: Float) : Comparable<Weight> {
 inline val Int.kg: Weight
     get() = Weight(this.toFloat())
 
-inline val Double.kg: Weight
-    get() = Weight(this.toFloat())
-
 inline val Float.kg: Weight
     get() = Weight(this)
+
+inline val Double.kg: Weight
+    get() = Weight(this.toFloat())
