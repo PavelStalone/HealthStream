@@ -1,44 +1,64 @@
 package ru.health.stream.feature.vitals.domain
 
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Duration.Companion.days
+import kotlin.time.DurationUnit
 
 internal class DatePositionTransformer(
-    timeZone: TimeZone,
     nowDate: Instant,
+    timeZone: TimeZone,
     period: Period = Period.Day,
 ) {
 
-    private val localDate = nowDate.toLocalDateTime(timeZone).date
+    private val start: Instant
+    private val durationSecondsInv: Double // Инвертированная длительность для замены деления умножением
 
-    private val start = when (period) {
-        Period.Day -> localDate.atStartOfDayIn(timeZone)
-        Period.Year -> localDate.atStartOfDayIn(timeZone).minus(localDate.dayOfYear.days)
-        Period.Month -> localDate.atStartOfDayIn(timeZone).minus(localDate.dayOfMonth.days)
-        is Period.Week -> {
-            val currentDayOfWeek = localDate.dayOfWeek
-            val instant = localDate.atStartOfDayIn(timeZone)
+    init {
+        val localDate = nowDate.toLocalDateTime(timeZone).date
 
-            val offset = currentDayOfWeek.value - period.startDayOfWeek.value
+        start = when (period) {
+            Period.Day -> localDate
+            Period.Month -> LocalDate(localDate.year, localDate.month, 1)
+            Period.Year -> LocalDate(localDate.year, 1, 1)
+            is Period.Week -> {
+                val offset = (localDate.dayOfWeek.value - period.startDayOfWeek.value)
+                    .let { if (it < 0) it + 7 else it }
 
-            instant.minus((offset + if (offset < 0) DayOfWeek.entries.size else 0).days)
+                localDate.minus(offset, DateTimeUnit.DAY)
+            }
+        }.atStartOfDayIn(timeZone)
+
+        val end = when (period) {
+            Period.Day -> localDate.plus(1, DateTimeUnit.DAY).atStartOfDayIn(timeZone)
+            is Period.Week -> start.plus(7, DateTimeUnit.DAY, timeZone)
+            Period.Month -> {
+                val startOfMonth = LocalDate(localDate.year, localDate.month, 1)
+
+                startOfMonth.plus(1, DateTimeUnit.MONTH).atStartOfDayIn(timeZone)
+            }
+
+            Period.Year -> {
+                val startOfYear = LocalDate(localDate.year, 1, 1)
+
+                startOfYear.plus(1, DateTimeUnit.YEAR).atStartOfDayIn(timeZone)
+            }
         }
+
+        val durationSeconds = (end - start).toDouble(DurationUnit.SECONDS)
+        durationSecondsInv = if (durationSeconds > 0) 1.0 / durationSeconds else 0.0
     }
 
-    private val durationSeconds = when (period) {
-        Period.Day -> 1.days
-        is Period.Week -> 7.days
-        Period.Month -> localDate.month.maxLength().days
-        Period.Year -> localDate.toJavaLocalDate().lengthOfYear().days
-    }.inWholeSeconds
-
     fun transform(date: Instant): Float {
-        return ((date - start).inWholeSeconds.toDouble() / durationSeconds).toFloat()
+        val diffSeconds = (date - start).toDouble(DurationUnit.SECONDS)
+
+        return (diffSeconds * durationSecondsInv).toFloat()
     }
 }
 
