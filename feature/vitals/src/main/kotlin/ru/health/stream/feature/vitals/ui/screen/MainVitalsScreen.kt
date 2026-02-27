@@ -34,6 +34,7 @@ internal fun MainVitalsScreen() {
         ) {
             items(
                 items = weekCards,
+                key = WeekCardState::key,
             ) { weekCard ->
                 with(weekCard) {
                     MainWeekCard(

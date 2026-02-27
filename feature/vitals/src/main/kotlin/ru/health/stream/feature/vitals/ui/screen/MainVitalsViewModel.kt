@@ -41,6 +41,7 @@ class MainVitalsViewModel @Inject constructor(
         type = HeartRate.WithResource::class,
     ).map { heartRates ->
         WeekCardState(
+            key = "HeartRate.WithResource",
             measurementUnit = UiText.NonTranslatable("bpm"),
             measurementValue = heartRates.firstOrNull()?.pulse?.run {
                 UiText.NonTranslatable(toString())
@@ -72,6 +73,7 @@ class MainVitalsViewModel @Inject constructor(
 
 @Immutable
 data class WeekCardState(
+    val key: String,
     val measurementUnit: UiText,
     val measurementValue: UiText.NonTranslatable?,
     val measurementTitle: UiText,
