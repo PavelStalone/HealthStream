@@ -47,7 +47,7 @@ fun MainWeekCard(
     modifier: Modifier = Modifier,
     animation: Boolean = true,
     chartDrawables: List<Drawable> = emptyList(),
-    startDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
+    startDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
     chartContent: @Composable ChartScope.() -> Unit = {},
 ) {
 
@@ -115,7 +115,7 @@ fun MainWeekCard(
                     .fillMaxWidth()
                     .padding(8.dp),
                 animation = animation,
-                xRange = 0f..6f,
+                xRange = 0f..1f,
                 yRange = yRange,
                 chartDrawables = chartDrawables,
             ) {
@@ -123,10 +123,9 @@ fun MainWeekCard(
                 week.forEachIndexed { index, day ->
                     Text(
                         modifier = Modifier.bindXAxis(
-                            x = index.toFloat(),
+                            x = 1f / 7f * index.toFloat(),
                             alignment = when (index) {
                                 0 -> Alignment.End
-                                week.size - 1 -> Alignment.Start
                                 else -> Alignment.CenterHorizontally
                             }
                         ),
