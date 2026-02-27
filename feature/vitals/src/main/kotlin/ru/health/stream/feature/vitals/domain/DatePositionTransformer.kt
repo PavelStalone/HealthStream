@@ -12,7 +12,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.DurationUnit
 
 internal class DatePositionTransformer(
-    nowDate: Instant,
+    dateNow: Instant,
     timeZone: TimeZone,
     period: Period = Period.Day,
 ) {
@@ -21,14 +21,14 @@ internal class DatePositionTransformer(
     private val durationSecondsInv: Double // Инвертированная длительность для замены деления умножением
 
     init {
-        val localDate = nowDate.toLocalDateTime(timeZone).date
+        val localDate = dateNow.toLocalDateTime(timeZone).date
 
         start = when (period) {
             Period.Day -> localDate
             Period.Month -> LocalDate(localDate.year, localDate.month, 1)
             Period.Year -> LocalDate(localDate.year, 1, 1)
             is Period.Week -> {
-                val offset = (localDate.dayOfWeek.value - period.startDayOfWeek.value)
+                val offset = (localDate.dayOfWeek.value - period.firstDayOfWeek.value)
                     .let { if (it < 0) it + 7 else it }
 
                 localDate.minus(offset, DateTimeUnit.DAY)
@@ -65,7 +65,7 @@ internal class DatePositionTransformer(
 internal sealed interface Period {
 
     data object Day : Period
-    data class Week(val startDayOfWeek: DayOfWeek) : Period
+    data class Week(val firstDayOfWeek: DayOfWeek) : Period
     data object Month : Period
     data object Year : Period
 }

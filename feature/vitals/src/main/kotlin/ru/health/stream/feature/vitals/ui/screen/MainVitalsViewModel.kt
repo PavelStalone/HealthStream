@@ -32,8 +32,8 @@ class MainVitalsViewModel @Inject constructor(
 
     private val positionTransformer = DatePositionTransformer(
         timeZone = TimeZone.currentSystemDefault(),
-        nowDate = Clock.System.now(),
-        period = Period.Week(startDayOfWeek = DayOfWeek.MONDAY)
+        dateNow = Clock.System.now(),
+        period = Period.Week(firstDayOfWeek = DayOfWeek.MONDAY)
     )
 
     val heartRateFlow = measurementRepository.getMeasurementsFlowByDuration(
