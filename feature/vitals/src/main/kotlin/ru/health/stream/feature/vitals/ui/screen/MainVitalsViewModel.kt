@@ -66,8 +66,9 @@ class MainVitalsViewModel @Inject constructor(
         heartRateFlow,
         transform = { states -> states.toList() },
     ).shareIn(
+        replay = 1,
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds),
     )
 }
 

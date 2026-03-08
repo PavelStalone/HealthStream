@@ -5,14 +5,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
-import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.StepsRecord
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -20,17 +27,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.theme.HealthStreamTheme
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.settings.navigation.SettingsScreen
 import ru.health.stream.feature.vitals.data.navigation.MainVitalsScreen
 import ru.health.stream.feature.vitals.data.repository.MeasurementRepository
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.days
 
 @AndroidEntryPoint
 class MainActivity : StarterActivity() {
@@ -73,7 +77,17 @@ class MainActivity : StarterActivity() {
             HealthStreamTheme {
                 val backStack = rememberNavBackStack(MainVitalsScreen)
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        AppBottomBar(
+                            backStack = backStack,
+                            onTabClick = { screen ->
+                                navigationRouter.replaceStack(screen)
+                            }
+                        )
+                    }
+                ) { innerPadding ->
                     NavHost(
                         backStack = backStack,
                         router = navigationRouter,
@@ -91,26 +105,61 @@ class MainActivity : StarterActivity() {
             }
         }
     }
+}
 
-    // Create the permissions launcher
-//    val requestPermissionActivityContract =
-//        PermissionController.createRequestPermissionResultContract()
-//
-//    val requestPermissions =
-//        registerForActivityResult(requestPermissionActivityContract) { granted ->
-//            if (granted.containsAll(PERMISSIONS)) {
-//                // Permissions successfully granted
-//            } else {
-//                // Lack of required permissions
-//            }
-//        }
-//
-//    suspend fun checkPermissionsAndRun(healthConnectClient: HealthConnectClient) {
-//        val granted = healthConnectClient.permissionController.getGrantedPermissions()
-//        if (granted.containsAll(PERMISSIONS)) {
-//            // Permissions already granted; proceed with inserting or reading data
-//        } else {
-//            requestPermissions.launch(PERMISSIONS)
-//        }
-//    }
+@Composable
+private fun AppBottomBar(
+    backStack: List<NavKey>,
+    onTabClick: (NavKey) -> Unit
+) {
+    val tabs = remember {
+        listOf(
+            BottomTab.Vitals,
+            BottomTab.Settings
+        )
+    }
+    val tabKeys = remember { tabs.map { it.screen }.toSet() }
+    val activeTabKey by remember(backStack) {
+        derivedStateOf {
+            backStack.findLast { it in tabKeys }
+        }
+    }
+
+    NavigationBar {
+        tabs.forEach { tab ->
+            NavigationBarItem(
+                selected = tab.screen == activeTabKey,
+                onClick = { onTabClick(tab.screen) },
+                icon = {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = tab.title
+                    )
+                },
+                label = {
+                    Text(text = tab.title)
+                },
+                alwaysShowLabel = false
+            )
+        }
+    }
+}
+
+private sealed class BottomTab(
+    val title: String,
+    val screen: NavKey,
+    val icon: ImageVector,
+) {
+
+    data object Vitals : BottomTab(
+        title = "Vitals",
+        screen = MainVitalsScreen,
+        icon = Icons.Default.Favorite,
+    )
+
+    data object Settings : BottomTab(
+        title = "Settings",
+        screen = SettingsScreen,
+        icon = Icons.Default.Settings,
+    )
 }
