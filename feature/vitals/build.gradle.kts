@@ -13,6 +13,7 @@ dependencies {
 
     implementation(project(":core:ui"))
     implementation(project(":core:starter"))
+    implementation(project(":core:navigation"))
 
     implementation(project(":feature:chart"))
     implementation(project(":feature:settings"))

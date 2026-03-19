@@ -6,3 +6,7 @@ plugins {
 android {
     namespace = "ru.health.stream.core.ui"
 }
+
+dependencies {
+    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
+}

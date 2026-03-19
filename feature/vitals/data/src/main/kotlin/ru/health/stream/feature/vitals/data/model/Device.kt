@@ -36,8 +36,8 @@ sealed interface Device : Resource {
     }
 }
 
-fun Device.copy(id: String, lastMeasured: Instant): Device = when (this) {
-    is Device.BloodPressure -> copy(id = id, lastMeasured = lastMeasured)
-    is Device.PulseOximeter -> copy(id = id, lastMeasured = lastMeasured)
-    is Device.WeightScale -> copy(id = id, lastMeasured = lastMeasured)
+fun Device.copy(lastMeasured: Instant): Device = when (this) {
+    is Device.BloodPressure -> copy(lastMeasured = lastMeasured)
+    is Device.PulseOximeter -> copy(lastMeasured = lastMeasured)
+    is Device.WeightScale -> copy(lastMeasured = lastMeasured)
 }

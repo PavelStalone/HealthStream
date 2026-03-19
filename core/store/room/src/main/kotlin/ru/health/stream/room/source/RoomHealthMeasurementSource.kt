@@ -9,11 +9,10 @@ import kotlinx.datetime.Instant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.core.store.vitals.HealthMeasurementSource
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.room.MeasurementTable
 import javax.inject.Inject
 import kotlin.reflect.KClass
-import kotlin.time.Duration
 
 @Suppress("UNCHECKED_CAST")
 internal class RoomHealthMeasurementSource @Inject constructor(
@@ -25,7 +24,7 @@ internal class RoomHealthMeasurementSource @Inject constructor(
     override suspend fun <T : HealthMeasurement> getMeasurementByRange(
         start: Instant,
         end: Instant,
-        type: KClass<T>
+        type: KClass<T>,
     ): List<T> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end, kClass=$type")
 
@@ -43,28 +42,16 @@ internal class RoomHealthMeasurementSource @Inject constructor(
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
 
-    override suspend fun <T : HealthMeasurement> getMeasurementByDuration(
-        duration: Duration,
-        type: KClass<T>
-    ): List<T> {
-        logV("getMeasurementByDuration called: duration=$duration, kClass=$type")
-
-        val now = Clock.System.now()
-
-        return getMeasurementByRange(start = now - duration, end = now, type = type)
-    }
-
-    override fun <T : HealthMeasurement> getMeasurementFlowByDuration(
-        duration: Duration,
-        type: KClass<T>
+    override fun <T : HealthMeasurement> getMeasurementFlowByRange(
+        start: Instant,
+        end: Instant,
+        type: KClass<T>,
     ): Flow<List<T>> = runCatching {
-        logV("getMeasurementFlowByDuration called: duration=$duration, kClass=$type")
-
-        val now = Clock.System.now()
+        logV("getMeasurementFlowByRange called: start=$start, end=$end, kClass=$type")
 
         val response = tables.filter { table -> type.java.isAssignableFrom(table.type.java) }
             .map { table ->
-                table.getFlowByStartDate(start = now - duration).map { entities ->
+                table.getFlowByRange(start = start, end = end).map { entities ->
                     entities.map { entity -> table.mapToMeasurement(entity) }
                 }
             }
@@ -76,7 +63,7 @@ internal class RoomHealthMeasurementSource @Inject constructor(
 
         response
     }.onFailure { exception ->
-        logW("Error while getMeasurementByRange running", exception)
+        logW("Error while getMeasurementFlowByRange running", exception)
     }.getOrElse { flowOf(emptyList()) }
 
     override suspend fun <T : HealthMeasurement> writeMeasurement(measurement: T): Result<T> =

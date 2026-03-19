@@ -4,17 +4,15 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.core.store.healthconnect.HealthConnectManager
 import ru.health.stream.core.store.healthconnect.record.MeasurementSource
 import ru.health.stream.core.store.vitals.HealthMeasurementSource
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import javax.inject.Inject
 import kotlin.reflect.KClass
-import kotlin.time.Duration
 
 @Suppress("UNCHECKED_CAST")
 internal class HealthConnectMeasurementSource @Inject constructor(
@@ -34,7 +32,7 @@ internal class HealthConnectMeasurementSource @Inject constructor(
     override suspend fun <T : HealthMeasurement> getMeasurementByRange(
         start: Instant,
         end: Instant,
-        type: KClass<T>
+        type: KClass<T>,
     ): List<T> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end, kClass=$type")
 
@@ -49,24 +47,14 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
 
-    override suspend fun <T : HealthMeasurement> getMeasurementByDuration(
-        duration: Duration,
-        type: KClass<T>
-    ): List<T> {
-        logV("getMeasurementByDuration called: duration=$duration, type=$type")
-
-        val now = Clock.System.now()
-
-        return getMeasurementByRange(start = now - duration, end = now, type = type)
-    }
-
-    override fun <T : HealthMeasurement> getMeasurementFlowByDuration(
-        duration: Duration,
-        type: KClass<T>
+    override fun <T : HealthMeasurement> getMeasurementFlowByRange(
+        start: Instant,
+        end: Instant,
+        type: KClass<T>,
     ): Flow<List<T>> {
-        logV("getMeasurementFlowByDuration called: duration=$duration, type=$type")
+        logV("getMeasurementFlowByDuration called: start=$start, end=$end, kClass=$type")
 
-        return flow { emit(getMeasurementByDuration(duration = duration, type = type)) }
+        return flow { emit(getMeasurementByRange(start = start, end = end, type = type)) }
     }
 
     override suspend fun <T : HealthMeasurement> writeMeasurement(

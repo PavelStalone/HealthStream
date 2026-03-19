@@ -115,7 +115,7 @@ private fun AppBottomBar(
     val tabs = remember {
         listOf(
             BottomTab.Vitals,
-            BottomTab.Settings
+            BottomTab.Settings,
         )
     }
     val tabKeys = remember { tabs.map { it.screen }.toSet() }

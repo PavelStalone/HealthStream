@@ -62,7 +62,7 @@ internal class PulseOx(
         logI("onInvalidated called")
 
         measurementBuilder?.build()
-            ?.let { measurements -> remoteDeviceSource.sendMeasurements(measurements) }
+            ?.let { measurement -> remoteDeviceSource.sendMeasurement(measurement) }
         measurementBuilder = null
     }
 
