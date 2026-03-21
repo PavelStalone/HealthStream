@@ -14,8 +14,8 @@ internal interface HeartRateDao : MeasurementDao<HeartRateEntity> {
     @Query("SELECT * FROM heartRate WHERE created_at >= :start AND created_at <= :end")
     override suspend fun getByRange(start: Instant, end: Instant): List<HeartRateEntity>
 
-    @Query("SELECT * FROM heartRate WHERE created_at >= :start")
-    override fun getFlowByStartDate(start: Instant): Flow<List<HeartRateEntity>>
+    @Query("SELECT * FROM heartRate WHERE created_at >= :start AND created_at <= :end")
+    override fun getFlowByRange(start: Instant, end: Instant): Flow<List<HeartRateEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     override suspend fun insert(entity: HeartRateEntity)

@@ -1,5 +1,6 @@
 package ru.health.stream.feature.vitals.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,22 +9,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ru.health.stream.core.navigation.LocalRouter
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.vitals.ui.component.MainWeekCard
+import ru.health.stream.feature.vitals.data.navigation.MeasurementScreen
+import ru.health.stream.feature.vitals.ui.component.MeasurementCard
 
 @Composable
 internal fun MainVitalsScreen() {
     val vitalsViewModel: MainVitalsViewModel = hiltViewModel()
+    val router = LocalRouter.current
 
     val weekCards by vitalsViewModel.weekCardStates.collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -37,11 +41,14 @@ internal fun MainVitalsScreen() {
                 key = WeekCardState::key,
             ) { weekCard ->
                 with(weekCard) {
-                    MainWeekCard(
+                    MeasurementCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(240.dp)
-                            .padding(horizontal = 8.dp),
+                            .padding(horizontal = 8.dp)
+                            .clickable(
+                                onClick = { router.push(MeasurementScreen(measurementType = weekCard.measurementType)) }
+                            ),
                         measurementIcon = measurementIcon,
                         measurementUnit = measurementUnit.asText(),
                         measurementTitle = measurementUnit.asText(),
@@ -55,8 +62,8 @@ internal fun MainVitalsScreen() {
                             listOf(
                                 CubicLine(
                                     points = points,
-                                    style = Stroke(width = 16f),
-                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    style = Stroke(width = 8f),
+                                    color = Color.Red,
                                 )
                             )
                         } else {

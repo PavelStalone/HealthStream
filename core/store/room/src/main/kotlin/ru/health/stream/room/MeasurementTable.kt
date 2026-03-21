@@ -1,6 +1,6 @@
 package ru.health.stream.room
 
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.room.dao.MeasurementDao
 import kotlin.reflect.KClass
 

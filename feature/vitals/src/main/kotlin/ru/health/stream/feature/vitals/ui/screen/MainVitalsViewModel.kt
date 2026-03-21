@@ -17,12 +17,13 @@ import kotlinx.datetime.TimeZone
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.feature.chart.model.ChartPosition
-import ru.health.stream.feature.vitals.data.model.HeartRate
+import ru.health.stream.feature.vitals.data.model.Period
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HeartRate
 import ru.health.stream.feature.vitals.data.repository.MeasurementRepository
 import ru.health.stream.feature.vitals.domain.DatePositionTransformer
-import ru.health.stream.feature.vitals.domain.Period
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.days
+import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
@@ -36,12 +37,18 @@ class MainVitalsViewModel @Inject constructor(
         period = Period.Week(firstDayOfWeek = DayOfWeek.MONDAY)
     )
 
-    val heartRateFlow = measurementRepository.getMeasurementsFlowByDuration(
-        duration = 7.days,
-        type = HeartRate.WithResource::class,
+    private val period = Period.Week(firstDayOfWeek = DayOfWeek.MONDAY)
+    private val range =
+        period.calculateRange(date = Clock.System.now(), timeZone = TimeZone.currentSystemDefault())
+
+    val heartRateFlow = measurementRepository.getMeasurementsFlowByRange(
+        from = range.start,
+        to = range.endInclusive,
+        type = HeartRate::class,
     ).map { heartRates ->
         WeekCardState(
-            key = "HeartRate.WithResource",
+            key = "HeartRate",
+            measurementType = HeartRate::class,
             measurementUnit = UiText.NonTranslatable("bpm"),
             measurementValue = heartRates.firstOrNull()?.pulse?.run {
                 UiText.NonTranslatable(toString())
@@ -75,6 +82,7 @@ class MainVitalsViewModel @Inject constructor(
 @Immutable
 data class WeekCardState(
     val key: String,
+    val measurementType: KClass<out HealthMeasurement>,
     val measurementUnit: UiText,
     val measurementValue: UiText.NonTranslatable?,
     val measurementTitle: UiText,

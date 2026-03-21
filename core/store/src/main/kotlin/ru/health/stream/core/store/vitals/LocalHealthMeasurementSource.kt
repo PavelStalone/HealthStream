@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import ru.health.stream.core.common.bindByFlow
 import ru.health.stream.core.monitor.logD
@@ -12,7 +13,7 @@ import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.store.NotAvailableStoreException
 import ru.health.stream.core.store.Store
 import ru.health.stream.core.store.mergeByTimeAndId
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.feature.vitals.source.local.LocalHealthMeasurementSource
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -43,34 +44,19 @@ internal class LocalHealthMeasurementSourceImpl @Inject constructor(
             .toList()
     }
 
-    override suspend fun <T : HealthMeasurement> getMeasurementByDuration(
-        duration: Duration,
-        type: KClass<T>
-    ): List<T> {
-        logV("getMeasurementByDuration called: duration=$duration, kClass=$type")
-
-        return activeSources.first()
-            .map { source ->
-                logD("${source::class.simpleName} isActive")
-
-                source.getMeasurementByDuration(duration = duration, type = type)
-            }
-            .mergeByTimeAndId()
-            .toList()
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun <T : HealthMeasurement> getMeasurementFlowByDuration(
-        duration: Duration,
-        type: KClass<T>
+    override fun <T : HealthMeasurement> getMeasurementFlowByRange(
+        start: Instant,
+        end: Instant,
+        type: KClass<T>,
     ): Flow<List<T>> {
-        logV("getMeasurementFlowByDuration called: duration=$duration, kClass=$type")
+        logV("getMeasurementFlowByRange called: start=$start, end=$end, kClass=$type")
 
         return activeSources.flatMapLatest { sources ->
             sources.map { source ->
                 logD("${source::class.simpleName} isActive")
 
-                source.getMeasurementFlowByDuration(duration = duration, type = type)
+                source.getMeasurementFlowByRange(start = start, end = end, type = type)
             }.let { flows ->
                 combine(flows) { measurements -> measurements.toList().mergeByTimeAndId().toList() }
             }

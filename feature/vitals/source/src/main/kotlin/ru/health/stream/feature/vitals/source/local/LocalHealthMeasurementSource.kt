@@ -2,7 +2,7 @@ package ru.health.stream.feature.vitals.source.local
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import kotlin.reflect.KClass
 import kotlin.time.Duration
 
@@ -14,13 +14,9 @@ interface LocalHealthMeasurementSource {
         type: KClass<T>,
     ): List<T>
 
-    suspend fun <T : HealthMeasurement> getMeasurementByDuration(
-        duration: Duration,
-        type: KClass<T>,
-    ): List<T>
-
-    fun <T : HealthMeasurement> getMeasurementFlowByDuration(
-        duration: Duration,
+    fun <T : HealthMeasurement> getMeasurementFlowByRange(
+        start: Instant,
+        end: Instant,
         type: KClass<T>,
     ): Flow<List<T>>
 

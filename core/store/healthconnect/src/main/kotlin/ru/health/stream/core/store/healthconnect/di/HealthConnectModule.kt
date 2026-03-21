@@ -15,7 +15,7 @@ import ru.health.stream.core.store.healthconnect.settings.SettingsCell
 import ru.health.stream.core.store.healthconnect.source.HealthConnectMeasurementSource
 import ru.health.stream.core.store.vitals.HealthMeasurementSource
 import ru.health.stream.feature.settings.GeneralSettings
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 
 @Module
 @InstallIn(SingletonComponent::class)

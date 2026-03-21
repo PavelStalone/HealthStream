@@ -1,31 +1,31 @@
-package ru.health.stream.feature.vitals.data.model
+package ru.health.stream.feature.vitals.data.model.measurement
 
 import kotlinx.datetime.Instant
+import ru.health.stream.feature.vitals.data.model.EmptyMetadata
+import ru.health.stream.feature.vitals.data.model.Metadata
+import ru.health.stream.feature.vitals.data.model.Resource
+import kotlin.uuid.Uuid
 
-sealed interface BodyWeight : HealthMeasurement {
+data class BodyWeight(
+    override val id: String,
+    override val createdAt: Instant,
+    override val resource: Resource,
+    override val metadata: Metadata = EmptyMetadata,
+    val weight: Weight,
+) : HealthMeasurement, Metadata by metadata {
 
-    val weight: Weight
-
-    data class Simple(
-        override val id: String,
-        override val weight: Weight,
-        override val createdAt: Instant
-    ) : BodyWeight
-
-    data class WithResource(
-        override val resource: Resource,
-        private val bodyWeight: BodyWeight,
-    ) : BodyWeight by bodyWeight, HealthMeasurement.WithResource
+    init {
+        Uuid.parse(id) // Check uuid format
+        require(weight.value > 0) { "Weight must be positive: ${weight.value}" }
+    }
 }
-
-fun BodyWeight.Simple.addResource(resource: Resource): BodyWeight.WithResource =
-    BodyWeight.WithResource(
-        bodyWeight = this,
-        resource = resource,
-    )
 
 @JvmInline
 value class Weight(val value: Float) : Comparable<Weight> {
+
+    init {
+        require(value >= 0) { "Weight value cannot be negative: $value" }
+    }
 
     inline operator fun unaryMinus() = Weight(-value)
     inline operator fun div(other: Int): Weight = Weight(value / other)

@@ -3,7 +3,7 @@ package ru.health.stream.room.mapper
 import io.github.jacksever.automapper.annotation.AutoMapper
 import io.github.jacksever.automapper.annotation.AutoMapperModule
 import ru.health.stream.feature.vitals.data.model.Device
-import ru.health.stream.feature.vitals.data.model.HeartRate
+import ru.health.stream.feature.vitals.data.model.measurement.HeartRate
 import ru.health.stream.feature.vitals.data.model.Resource
 import ru.health.stream.room.entity.HeartRateEntity
 import ru.health.stream.room.entity.ResourceEntity
@@ -15,7 +15,7 @@ internal interface MapperModule {
     fun resourceMapper(resource: Resource): ResourceEntity
 
     @AutoMapper
-    fun heartRateMapper(heartRate: HeartRate.WithResource): HeartRateEntity
+    fun heartRateMapper(heartRate: HeartRate): HeartRateEntity
 
     @AutoMapper
     fun statusMapper(status: Device.Status): ResourceEntity.DeviceEntity.Status

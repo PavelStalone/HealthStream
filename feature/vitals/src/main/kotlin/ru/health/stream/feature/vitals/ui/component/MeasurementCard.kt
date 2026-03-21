@@ -24,8 +24,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import ru.health.stream.core.ui.composition.LocalLocale
+import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.layout.RowByFirstBaseLine
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.drawIcon
@@ -34,11 +36,11 @@ import ru.health.stream.feature.chart.core.ChartScope
 import ru.health.stream.feature.chart.core.Drawable
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.model.ChartPosition
+import ru.health.stream.feature.vitals.data.model.Period
 import java.lang.Math.random
-import java.time.format.TextStyle
 
 @Composable
-fun MainWeekCard(
+fun MeasurementCard(
     measurementUnit: String,
     measurementValue: String?,
     measurementTitle: String,
@@ -47,15 +49,25 @@ fun MainWeekCard(
     modifier: Modifier = Modifier,
     animation: Boolean = true,
     chartDrawables: List<Drawable> = emptyList(),
-    startDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+    period: Period = Period.Week(firstDayOfWeek = firstDayOfWeek),
     chartContent: @Composable ChartScope.() -> Unit = {},
 ) {
-
     val locale = LocalLocale.current
+    val timeZone = LocalTimeZone.current
 
-    val week = remember(startDayOfWeek) {
-        List(7) { index ->
-            startDayOfWeek.plus(index.toLong()).getDisplayName(TextStyle.SHORT, locale)
+    val display = remember(locale, period, timeZone, firstDayOfWeek) {
+        when (period) {
+            Period.Day -> Period.Day.getDisplay()
+            Period.Month -> Period.Month.getDisplay(
+                locale = locale,
+                timeZone = timeZone,
+                date = Clock.System.now(),
+                firstDayOfWeek = firstDayOfWeek,
+            )
+
+            is Period.Week -> period.getDisplay(locale = locale)
+            Period.Year -> Period.Year.getDisplay(locale = locale)
         }
     }
 
@@ -120,16 +132,17 @@ fun MainWeekCard(
                 chartDrawables = chartDrawables,
             ) {
                 chartContent()
-                week.forEachIndexed { index, day ->
+                display.forEach { (x, text) ->
                     Text(
                         modifier = Modifier.bindXAxis(
-                            x = 1f / 7f * index.toFloat(),
-                            alignment = when (index) {
-                                0 -> Alignment.End
+                            x = x,
+                            alignment = when (x) {
+                                0f -> Alignment.End
+                                1f -> Alignment.Start
                                 else -> Alignment.CenterHorizontally
                             }
                         ),
-                        text = day,
+                        text = text,
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
@@ -151,7 +164,7 @@ fun MainWeekCard(
 
 @Preview
 @Composable
-private fun PreviewMainWeekCards() {
+private fun PreviewMeasurementCards() {
     MaterialTheme {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -160,20 +173,19 @@ private fun PreviewMainWeekCards() {
             repeat(2) {
                 val points = List(7) { index ->
                     ChartPosition.Point(
-                        x = index.toFloat(),
+                        x = index.toFloat() / 6f,
                         y = 40 + random().toFloat() * 50,
                         z = 0f
                     )
                 }
 
-                MainWeekCard(
+                MeasurementCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(240.dp)
                         .padding(horizontal = 8.dp),
                     measurementUnit = "bpm",
                     measurementTitle = "Pulse",
-                    startDayOfWeek = DayOfWeek.MONDAY,
                     measurementIcon = UiIcon.Vector(Icons.Rounded.FavoriteBorder),
                     measurementValue = points.maxOf { it.y.toInt() }.toString(),
                     yRange = 40f..90f,
@@ -187,14 +199,13 @@ private fun PreviewMainWeekCards() {
                 )
             }
 
-            MainWeekCard(
+            MeasurementCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(240.dp)
                     .padding(horizontal = 8.dp),
                 measurementUnit = "bpm",
                 measurementTitle = "Pulse",
-                startDayOfWeek = DayOfWeek.MONDAY,
                 measurementIcon = UiIcon.Vector(Icons.Rounded.FavoriteBorder),
                 measurementValue = null,
                 yRange = 40f..90f,

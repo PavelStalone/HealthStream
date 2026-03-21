@@ -1,6 +1,6 @@
 package ru.health.stream.core.store
 
-import ru.health.stream.feature.vitals.data.model.HealthMeasurement
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import java.util.SortedSet
 
 internal fun <T : HealthMeasurement> Iterable<Iterable<T>>.mergeByTimeAndId(): Set<T> {

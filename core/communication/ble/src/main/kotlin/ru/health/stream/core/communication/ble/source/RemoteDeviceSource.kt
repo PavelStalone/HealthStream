@@ -10,25 +10,25 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import ru.health.stream.core.common.di.ApplicationCoroutineScope
 import ru.health.stream.core.monitor.logV
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.feature.vitals.source.remote.RemoteDeviceSource
-import ru.health.stream.feature.vitals.source.remote.model.DeviceWithSimpleMeasurements
 
 @Singleton
 class RemoteDeviceSourceImpl @Inject constructor(
     @ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : RemoteDeviceSource {
 
-    private val _flow = MutableSharedFlow<DeviceWithSimpleMeasurements>(
+    private val _flow = MutableSharedFlow<HealthMeasurement>(
         replay = 0,
         extraBufferCapacity = 3,
         onBufferOverflow = BufferOverflow.SUSPEND,
     )
 
-    override val flow: Flow<DeviceWithSimpleMeasurements> = _flow.asSharedFlow()
+    override val flow: Flow<HealthMeasurement> = _flow.asSharedFlow()
 
-    internal fun sendMeasurements(measurements: DeviceWithSimpleMeasurements) {
-        logV("sendMeasurements called: $measurements")
+    internal fun sendMeasurement(measurement: HealthMeasurement) {
+        logV("sendMeasurement called: $measurement")
 
-        applicationScope.launch { _flow.emit(measurements) }
+        applicationScope.launch { _flow.emit(measurement) }
     }
 }

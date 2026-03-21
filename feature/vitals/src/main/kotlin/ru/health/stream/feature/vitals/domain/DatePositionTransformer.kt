@@ -1,14 +1,8 @@
 package ru.health.stream.feature.vitals.domain
 
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
+import ru.health.stream.feature.vitals.data.model.Period
 import kotlin.time.DurationUnit
 
 internal class DatePositionTransformer(
@@ -21,37 +15,11 @@ internal class DatePositionTransformer(
     private val durationSecondsInv: Double // Инвертированная длительность для замены деления умножением
 
     init {
-        val localDate = dateNow.toLocalDateTime(timeZone).date
+        val range = period.calculateRange(date = dateNow, timeZone = timeZone)
 
-        start = when (period) {
-            Period.Day -> localDate
-            Period.Month -> LocalDate(localDate.year, localDate.month, 1)
-            Period.Year -> LocalDate(localDate.year, 1, 1)
-            is Period.Week -> {
-                val offset = (localDate.dayOfWeek.value - period.firstDayOfWeek.value)
-                    .let { if (it < 0) it + 7 else it }
+        start = range.start
 
-                localDate.minus(offset, DateTimeUnit.DAY)
-            }
-        }.atStartOfDayIn(timeZone)
-
-        val end = when (period) {
-            Period.Day -> localDate.plus(1, DateTimeUnit.DAY).atStartOfDayIn(timeZone)
-            is Period.Week -> start.plus(7, DateTimeUnit.DAY, timeZone)
-            Period.Month -> {
-                val startOfMonth = LocalDate(localDate.year, localDate.month, 1)
-
-                startOfMonth.plus(1, DateTimeUnit.MONTH).atStartOfDayIn(timeZone)
-            }
-
-            Period.Year -> {
-                val startOfYear = LocalDate(localDate.year, 1, 1)
-
-                startOfYear.plus(1, DateTimeUnit.YEAR).atStartOfDayIn(timeZone)
-            }
-        }
-
-        val durationSeconds = (end - start).toDouble(DurationUnit.SECONDS)
+        val durationSeconds = (range.endInclusive - range.start).toDouble(DurationUnit.SECONDS)
         durationSecondsInv = if (durationSeconds > 0) 1.0 / durationSeconds else 0.0
     }
 
@@ -60,12 +28,4 @@ internal class DatePositionTransformer(
 
         return (diffSeconds * durationSecondsInv).toFloat()
     }
-}
-
-internal sealed interface Period {
-
-    data object Day : Period
-    data class Week(val firstDayOfWeek: DayOfWeek) : Period
-    data object Month : Period
-    data object Year : Period
 }
