@@ -8,5 +8,5 @@ android {
 }
 
 dependencies {
-    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
+    implementation(libs.io.coil.compose)
 }

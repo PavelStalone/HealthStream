@@ -98,7 +98,6 @@ internal class MeasurementViewModel @AssistedInject constructor(
         measurementFlow,
         convertedPeriodFlow,
     ) { measurements, period ->
-
         MeasurementsChartState.Main(
             drawableData = DrawableData.create(
                 period = period,
