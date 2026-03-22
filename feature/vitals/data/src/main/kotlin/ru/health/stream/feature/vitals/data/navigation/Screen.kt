@@ -12,3 +12,8 @@ data object MainVitalsScreen : NavKey
 data class MeasurementScreen(
     val measurementType: KClass<out HealthMeasurement>,
 ) : NavKey
+
+@Serializable
+data class AddMeasurementScreen(
+    val measurementType: KClass<out HealthMeasurement>,
+) : NavKey

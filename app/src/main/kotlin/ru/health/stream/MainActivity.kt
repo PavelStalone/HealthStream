@@ -24,6 +24,8 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.scene.DialogSceneStrategy
+import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
@@ -96,6 +98,7 @@ class MainActivity : StarterActivity() {
                             modifier = Modifier.padding(innerPadding),
                             backStack = backStack,
                             onBack = onBack,
+                            sceneStrategy = DialogSceneStrategy(),
                             entryProvider = entryProvider {
                                 entryBuilders.forEach { builder -> this.builder() }
                             },
