@@ -49,7 +49,6 @@ import kotlin.reflect.KClass
 @Composable
 fun AddMeasurementContent(
     onClose: () -> Unit,
-    onSaveClick: () -> Unit,
     measurementType: KClass<out HealthMeasurement>,
     modifier: Modifier = Modifier,
 ) {
@@ -144,7 +143,7 @@ fun AddMeasurementContent(
                     Text("Cancel", fontWeight = FontWeight.Bold)
                 }
                 Button(
-                    onClick = { viewModel.saveMeasurement(onSuccess = onSaveClick) },
+                    onClick = { viewModel.saveMeasurement(onSuccess = onClose) },
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp),

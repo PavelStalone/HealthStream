@@ -115,7 +115,7 @@ internal fun MeasurementScreen(
         )
 
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             contentPadding = PaddingValues(vertical = 16.dp),

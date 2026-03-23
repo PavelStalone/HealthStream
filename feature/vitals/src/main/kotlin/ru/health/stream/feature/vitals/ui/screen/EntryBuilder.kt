@@ -28,9 +28,7 @@ internal fun EntryProviderScope<NavKey>.featureEntryBuilder() {
         val router = LocalRouter.current
 
         AddMeasurementContent(
-            modifier = Modifier,
             onClose = { router.pop() },
-            onSaveClick = { router.pop() },
             measurementType = key.measurementType,
         )
     }
