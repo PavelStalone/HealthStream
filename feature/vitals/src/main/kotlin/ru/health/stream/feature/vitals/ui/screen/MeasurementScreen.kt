@@ -19,14 +19,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -49,11 +52,15 @@ import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import ru.health.stream.core.navigation.LocalRouter
+import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.model.UiIcon
+import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.feature.vitals.data.model.Period
 import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
+import ru.health.stream.feature.vitals.data.navigation.AddMeasurementScreen
 import ru.health.stream.feature.vitals.ui.component.MeasurementTrendCard
 import ru.health.stream.feature.vitals.ui.model.UiPeriod
 import kotlin.reflect.KClass
@@ -65,6 +72,8 @@ internal fun MeasurementScreen(
     modifier: Modifier = Modifier,
     startPeriod: UiPeriod = UiPeriod.Week,
 ) {
+    val router = LocalRouter.current
+
     val options = remember { listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year) }
     var selectedPeriod by remember { mutableStateOf(startPeriod) }
 
@@ -79,117 +88,144 @@ internal fun MeasurementScreen(
     val expandedMeasurements by viewModel.expandedMeasurementsFlow.collectAsStateWithLifecycle()
     val periodState by viewModel.convertedPeriodFlow.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(vertical = 16.dp),
-    ) {
-        item {
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth(),
-                space = 8.dp
-            ) {
-                options.forEach { option ->
-                    SegmentedButton(
-                        shape = RoundedCornerShape(4.dp),
-                        onClick = {
-                            selectedPeriod = option
-                            viewModel.changePeriod(option)
-                        },
-                        selected = option == selectedPeriod,
-                        icon = {}
-                    ) {
-                        Text(text = option.label.asText())
+    Column(modifier = modifier) {
+        TopBar(
+            modifier = Modifier.height(64.dp),
+            title = UiText.NonTranslatable(measurementType.simpleName ?: "Unknown"),
+            navigationIcon = {
+                IconButton(
+                    onClick = { router.pop() }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
+                }
+            },
+            actions = {
+                IconButton(
+                    onClick = { router.push(AddMeasurementScreen(measurementType = measurementType)) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = null
+                    )
+                }
+            }
+        )
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
+        ) {
+            item {
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    space = 8.dp
+                ) {
+                    options.forEach { option ->
+                        SegmentedButton(
+                            shape = RoundedCornerShape(4.dp),
+                            onClick = {
+                                selectedPeriod = option
+                                viewModel.changePeriod(option)
+                            },
+                            selected = option == selectedPeriod,
+                            icon = {}
+                        ) {
+                            Text(text = option.label.asText())
+                        }
                     }
                 }
             }
-        }
 
-        item {
-            Text(
-                text = "Graph",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            item {
+                Text(
+                    text = "Graph",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
-            when (val state = chartState) {
-                MeasurementsChartState.Loading -> {
-                    MeasurementTrendCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(240.dp),
-                        yRange = 0f..1f,
-                        animation = false,
-                        period = Period.Day
-                    )
-                }
-
-                is MeasurementsChartState.Main -> {
-                    with(state) {
+                when (val state = chartState) {
+                    MeasurementsChartState.Loading -> {
                         MeasurementTrendCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(240.dp),
-                            animation = true,
-                            period = periodState,
-                            yRange = drawableData.yRange,
-                            chartDrawables = drawableData.drawables,
+                            yRange = 0f..1f,
+                            animation = false,
+                            period = Period.Day
                         )
+                    }
+
+                    is MeasurementsChartState.Main -> {
+                        with(state) {
+                            MeasurementTrendCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(240.dp),
+                                animation = true,
+                                period = periodState,
+                                yRange = drawableData.yRange,
+                                chartDrawables = drawableData.drawables,
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        item {
-            Text(
-                text = "Values",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        }
+            item {
+                Text(
+                    text = "Values",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-        when (val state = measurementsState) {
-            MeasurementsState.Loading -> {}
-            is MeasurementsState.Main -> {
-                val formatter = DateTimeComponents.Format {
-                    monthName(MonthNames.ENGLISH_FULL)
-                    char(' ')
-                    dayOfMonth(padding = Padding.NONE)
-                    chars(", ")
-                    year()
-                }
-
-                state.measurements.forEach { group ->
-                    item(key = group.id) {
-                        MeasurementDateGroup(
-                            modifier = Modifier.animateItem(),
-                            date = group.date.format(formatter),
-                            isExpanded = expandedMeasurements.contains(group.id),
-                            onClick = { viewModel.expandMeasurement(group.id) }
-                        )
+            when (val state = measurementsState) {
+                MeasurementsState.Loading -> {}
+                is MeasurementsState.Main -> {
+                    val formatter = DateTimeComponents.Format {
+                        monthName(MonthNames.ENGLISH_FULL)
+                        char(' ')
+                        dayOfMonth(padding = Padding.NONE)
+                        chars(", ")
+                        year()
                     }
 
-                    if (expandedMeasurements.contains(group.id)) {
-                        group.measurements.forEach { measurement ->
-                            item(key = measurement.id) {
-                                with(measurement) {
-                                    MeasurementItem(
-                                        modifier = Modifier.animateItem(),
-                                        icon = resourceIcon,
-                                        sourceName = resourceTitle.asText(),
-                                        time = createdAt.format(formatter),
-                                        type = title.asText(),
-                                        value = value.asText(),
-                                        unit = unit.asText(),
-                                        note = note?.asText(),
-                                        showActions = false
-                                    )
-                                }
-                            }
+                    state.measurements.forEach { group ->
+                        item(key = group.id) {
+                            MeasurementDateGroup(
+                                modifier = Modifier.animateItem(),
+                                date = group.date.format(formatter),
+                                isExpanded = expandedMeasurements.contains(group.id),
+                                onClick = { viewModel.expandMeasurement(group.id) }
+                            )
+                        }
 
-                            item { Spacer(modifier = Modifier.height(8.dp)) }
+                        if (expandedMeasurements.contains(group.id)) {
+                            group.measurements.forEach { measurement ->
+                                item(key = measurement.id) {
+                                    with(measurement) {
+                                        MeasurementItem(
+                                            modifier = Modifier.animateItem(),
+                                            icon = resourceIcon,
+                                            sourceName = resourceTitle.asText(),
+                                            time = createdAt.format(formatter),
+                                            type = title.asText(),
+                                            value = value.asText(),
+                                            unit = unit.asText(),
+                                            note = note?.asText(),
+                                            showActions = false
+                                        )
+                                    }
+                                }
+
+                                item { Spacer(modifier = Modifier.height(8.dp)) }
+                            }
                         }
                     }
                 }

@@ -1,6 +1,7 @@
 package ru.health.stream.feature.vitals.data.model
 
 import kotlinx.datetime.Instant
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import kotlin.uuid.Uuid
 
 data class Note(
@@ -8,6 +9,7 @@ data class Note(
     val createdAt: Instant,
     val description: String,
     val title: String? = null,
+    val measurementsId: List<String> = emptyList(),
 ) : Metadata.Element {
 
     init {
