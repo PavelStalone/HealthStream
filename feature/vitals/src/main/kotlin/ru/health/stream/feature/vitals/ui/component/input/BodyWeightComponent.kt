@@ -59,14 +59,14 @@ class BodyWeightComponent : InputTypeComponent {
             value = state.weight,
             shape = MaterialTheme.shapes.large,
             onValueChange = { value -> changeWeight(value) },
-            label = { Text("Weight") },
+            label = { Text(text = "Вес") },
             isError = state.error != null,
             supportingText = state.error?.let { error ->
                 { Text(text = error) }
             },
             suffix = {
                 Text(
-                    text = "kg",
+                    text = "кг",
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalContentColor.current.copy(alpha = 0.6f)
                 )

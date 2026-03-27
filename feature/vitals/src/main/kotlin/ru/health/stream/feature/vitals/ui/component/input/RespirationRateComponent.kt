@@ -59,14 +59,14 @@ class RespirationRateComponent : InputTypeComponent {
             value = state.rate,
             shape = MaterialTheme.shapes.large,
             onValueChange = { value -> changeRate(value) },
-            label = { Text("Respiration Rate") },
+            label = { Text("Частота дыхания") },
             isError = state.error != null,
             supportingText = state.error?.let { error ->
                 { Text(text = error) }
             },
             suffix = {
                 Text(
-                    text = "rpm",
+                    text = "в/мин",
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalContentColor.current.copy(alpha = 0.6f)
                 )

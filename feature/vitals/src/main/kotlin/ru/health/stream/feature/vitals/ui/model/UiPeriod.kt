@@ -11,19 +11,19 @@ internal sealed class UiPeriod(
 ) {
 
     data object Today : UiPeriod(
-        label = UiText.NonTranslatable("Today")
+        label = UiText.NonTranslatable(value = "Сегодня")
     )
 
     data object Week : UiPeriod(
-        label = UiText.NonTranslatable("Week")
+        label = UiText.NonTranslatable(value = "Неделя")
     )
 
     data object Month : UiPeriod(
-        label = UiText.NonTranslatable("Month")
+        label = UiText.NonTranslatable(value = "Месяц")
     )
 
     data object Year : UiPeriod(
-        label = UiText.NonTranslatable("Year")
+        label = UiText.NonTranslatable(value = "Год")
     )
 }
 
