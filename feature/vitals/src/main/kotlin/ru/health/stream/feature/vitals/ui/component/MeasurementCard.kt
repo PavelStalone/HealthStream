@@ -249,7 +249,7 @@ private fun PreviewMeasurementCards() {
             MeasurementCard(
                 modifier = Modifier.fillMaxWidth(),
                 measurementUnit = "кг",
-                measurementTitle = "Вес",
+                measurementTitle = "Вес тела",
                 onClick = {},
                 measurementIcon = UiIcon.Vector(imageVector = Icons.Rounded.FavoriteBorder),
                 measurementValue = null,

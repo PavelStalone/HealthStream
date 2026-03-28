@@ -145,31 +145,31 @@ internal class MeasurementViewModel @AssistedInject constructor(
 
     private fun HealthMeasurement.asUiMeasurement(): UiMeasurement {
         val (value, unit) = when (this) {
-            is HeartRate -> pulse.toString() to "bpm"
-            is BodyWeight -> weight.toString() to "kg"
+            is HeartRate -> pulse.toString() to "уд/мин"
+            is BodyWeight -> weight.toString() to "кг"
             is OxygenSaturation -> saturation.toString() to "%"
-            is BloodPressure -> "$systolic/$diastolic" to "mmHg"
-            is RespirationRate -> rate.toString() to "breaths/min"
-            is BloodGlucose -> level.toInt().toString() to "mmol/L"
+            is BloodPressure -> "$systolic/$diastolic" to "мм рт. ст."
+            is RespirationRate -> rate.toString() to "дых/мин"
+            is BloodGlucose -> level.toInt().toString() to "ммоль/л"
 
-            is SystolicPressure -> systolic.toString() to "mmHg"
-            is DiastolicPressure -> diastolic.toString() to "mmHg"
+            is SystolicPressure -> systolic.toString() to "мм рт. ст."
+            is DiastolicPressure -> diastolic.toString() to "мм рт. ст."
         }
 
         val resourceTitle = when (val resource = resource) {
-            is Device.BloodPressure -> UiText.NonTranslatable("Blood Pressure Cuff")
-            is Device.PulseOximeter -> UiText.NonTranslatable("Pulse Oximeter")
-            is Device.WeightScale -> UiText.NonTranslatable("Weight Scale")
-            is Resource.App -> UiText.App(resource.packageName)
-            Resource.Manual -> UiText.NonTranslatable("Manual Entry")
+            is Device.BloodPressure -> UiText.NonTranslatable(value = "Тонометр")
+            is Device.PulseOximeter -> UiText.NonTranslatable(value = "Пульсоксиметр")
+            is Device.WeightScale -> UiText.NonTranslatable(value = "Весы")
+            is Resource.App -> UiText.App(packageName = resource.packageName)
+            Resource.Manual -> UiText.NonTranslatable(value = "Ручной ввод")
         }
 
         val resourceIcon = when (val resource = resource) {
-            is Device.BloodPressure -> UiIcon.Vector(DeviceIcons.BPCuff)
-            is Device.PulseOximeter -> UiIcon.Vector(DeviceIcons.PulseOximeter)
-            is Device.WeightScale -> UiIcon.Vector(DeviceIcons.WeightScale)
+            is Device.BloodPressure -> UiIcon.Vector(imageVector = DeviceIcons.BPCuff)
+            is Device.PulseOximeter -> UiIcon.Vector(imageVector = DeviceIcons.PulseOximeter)
+            is Device.WeightScale -> UiIcon.Vector(imageVector = DeviceIcons.WeightScale)
             is Resource.App -> UiIcon.App(packageName = resource.packageName)
-            Resource.Manual -> UiIcon.Vector(DeviceIcons.Pencil)
+            Resource.Manual -> UiIcon.Vector(imageVector = DeviceIcons.Pencil)
         }
 
         return UiMeasurement(
@@ -178,11 +178,11 @@ internal class MeasurementViewModel @AssistedInject constructor(
             resourceTitle = resourceTitle,
             resourceIcon = resourceIcon,
             title = UiText.NonTranslatable(
-                this::class.simpleName ?: "Unknown"
+                value = this::class.simpleName ?: "Неизвестно"
             ), // TODO: Change text - shoplikpavel 2026-03-17
-            value = UiText.NonTranslatable(value),
-            unit = UiText.NonTranslatable(unit),
-            note = metadata[Note]?.let { note -> UiText.NonTranslatable(note.description) }
+            value = UiText.NonTranslatable(value = value),
+            unit = UiText.NonTranslatable(value = unit),
+            note = metadata[Note]?.let { note -> UiText.NonTranslatable(value = note.description) }
         )
     }
 
