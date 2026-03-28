@@ -8,9 +8,9 @@ android {
 }
 
 dependencies {
-    api(project(":feature:vitals:source"))
-    implementation(project(":feature:settings"))
+    api(projects.feature.vitals.source)
+    implementation(projects.feature.settings)
 
-    implementation(project(":core:common"))
-    implementation(project(":core:monitor"))
+    implementation(projects.core.common)
+    implementation(projects.core.monitor)
 }

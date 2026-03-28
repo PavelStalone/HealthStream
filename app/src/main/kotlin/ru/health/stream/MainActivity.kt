@@ -25,7 +25,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
-import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,7 +94,7 @@ class MainActivity : StarterActivity() {
                         router = navigationRouter,
                     ) { backStack, onBack, _ ->
                         NavDisplay(
-                            modifier = Modifier.padding(innerPadding),
+                            modifier = Modifier.padding(paddingValues = innerPadding),
                             backStack = backStack,
                             onBack = onBack,
                             sceneStrategy = DialogSceneStrategy(),
@@ -121,10 +120,10 @@ private fun AppBottomBar(
             BottomTab.Settings,
         )
     }
-    val tabKeys = remember { tabs.map { it.screen }.toSet() }
+    val tabKeys = remember { tabs.map { tab -> tab.screen }.toSet() }
     val activeTabKey by remember(backStack) {
         derivedStateOf {
-            backStack.findLast { it in tabKeys }
+            backStack.findLast { stack -> stack in tabKeys }
         }
     }
 
@@ -134,10 +133,7 @@ private fun AppBottomBar(
                 selected = tab.screen == activeTabKey,
                 onClick = { onTabClick(tab.screen) },
                 icon = {
-                    Icon(
-                        imageVector = tab.icon,
-                        contentDescription = tab.title
-                    )
+                    Icon(imageVector = tab.icon, contentDescription = tab.title)
                 },
                 label = {
                     Text(text = tab.title)

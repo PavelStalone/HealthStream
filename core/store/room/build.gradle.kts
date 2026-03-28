@@ -20,8 +20,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
 
-    implementation(project(":core:store"))
-    implementation(project(":core:monitor"))
+    implementation(projects.core.store)
+    implementation(projects.core.monitor)
 
     implementation(libs.io.github.automapper.annotation)
     ksp(libs.io.github.automapper.processor)

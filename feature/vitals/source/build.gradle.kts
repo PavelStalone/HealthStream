@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api(project(":feature:vitals:data"))
+    api(projects.feature.vitals.data)
 }
