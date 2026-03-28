@@ -128,13 +128,14 @@ dagger-hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "com-
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "com-google-dagger" }
 
 #region Gradle plugins
-gradlePlugin-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+gradlePlugin-room = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-compose = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-hilt = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "com-google-dagger" }
 gradlePlugin-ksp = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "com-google-ksp" }
 gradlePlugin-cache-fix = { group = "org.gradle.android.cache-fix", name = "org.gradle.android.cache-fix.gradle.plugin", version.ref = "org-gradle-android-cache-fix" }
+gradlePlugin-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 #endregion
 
 [bundles]
@@ -142,15 +143,3 @@ health-stream-ble = ["nordic-ble", "nordic-ble-ktx", "nordic-support-ble-scanner
 health-stream-compose = ["androidx-compose-material3", "androidx-compose-ui", "androidx-compose-runtime", "androidx-compose-ui-tooling-preview", "androidx-constraintlayout-compose", "androidx-activity-compose", "androidx-lifecycle-viewmodel-compose", "androidx-compose-material-icons-extended"]
 
 [plugins]
-android-library = { id = "com.android.library", version.ref = "agp" }
-android-application = { id = "com.android.application", version.ref = "agp" }
-
-androidx-room = { id = "androidx.room", version.ref = "room" }
-
-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-
-com-google-ksp = { id = "com.google.devtools.ksp", version.ref = "com-google-ksp" }
-com-google-dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "com-google-dagger" }
-org-gradle-android-cache-fix = { id = "org.gradle.android.cache-fix", version.ref = "org-gradle-android-cache-fix" }
