@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Card
@@ -122,7 +122,7 @@ internal fun MeasurementCard(
                     modifier = Modifier
                         .background(
                             color = Color(color = 0xFFE8F5E9),
-                            shape = RoundedCornerShape(percent = 100)
+                            shape = CircleShape
                         )
                         .padding(horizontal = 12.dp, vertical = 4.dp),
                     text = "Норма",

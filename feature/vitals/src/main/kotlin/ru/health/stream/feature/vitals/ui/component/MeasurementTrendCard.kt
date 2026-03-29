@@ -88,18 +88,16 @@ internal fun MeasurementTrendCard(
                     )
                     .padding(top = 16.dp),
                 text = text,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.outline,
-                ),
+                color = MaterialTheme.colorScheme.outline,
+                style = MaterialTheme.typography.labelSmall,
             )
         }
         yLabels.forEach { y ->
             Text(
                 modifier = Modifier.bindYAxis(y = y, side = YAxisSide.Left),
                 text = y.toInt().toString(),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.outline,
-                ),
+                color = MaterialTheme.colorScheme.outline,
+                style = MaterialTheme.typography.labelSmall,
             )
         }
     }

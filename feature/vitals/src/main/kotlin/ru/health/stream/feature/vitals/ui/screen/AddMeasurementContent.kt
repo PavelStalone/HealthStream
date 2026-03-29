@@ -3,21 +3,19 @@ package ru.health.stream.feature.vitals.ui.screen
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
@@ -118,7 +116,7 @@ internal fun AddMeasurementContent(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                 ),
-                leadingIcon = {
+                prefix = {
                     Icon(
                         imageVector = Icons.Rounded.Info,
                         contentDescription = null,
@@ -138,7 +136,7 @@ internal fun AddMeasurementContent(
                     .weight(1f)
                     .height(60.dp),
                 onClick = onClose,
-                shape = RoundedCornerShape(size = 18.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -151,7 +149,7 @@ internal fun AddMeasurementContent(
                     .weight(1f)
                     .height(60.dp),
                 onClick = { viewModel.saveMeasurement(onSuccess = onClose) },
-                shape = RoundedCornerShape(size = 18.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -191,12 +189,12 @@ private fun MeasurementTypeSelector(
         label = "rotation"
     )
 
-    Box(modifier = modifier) {
+    BoxWithConstraints(modifier = modifier) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { expanded = true },
-            shape = RoundedCornerShape(size = 18.dp),
+            shape = MaterialTheme.shapes.large,
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(
                 width = 1.dp,
@@ -234,14 +232,11 @@ private fun MeasurementTypeSelector(
         }
 
         DropdownMenu(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(size = 16.dp)
-                ),
+            modifier = Modifier.width(maxWidth),
             expanded = expanded,
+            shape = MaterialTheme.shapes.large,
             onDismissRequest = { expanded = false },
+            containerColor = MaterialTheme.colorScheme.surface,
         ) {
             MeasurementType.entries.forEachIndexed { index, type ->
                 DropdownMenuItem(

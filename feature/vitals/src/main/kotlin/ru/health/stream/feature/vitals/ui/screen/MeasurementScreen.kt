@@ -1,6 +1,5 @@
 package ru.health.stream.feature.vitals.ui.screen
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -53,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -144,7 +146,6 @@ internal fun MeasurementScreen(
                 .fillMaxSize()
                 .padding(horizontal = 8.dp),
             contentPadding = PaddingValues(all = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -178,6 +179,8 @@ internal fun MeasurementScreen(
                     }
                 }
             }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             item {
                 Column {
@@ -225,6 +228,8 @@ internal fun MeasurementScreen(
                 }
             }
 
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
             item {
                 Text(
                     modifier = Modifier.padding(start = 4.dp),
@@ -252,48 +257,83 @@ internal fun MeasurementScreen(
                 }
 
                 state.measurements.forEach { group ->
+                    val isExpanded = expandedMeasurements.contains(group.id)
+
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+
                     item(key = group.id) {
-                        val isExpanded = expandedMeasurements.contains(group.id)
+                        val cardShape = if (isExpanded) {
+                            MaterialTheme.shapes.large.copy(
+                                bottomEnd = CornerSize(0.dp),
+                                bottomStart = CornerSize(0.dp)
+                            )
+                        } else {
+                            MaterialTheme.shapes.large
+                        }
 
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .animateContentSize(),
-                            shape = MaterialTheme.shapes.large,
+                                .animateItem(),
+                            shape = cardShape,
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
                             ),
                         ) {
-                            Column {
-                                MeasurementDateHeader(
-                                    date = group.date.format(formatter),
-                                    isExpanded = isExpanded,
-                                    onClick = { viewModel.expandMeasurement(group.id) }
-                                )
+                            MeasurementDateHeader(
+                                date = group.date.format(formatter),
+                                isExpanded = isExpanded,
+                                onClick = { viewModel.expandMeasurement(group.id) }
+                            )
+                        }
+                    }
 
-                                if (isExpanded) {
-                                    group.measurements.forEachIndexed { index, measurement ->
-                                        with(measurement) {
-                                            SwipeableMeasurementRow(
-                                                onEditClick = {
-                                                    // TODO: Handle edit click
-                                                },
-                                                onDeleteClick = {
-                                                    // TODO: Handle delete click
-                                                }
-                                            ) {
-                                                MeasurementRow(
-                                                    modifier = Modifier.animateItem(),
-                                                    icon = resourceIcon,
-                                                    sourceName = resourceTitle.asText(),
-                                                    time = createdAt.format(timeFormatter),
-                                                    value = value.asText(),
-                                                    unit = unit.asText(),
-                                                    note = note?.asText(),
-                                                    isLast = index == group.measurements.lastIndex,
-                                                )
+                    if (isExpanded) {
+                        group.measurements.forEachIndexed { index, measurement ->
+                            val isLast = index == group.measurements.lastIndex
+
+                            with(measurement) {
+                                item(key = id) {
+                                    val cardShape = if (isLast) {
+                                        MaterialTheme.shapes.large.copy(
+                                            topEnd = CornerSize(0.dp),
+                                            topStart = CornerSize(0.dp),
+                                        )
+                                    } else {
+                                        RectangleShape
+                                    }
+
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateItem(),
+                                        shape = cardShape,
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                                alpha = 0.2f
+                                            )
+                                        ),
+                                    ) {
+                                        SwipeableMeasurementRow(
+                                            onEditClick = {
+                                                // TODO: Handle edit click
+                                            },
+                                            onDeleteClick = {
+                                                // TODO: Handle delete click
                                             }
+                                        ) {
+                                            MeasurementRow(
+                                                modifier = Modifier,
+                                                icon = resourceIcon,
+                                                sourceName = resourceTitle.asText(),
+                                                time = createdAt.format(timeFormatter),
+                                                value = value.asText(),
+                                                unit = unit.asText(),
+                                                note = note?.asText(),
+                                                isLast = isLast,
+                                            )
                                         }
                                     }
                                 }
