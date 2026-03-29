@@ -54,7 +54,7 @@ internal class AddMeasurementViewModel @AssistedInject constructor(
             _uiState.update {
                 state.copy(
                     selectedType = type,
-                    inputTypeComponent = getInputComponent(type)
+                    inputTypeComponent = getInputComponent(measurementType = type)
                 )
             }
         }
@@ -146,10 +146,10 @@ internal data class AddMeasurementUiState(
 )
 
 internal enum class MeasurementType(val title: String) {
-    HEART_RATE("Heart Rate"),
-    BLOOD_PRESSURE("Blood Pressure"),
-    OXYGEN_SATURATION("Oxygen Saturation"),
-    BODY_WEIGHT("Body Weight"),
-    BLOOD_GLUCOSE("Blood Glucose"),
-    RESPIRATION_RATE("Respiration Rate")
+    HEART_RATE(title = "Пульс"),
+    BLOOD_PRESSURE(title = "Давление"),
+    OXYGEN_SATURATION(title = "Сатурация кислорода"),
+    BODY_WEIGHT(title = "Вес тела"),
+    BLOOD_GLUCOSE(title = "Глюкоза в крови"),
+    RESPIRATION_RATE(title = "Частота дыхания")
 }

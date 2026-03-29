@@ -49,15 +49,15 @@ class MainVitalsViewModel @Inject constructor(
         WeekCardState(
             key = "HeartRate",
             measurementType = HeartRate::class,
-            measurementUnit = UiText.NonTranslatable("bpm"),
+            measurementUnit = UiText.NonTranslatable(value = "уд/мин"),
             measurementValue = heartRates.firstOrNull()?.pulse?.run {
                 UiText.NonTranslatable(toString())
             },
-            measurementTitle = UiText.NonTranslatable("Pulse"),
-            measurementIcon = UiIcon.Vector(Icons.Rounded.FavoriteBorder),
+            measurementTitle = UiText.NonTranslatable(value = "Пульс"),
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Rounded.FavoriteBorder),
             points = heartRates.map { heartRate ->
                 ChartPosition.Point(
-                    x = positionTransformer.transform(heartRate.createdAt),
+                    x = positionTransformer.transform(date = heartRate.createdAt),
                     y = heartRate.pulse.toFloat(),
                     z = 0f
                 )

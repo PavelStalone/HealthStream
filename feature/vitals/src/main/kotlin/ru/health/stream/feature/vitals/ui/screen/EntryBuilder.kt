@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.scene.DialogSceneStrategy
 import ru.health.stream.core.navigation.LocalRouter
 import ru.health.stream.feature.vitals.data.navigation.AddMeasurementScreen
 import ru.health.stream.feature.vitals.data.navigation.MainVitalsScreen
@@ -22,9 +21,7 @@ internal fun EntryProviderScope<NavKey>.featureEntryBuilder() {
         )
     }
 
-    entry<AddMeasurementScreen>(
-        metadata = DialogSceneStrategy.dialog()
-    ) { key ->
+    entry<AddMeasurementScreen> { key ->
         val router = LocalRouter.current
 
         AddMeasurementContent(

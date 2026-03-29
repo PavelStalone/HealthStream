@@ -25,7 +25,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
-import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,9 +94,9 @@ class MainActivity : StarterActivity() {
                         router = navigationRouter,
                     ) { backStack, onBack, _ ->
                         NavDisplay(
-                            modifier = Modifier.padding(innerPadding),
-                            backStack = backStack,
+                            modifier = Modifier.padding(paddingValues = innerPadding),
                             onBack = onBack,
+                            backStack = backStack,
                             sceneStrategy = DialogSceneStrategy(),
                             entryProvider = entryProvider {
                                 entryBuilders.forEach { builder -> this.builder() }
@@ -155,13 +154,13 @@ private sealed class BottomTab(
 ) {
 
     data object Vitals : BottomTab(
-        title = "Vitals",
+        title = "Измерения",
         screen = MainVitalsScreen,
         icon = Icons.Default.Favorite,
     )
 
     data object Settings : BottomTab(
-        title = "Settings",
+        title = "Настройки",
         screen = SettingsScreen,
         icon = Icons.Default.Settings,
     )

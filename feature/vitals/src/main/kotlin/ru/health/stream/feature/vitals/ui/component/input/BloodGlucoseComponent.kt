@@ -59,14 +59,14 @@ class BloodGlucoseComponent : InputTypeComponent {
             value = state.level,
             shape = MaterialTheme.shapes.large,
             onValueChange = { value -> changeLevel(value) },
-            label = { Text("Blood Glucose") },
+            label = { Text(text = "Глюкоза в крови") },
             isError = state.error != null,
             supportingText = state.error?.let { error ->
                 { Text(text = error) }
             },
             suffix = {
                 Text(
-                    text = "mmol/L",
+                    text = "ммоль/л",
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalContentColor.current.copy(alpha = 0.6f)
                 )

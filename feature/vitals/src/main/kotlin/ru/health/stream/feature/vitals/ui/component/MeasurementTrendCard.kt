@@ -25,13 +25,13 @@ import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.vitals.data.model.Period
 
 @Composable
-fun MeasurementTrendCard(
+internal fun MeasurementTrendCard(
+    period: Period,
     yRange: ClosedFloatingPointRange<Float>,
     modifier: Modifier = Modifier,
-    chartDrawables: List<Drawable> = emptyList(),
     animation: Boolean = true,
+    chartDrawables: List<Drawable> = emptyList(),
     firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
-    period: Period,
 ) {
     val locale = LocalLocale.current
     val timeZone = LocalTimeZone.current
@@ -55,7 +55,7 @@ fun MeasurementTrendCard(
         val step = 10f
         val start = (yRange.start / step).toInt() * step
         val end = (yRange.endInclusive / step).toInt() * step
-        generateSequence(start) { it + step }
+        generateSequence(seed = start) { it + step }
             .takeWhile { it <= end }
             .toList()
     }
@@ -72,7 +72,7 @@ fun MeasurementTrendCard(
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
             )
-            addAll(chartDrawables)
+            addAll(elements = chartDrawables)
         }
     ) {
         display.forEach { (x, text) ->
@@ -88,16 +88,16 @@ fun MeasurementTrendCard(
                     )
                     .padding(top = 16.dp),
                 text = text,
+                color = MaterialTheme.colorScheme.outline,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
             )
         }
         yLabels.forEach { y ->
             Text(
                 modifier = Modifier.bindYAxis(y = y, side = YAxisSide.Left),
                 text = y.toInt().toString(),
+                color = MaterialTheme.colorScheme.outline,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
             )
         }
     }
