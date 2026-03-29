@@ -1,11 +1,13 @@
 package ru.health.stream.feature.vitals.domain
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import ru.health.stream.feature.chart.core.Drawable
+import ru.health.stream.feature.chart.core.drawable.CubicArea
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.vitals.data.model.Period
@@ -34,6 +36,7 @@ data class DrawableData(
             dateNow: Instant,
             timeZone: TimeZone,
             measurements: List<HealthMeasurement>,
+            primaryColor: Color = Color(0xFF0061A4), // Need to change it dynamically?
         ): DrawableData {
             val pointsMap = mutableMapOf<KClass<*>, MutableList<ChartPosition.Point>>()
             val positionTransformer = DatePositionTransformer(
@@ -43,12 +46,12 @@ data class DrawableData(
             )
 
             fun addPoint(clazz: KClass<*>, x: Float, y: Float) {
-                pointsMap.getOrPut(clazz) { mutableListOf() }
+                pointsMap.getOrPut(key = clazz) { mutableListOf() }
                     .add(ChartPosition.Point(x = x, y = y, z = 0f))
             }
 
             measurements.forEach { measurement ->
-                val x = positionTransformer.transform(measurement.createdAt)
+                val x = positionTransformer.transform(date = measurement.createdAt)
                 val type = measurement::class
 
                 when (measurement) {
@@ -75,12 +78,26 @@ data class DrawableData(
                     min..max
                 }
 
-            val charts = pointsMap.values.map { positions ->
-                CubicLine(
-                    color = Color.Red,
-                    points = positions,
-                    style = Stroke(width = 8f),
-                )
+            val charts = pointsMap.values.flatMap { positions ->
+                val sorted = positions.sortedBy { position -> position.x }
+                if (sorted.size >= 2) {
+                    listOf(
+                        CubicArea(
+                            points = sorted,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    primaryColor.copy(alpha = 0.2f),
+                                    primaryColor.copy(alpha = 0.0f)
+                                )
+                            )
+                        ),
+                        CubicLine(
+                            points = sorted,
+                            style = Stroke(width = 8f),
+                            color = primaryColor,
+                        )
+                    )
+                } else emptyList()
             }
 
             return DrawableData(

@@ -95,8 +95,8 @@ class MainActivity : StarterActivity() {
                     ) { backStack, onBack, _ ->
                         NavDisplay(
                             modifier = Modifier.padding(paddingValues = innerPadding),
-                            backStack = backStack,
                             onBack = onBack,
+                            backStack = backStack,
                             sceneStrategy = DialogSceneStrategy(),
                             entryProvider = entryProvider {
                                 entryBuilders.forEach { builder -> this.builder() }
@@ -151,13 +151,13 @@ private sealed class BottomTab(
 ) {
 
     data object Vitals : BottomTab(
-        title = "Vitals",
+        title = "Измерения",
         screen = MainVitalsScreen,
         icon = Icons.Default.Favorite,
     )
 
     data object Settings : BottomTab(
-        title = "Settings",
+        title = "Настройки",
         screen = SettingsScreen,
         icon = Icons.Default.Settings,
     )

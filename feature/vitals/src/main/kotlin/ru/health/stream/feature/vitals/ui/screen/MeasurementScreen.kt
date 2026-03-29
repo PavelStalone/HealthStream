@@ -1,7 +1,12 @@
 package ru.health.stream.feature.vitals.ui.screen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,11 +18,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -27,11 +34,14 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,8 +52,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,30 +68,26 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import ru.health.stream.core.navigation.LocalRouter
-import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.drawIcon
-import ru.health.stream.feature.vitals.data.model.Period
 import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.feature.vitals.data.navigation.AddMeasurementScreen
 import ru.health.stream.feature.vitals.ui.component.MeasurementTrendCard
+import ru.health.stream.feature.vitals.ui.model.RUSSIAN_FULL
 import ru.health.stream.feature.vitals.ui.model.UiPeriod
+import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun MeasurementScreen(
     measurementType: KClass<out HealthMeasurement>,
     modifier: Modifier = Modifier,
     startPeriod: UiPeriod = UiPeriod.Week,
 ) {
     val router = LocalRouter.current
-
-    val options = remember { listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year) }
-    var selectedPeriod by remember { mutableStateOf(startPeriod) }
-
     val viewModel: MeasurementViewModel = hiltViewModel(
         creationCallback = { factory: MeasurementViewModel.Factory ->
             factory.create(period = startPeriod, measurementType = measurementType)
@@ -88,143 +99,244 @@ internal fun MeasurementScreen(
     val expandedMeasurements by viewModel.expandedMeasurementsFlow.collectAsStateWithLifecycle()
     val periodState by viewModel.convertedPeriodFlow.collectAsStateWithLifecycle()
 
-    Column(modifier = modifier) {
-        TopBar(
-            modifier = Modifier.height(64.dp),
-            title = UiText.NonTranslatable(measurementType.simpleName ?: "Unknown"),
-            navigationIcon = {
-                IconButton(
-                    onClick = { router.pop() }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            },
-            actions = {
-                IconButton(
-                    onClick = { router.push(AddMeasurementScreen(measurementType = measurementType)) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Add,
-                        contentDescription = null
-                    )
-                }
-            }
-        )
+    var selectedPeriod by remember { mutableStateOf(value = startPeriod) }
+    val options = listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year)
 
+    Column(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            IconButton(
+                modifier = Modifier.align(Alignment.CenterStart),
+                onClick = { router.pop() }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null
+                )
+            }
+            Text(
+                text = UiText.NonTranslatable(
+                    value = measurementType.simpleName ?: "Детали измерения"
+                ).asText(),
+                style = MaterialTheme.typography.titleLarge
+            )
+            IconButton(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                        shape = CircleShape
+                    )
+                    .align(Alignment.CenterEnd),
+                onClick = { router.push(AddMeasurementScreen(measurementType)) }
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp),
+                .padding(horizontal = 8.dp),
+            contentPadding = PaddingValues(all = 16.dp),
         ) {
             item {
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    space = 8.dp
-                ) {
-                    options.forEach { option ->
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    options.forEachIndexed { index, option ->
                         SegmentedButton(
-                            shape = RoundedCornerShape(4.dp),
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = options.size,
+                            ),
                             onClick = {
                                 selectedPeriod = option
                                 viewModel.changePeriod(option)
                             },
                             selected = option == selectedPeriod,
-                            icon = {}
+                            icon = {},
+                            colors = SegmentedButtonDefaults.colors(
+                                activeContentColor = MaterialTheme.colorScheme.onPrimary,
+                                activeContainerColor = MaterialTheme.colorScheme.primary,
+                                inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                    alpha = 0.3f
+                                )
+                            )
                         ) {
-                            Text(text = option.label.asText())
-                        }
-                    }
-                }
-            }
-
-            item {
-                Text(
-                    text = "Graph",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                when (val state = chartState) {
-                    MeasurementsChartState.Loading -> {
-                        MeasurementTrendCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(240.dp),
-                            yRange = 0f..1f,
-                            animation = false,
-                            period = Period.Day
-                        )
-                    }
-
-                    is MeasurementsChartState.Main -> {
-                        with(state) {
-                            MeasurementTrendCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(240.dp),
-                                animation = true,
-                                period = periodState,
-                                yRange = drawableData.yRange,
-                                chartDrawables = drawableData.drawables,
+                            Text(
+                                text = option.label.asText(),
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                ),
                             )
                         }
                     }
                 }
             }
 
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
             item {
-                Text(
-                    text = "Values",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            when (val state = measurementsState) {
-                MeasurementsState.Loading -> {}
-                is MeasurementsState.Main -> {
-                    val formatter = DateTimeComponents.Format {
-                        monthName(MonthNames.ENGLISH_FULL)
-                        char(' ')
-                        dayOfMonth(padding = Padding.NONE)
-                        chars(", ")
-                        year()
-                    }
-
-                    state.measurements.forEach { group ->
-                        item(key = group.id) {
-                            MeasurementDateGroup(
-                                modifier = Modifier.animateItem(),
-                                date = group.date.format(formatter),
-                                isExpanded = expandedMeasurements.contains(group.id),
-                                onClick = { viewModel.expandMeasurement(group.id) }
-                            )
-                        }
-
-                        if (expandedMeasurements.contains(group.id)) {
-                            group.measurements.forEach { measurement ->
-                                item(key = measurement.id) {
-                                    with(measurement) {
-                                        MeasurementItem(
-                                            modifier = Modifier.animateItem(),
-                                            icon = resourceIcon,
-                                            sourceName = resourceTitle.asText(),
-                                            time = createdAt.format(formatter),
-                                            type = title.asText(),
-                                            value = value.asText(),
-                                            unit = unit.asText(),
-                                            note = note?.asText(),
-                                            showActions = false
-                                        )
+                Column {
+                    Text(
+                        modifier = Modifier.padding(bottom = 12.dp, start = 4.dp),
+                        text = "Динамика показателей",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    )
+                    Card(
+                        shape = MaterialTheme.shapes.extraLarge,
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Box(modifier = Modifier.padding(all = 20.dp)) {
+                            when (val state = chartState) {
+                                MeasurementsChartState.Loading -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(220.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CircularProgressIndicator(strokeWidth = 3.dp)
                                     }
                                 }
 
-                                item { Spacer(modifier = Modifier.height(8.dp)) }
+                                is MeasurementsChartState.Main -> {
+                                    with(state) {
+                                        MeasurementTrendCard(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(220.dp),
+                                            period = periodState,
+                                            yRange = drawableData.yRange,
+                                            chartDrawables = drawableData.drawables,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
+            item {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp),
+                    text = "История измерений",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                )
+            }
+
+            if (measurementsState is MeasurementsState.Main) {
+                val state = measurementsState as MeasurementsState.Main
+                val formatter = DateTimeComponents.Format {
+                    monthName(names = MonthNames.RUSSIAN_FULL)
+                    char(value = ' ')
+                    dayOfMonth(Padding.NONE)
+                    chars(value = ", ")
+                    year()
+                }
+                val timeFormatter = DateTimeComponents.Format {
+                    hour()
+                    char(value = ':')
+                    minute()
+                }
+
+                state.measurements.forEach { group ->
+                    val isExpanded = expandedMeasurements.contains(group.id)
+
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                    item(key = group.id) {
+                        val cardShape = if (isExpanded) {
+                            MaterialTheme.shapes.large.copy(
+                                bottomEnd = CornerSize(0.dp),
+                                bottomStart = CornerSize(0.dp)
+                            )
+                        } else {
+                            MaterialTheme.shapes.large
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem(),
+                            shape = cardShape,
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                            ),
+                        ) {
+                            MeasurementDateHeader(
+                                date = group.date.format(formatter),
+                                isExpanded = isExpanded,
+                                onClick = { viewModel.expandMeasurement(group.id) }
+                            )
+                        }
+                    }
+
+                    if (isExpanded) {
+                        group.measurements.forEachIndexed { index, measurement ->
+                            val isLast = index == group.measurements.lastIndex
+
+                            with(measurement) {
+                                item(key = id) {
+                                    val cardShape = if (isLast) {
+                                        MaterialTheme.shapes.large.copy(
+                                            topEnd = CornerSize(0.dp),
+                                            topStart = CornerSize(0.dp),
+                                        )
+                                    } else {
+                                        RectangleShape
+                                    }
+
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateItem(),
+                                        shape = cardShape,
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                                alpha = 0.2f
+                                            )
+                                        ),
+                                    ) {
+                                        SwipeableMeasurementRow(
+                                            onEditClick = {
+                                                // TODO: Handle edit click
+                                            },
+                                            onDeleteClick = {
+                                                // TODO: Handle delete click
+                                            }
+                                        ) {
+                                            MeasurementRow(
+                                                modifier = Modifier,
+                                                icon = resourceIcon,
+                                                sourceName = resourceTitle.asText(),
+                                                time = createdAt.format(timeFormatter),
+                                                value = value.asText(),
+                                                unit = unit.asText(),
+                                                note = note?.asText(),
+                                                isLast = isLast,
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -235,7 +347,7 @@ internal fun MeasurementScreen(
 }
 
 @Composable
-fun MeasurementDateGroup(
+private fun MeasurementDateHeader(
     date: String,
     onClick: () -> Unit,
     isExpanded: Boolean,
@@ -244,161 +356,232 @@ fun MeasurementDateGroup(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(all = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = date,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            ),
         )
         Icon(
+            modifier = Modifier.size(24.dp),
             imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-            contentDescription = null
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
         )
     }
 }
 
 @Composable
-fun MeasurementItem(
+private fun MeasurementRow(
     icon: UiIcon,
-    sourceName: String,
-    time: String,
-    type: String,
-    value: String,
     unit: String,
+    time: String,
+    value: String,
+    isLast: Boolean,
+    sourceName: String,
     modifier: Modifier = Modifier,
     note: String? = null,
     status: String? = null,
-    showActions: Boolean = false,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        )
-    ) {
-        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(size = 44.dp)
+                    .background(
+                        shape = MaterialTheme.shapes.medium,
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                icon.drawIcon(
+                    modifier = Modifier.size(size = 22.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .weight(weight = 1f)
+                    .padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        icon.drawIcon(
-                            modifier = Modifier.size(24.dp),
-                            tint = Color(0xFF4CAF50)
-                        )
-                        Text(
-                            text = sourceName,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Text(
-                        text = time,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                Text(
+                    text = sourceName,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = type,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            Text(
-                                text = value,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = unit,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            )
-                        }
-                    }
-
-                    status?.let {
-                        Surface(
-                            color = Color(0xFFFFE0B2),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = it,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color(0xFFE65100),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-
-                note?.let {
+                )
+                Text(
+                    text = time,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                )
+                note?.let { note ->
                     Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = note,
+                        maxLines = 2,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
                     )
                 }
             }
-
-            if (showActions) {
-                Column(
-                    modifier = Modifier
-                        .width(60.dp)
-                        .fillMaxHeight()
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .background(Color(0xFFFFECB3)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Edit,
-                            contentDescription = null,
-                            tint = Color.DarkGray
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
                         )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .background(Color(0xFFFFCDD2)),
-                        contentAlignment = Alignment.Center
+                    )
+                    Text(
+                        text = unit,
+                        modifier = Modifier.padding(bottom = 3.dp),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    )
+                }
+                status?.let { status ->
+                    Surface(
+                        color = Color(0xFFFFE0B2),
+                        shape = MaterialTheme.shapes.medium
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = null,
-                            tint = Color.Red
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            text = status,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                color = Color(0xFFE65100),
+                                fontWeight = FontWeight.Bold,
+                            ),
                         )
                     }
                 }
             }
         }
+
+        if (!isLast) {
+            HorizontalDivider(
+                modifier = Modifier.padding(start = 72.dp),
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+            )
+        }
     }
+}
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun SwipeableMeasurementRow(
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val actionWidth = 120.dp
+    val actionWidthPx = with(LocalDensity.current) { actionWidth.toPx() }
+
+    val anchors = remember(actionWidthPx) {
+        DraggableAnchors {
+            DragState.CLOSED at 0f
+            DragState.OPENED at -actionWidthPx
+        }
+    }
+
+    val state = remember {
+        AnchoredDraggableState(
+            initialValue = DragState.CLOSED,
+            anchors = anchors
+        )
+    }
+
+    val offset = state.offset
+    val progress = (-offset / actionWidthPx).coerceIn(0f, 1f)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .clipToBounds()
+    ) {
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(actionWidth * progress)
+                .fillMaxHeight()
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .background(color = Color(color = 0xFFFFECB3))
+                    .clickable(onClick = onEditClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    modifier = Modifier.graphicsLayer {
+                        alpha = progress
+                        scaleX = 0.8f + 0.2f * progress
+                        scaleY = 0.8f + 0.2f * progress
+                    },
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = null,
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .background(color = Color(color = 0xFFFFCDD2))
+                    .clickable(onClick = onDeleteClick),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    modifier = Modifier.graphicsLayer {
+                        alpha = progress
+                        scaleX = 0.8f + 0.2f * progress
+                        scaleY = 0.8f + 0.2f * progress
+                    },
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = null,
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .offset { IntOffset(x = offset.roundToInt(), y = 0) }
+                .anchoredDraggable(
+                    state = state,
+                    orientation = Orientation.Horizontal,
+                )
+        ) {
+            content()
+        }
+    }
+}
+
+private enum class DragState {
+    CLOSED,
+    OPENED,
+    ;
 }

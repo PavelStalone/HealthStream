@@ -59,14 +59,14 @@ class HeartRateComponent : InputTypeComponent {
             value = heartRate.pulse,
             shape = MaterialTheme.shapes.large,
             onValueChange = { value -> changePulse(value) },
-            label = { Text("Pulse") },
+            label = { Text(text = "Пульс") },
             isError = heartRate.error != null,
             supportingText = heartRate.error?.let { error ->
                 { Text(text = error) }
             },
             suffix = {
                 Text(
-                    text = "bpm",
+                    text = "уд/мин",
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalContentColor.current.copy(alpha = 0.6f)
                 )

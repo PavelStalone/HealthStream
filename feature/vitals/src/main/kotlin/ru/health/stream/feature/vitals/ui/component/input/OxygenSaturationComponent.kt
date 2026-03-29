@@ -59,7 +59,7 @@ class OxygenSaturationComponent : InputTypeComponent {
             value = state.saturation,
             shape = MaterialTheme.shapes.large,
             onValueChange = { value -> changeSaturation(value) },
-            label = { Text("SpO2") },
+            label = { Text(text = "SpO₂") },
             isError = state.error != null,
             supportingText = state.error?.let { error ->
                 { Text(text = error) }

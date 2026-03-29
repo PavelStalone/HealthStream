@@ -1,81 +1,104 @@
 package ru.health.stream.feature.vitals.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.health.stream.core.navigation.LocalRouter
 import ru.health.stream.core.ui.model.asText
+import ru.health.stream.feature.chart.core.drawable.CubicArea
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.vitals.data.navigation.MeasurementScreen
 import ru.health.stream.feature.vitals.ui.component.MeasurementCard
 
 @Composable
 internal fun MainVitalsScreen() {
-    val vitalsViewModel: MainVitalsViewModel = hiltViewModel()
     val router = LocalRouter.current
+    val vitalsViewModel: MainVitalsViewModel = hiltViewModel()
 
     val weekCards by vitalsViewModel.weekCardStates.collectAsStateWithLifecycle(initialValue = emptyList())
 
-    if (weekCards.isNotEmpty()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(
-                items = weekCards,
-                key = WeekCardState::key,
-            ) { weekCard ->
-                with(weekCard) {
-                    MeasurementCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(240.dp)
-                            .padding(horizontal = 8.dp)
-                            .clickable(
-                                onClick = { router.push(MeasurementScreen(measurementType = weekCard.measurementType)) }
-                            ),
-                        measurementIcon = measurementIcon,
-                        measurementUnit = measurementUnit.asText(),
-                        measurementTitle = measurementUnit.asText(),
-                        measurementValue = measurementValue?.asText(),
-                        yRange = if (points.isNotEmpty()) {
-                            points.minOf { point -> point.y }..points.maxOf { point -> point.y }
-                        } else {
-                            0f..1f
-                        },
-                        chartDrawables = if (points.isNotEmpty()) {
-                            listOf(
-                                CubicLine(
-                                    points = points,
-                                    style = Stroke(width = 8f),
-                                    color = Color.Red,
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            text = "Измерения",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+        )
+
+        if (weekCards.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                items(items = weekCards, key = WeekCardState::key) { weekCard ->
+                    with(weekCard) {
+                        MeasurementCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            measurementIcon = measurementIcon,
+                            measurementUnit = measurementUnit.asText(),
+                            measurementTitle = measurementTitle.asText(),
+                            measurementValue = measurementValue?.asText(),
+                            onClick = {
+                                router.push(MeasurementScreen(measurementType = measurementType))
+                            },
+                            yRange = if (points.isNotEmpty()) {
+                                points.minOf { point -> point.y }..points.maxOf { point -> point.y }
+                            } else {
+                                0f..1f
+                            },
+                            chartDrawables = if (points.isNotEmpty()) {
+                                listOf(
+                                    CubicArea(
+                                        points = points,
+                                        brush = Brush.verticalGradient(
+                                            colors = listOf(
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.0f),
+                                            )
+                                        )
+                                    ),
+                                    CubicLine(
+                                        points = points,
+                                        style = Stroke(width = 6.dp.value),
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
                                 )
-                            )
-                        } else {
-                            emptyList()
-                        }
-                    )
+                            } else {
+                                emptyList()
+                            }
+                        )
+                    }
                 }
             }
-        }
-    } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text("Not found measurements")
+        } else {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    modifier = Modifier.padding(all = 24.dp),
+                    text = "Пока нет ни одного измерения. Добавьте первое!",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.outline,
+                    ),
+                )
+            }
         }
     }
 }

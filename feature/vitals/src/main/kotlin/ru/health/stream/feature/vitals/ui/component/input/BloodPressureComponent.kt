@@ -78,11 +78,11 @@ class BloodPressureComponent : InputTypeComponent {
                 value = state.systolic,
                 shape = MaterialTheme.shapes.large,
                 onValueChange = { value -> changeSystolic(value) },
-                label = { Text("Systolic") },
+                label = { Text(text = "Систолическое") },
                 isError = state.error != null,
                 suffix = {
                     Text(
-                        text = "mmHg",
+                        text = "мм рт. ст.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalContentColor.current.copy(alpha = 0.6f)
                     )
@@ -97,11 +97,11 @@ class BloodPressureComponent : InputTypeComponent {
                 value = state.diastolic,
                 shape = MaterialTheme.shapes.large,
                 onValueChange = { value -> changeDiastolic(value) },
-                label = { Text("Diastolic") },
+                label = { Text(text = "Диастолическое") },
                 isError = state.error != null,
                 suffix = {
                     Text(
-                        text = "mmHg",
+                        text = "мм рт. ст.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalContentColor.current.copy(alpha = 0.6f)
                     )
