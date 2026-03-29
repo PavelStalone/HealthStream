@@ -40,6 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -52,6 +54,9 @@ import kotlinx.datetime.format.char
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.drawIcon
+import ru.health.stream.feature.chart.core.drawable.CubicLine
+import ru.health.stream.feature.chart.core.drawable.Scatter
+import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.vitals.data.model.Period
 import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.feature.vitals.ui.component.MeasurementTrendCard
@@ -135,7 +140,34 @@ internal fun MeasurementScreen(
                             animation = true,
                             period = periodState,
                             yRange = drawableData.yRange,
-                            chartDrawables = drawableData.drawables,
+                            chartDrawables = drawableData.positions.flatMap { positions ->
+                                listOf(
+                                    Scatter(
+                                        positions = positions,
+                                        pointColor = Color.Red,
+                                        rangeColor = Color.Red.copy(alpha = 0.3f),
+                                        radiusPoint = 6.dp
+                                    ),
+                                    CubicLine(
+                                        points = positions.map { position ->
+                                            when (position) {
+                                                is ChartPosition.Point -> position
+                                                is ChartPosition.Range.Horizontal -> ChartPosition.Point(
+                                                    position.averageX,
+                                                    position.y
+                                                )
+
+                                                is ChartPosition.Range.Vertical -> ChartPosition.Point(
+                                                    position.x,
+                                                    position.averageY
+                                                )
+                                            }
+                                        },
+                                        color = Color.White,
+                                        style = Stroke(width = 3f, cap = StrokeCap.Round),
+                                    )
+                                )
+                            },
                         )
                     }
                 }

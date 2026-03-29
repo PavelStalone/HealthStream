@@ -108,13 +108,13 @@ fun MeasurementTrendCard(
 private fun PreviewMeasurementTrendCard() {
     MaterialTheme {
         val points = listOf(
-            ChartPosition.Point(0 / 6f, 80f, 0f),
-            ChartPosition.Point(1 / 6f, 92f, 0f),
-            ChartPosition.Point(2 / 6f, 58f, 0f),
-            ChartPosition.Point(3 / 6f, 78f, 0f),
-            ChartPosition.Point(4 / 6f, 70f, 0f),
-            ChartPosition.Point(5 / 6f, 68f, 0f),
-            ChartPosition.Point(6 / 6f, 82f, 0f),
+            ChartPosition.Point(0 / 6f, 80f),
+            ChartPosition.Point(1 / 6f, 92f),
+            ChartPosition.Point(2 / 6f, 58f),
+            ChartPosition.Point(3 / 6f, 78f),
+            ChartPosition.Point(4 / 6f, 70f),
+            ChartPosition.Point(5 / 6f, 68f),
+            ChartPosition.Point(6 / 6f, 82f),
         )
 
         MeasurementTrendCard(
