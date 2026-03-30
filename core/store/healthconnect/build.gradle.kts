@@ -13,10 +13,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.health.connect.client)
 
-    implementation(project(":core:store"))
-    implementation(project(":core:monitor"))
-    implementation(project(":core:starter"))
-    implementation(project(":core:navigation"))
+    implementation(projects.core.ui)
+    implementation(projects.core.store)
+    implementation(projects.core.monitor)
+    implementation(projects.core.starter)
+    implementation(projects.core.navigation)
 
-    implementation(project(":feature:settings"))
+    implementation(projects.feature.settings)
 }

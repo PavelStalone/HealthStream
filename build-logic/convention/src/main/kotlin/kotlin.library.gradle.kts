@@ -1,3 +1,4 @@
+import ru.health.stream.buildlogic.extension.implementation
 import ru.health.stream.buildlogic.extension.libs
 
 plugins {
@@ -5,7 +6,7 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(libs.versions.java.get().toInt())
+    jvmToolchain(jdkVersion = libs.versions.java.get().toInt())
 
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi") // For Kotlin Uuid

@@ -9,16 +9,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,19 +30,23 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalTimeZone
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.layout.RowByFirstBaseLine
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.feature.chart.api.LineChart
 import ru.health.stream.feature.chart.core.ChartScope
 import ru.health.stream.feature.chart.core.Drawable
+import ru.health.stream.feature.chart.core.drawable.CubicArea
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.vitals.data.model.Period
 import java.lang.Math.random
 
 @Composable
-fun MeasurementCard(
+internal fun MeasurementCard(
+    onClick: () -> Unit,
     measurementUnit: String,
     measurementValue: String?,
     measurementTitle: String,
@@ -71,92 +77,125 @@ fun MeasurementCard(
         }
     }
 
-    Card(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
+    Card(
+        modifier = modifier,
+        onClick = onClick,
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(all = 16.dp)) {
             Row(
-                modifier = Modifier.align(Alignment.CenterStart),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                measurementIcon.drawIcon(
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = measurementTitle,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-
-            // TODO: Change to separate component - shoplikpavel 2026-02-04
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(horizontal = 4.dp),
-                text = "Normal",
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.titleSmall,
-            )
-        }
-
-        if (chartDrawables.isNotEmpty() && measurementValue != null) {
-            RowByFirstBaseLine(modifier = Modifier.padding(8.dp)) {
-                Text(
-                    text = measurementValue,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall,
-                )
-                Text(
-                    text = measurementUnit,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-
-            LineChart(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                animation = animation,
-                xRange = 0f..1f,
-                yRange = yRange,
-                chartDrawables = chartDrawables,
-            ) {
-                chartContent()
-                display.forEach { (x, text) ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                shape = MaterialTheme.shapes.medium,
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        measurementIcon.drawIcon(
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     Text(
-                        modifier = Modifier.bindXAxis(
-                            x = x,
-                            alignment = when (x) {
-                                0f -> Alignment.End
-                                1f -> Alignment.Start
-                                else -> Alignment.CenterHorizontally
-                            }
+                        text = measurementTitle,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
                         ),
-                        text = text,
-                        style = MaterialTheme.typography.titleSmall
                     )
                 }
-            }
-        } else {
-            Box(modifier = Modifier.fillMaxSize()) {
                 Text(
                     modifier = Modifier
-                        .align(Alignment.Center)
-                        .fillMaxWidth(),
-                    text = "Please take measurements",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.headlineSmall,
+                        .background(
+                            color = Color(color = 0xFFE8F5E9),
+                            shape = CircleShape
+                        )
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    text = "Норма",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = Color(color = 0xFF2E7D32),
+                        fontWeight = FontWeight.Bold,
+                    ),
                 )
+            }
+
+            if (measurementValue != null) {
+                RowByFirstBaseLine(modifier = Modifier.padding(vertical = 12.dp)) {
+                    Text(
+                        text = measurementValue,
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = 4.dp),
+                        text = measurementUnit,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                    )
+                }
+
+                if (chartDrawables.isNotEmpty()) {
+                    LineChart(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        animation = animation,
+                        xRange = 0f..1f,
+                        yRange = yRange,
+                        chartDrawables = chartDrawables,
+                    ) {
+                        chartContent()
+                        display.forEach { (x, text) ->
+                            Text(
+                                modifier = Modifier.bindXAxis(
+                                    x = x,
+                                    alignment = when (x) {
+                                        0f -> Alignment.End
+                                        1f -> Alignment.Start
+                                        else -> Alignment.CenterHorizontally
+                                    }
+                                ),
+                                text = text,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = MaterialTheme.colorScheme.outline,
+                                ),
+                            )
+                        }
+                    }
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Нет данных за этот период",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.outline,
+                        ),
+                    )
+                }
             }
         }
     }
@@ -167,45 +206,51 @@ fun MeasurementCard(
 private fun PreviewMeasurementCards() {
     MaterialTheme {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                .padding(all = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            repeat(2) {
-                val points = List(7) { index ->
-                    ChartPosition.Point(
-                        x = index.toFloat() / 6f,
-                        y = 40 + random().toFloat() * 50,
-                    )
-                }
-
-                MeasurementCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(240.dp)
-                        .padding(horizontal = 8.dp),
-                    measurementUnit = "bpm",
-                    measurementTitle = "Pulse",
-                    measurementIcon = UiIcon.Vector(Icons.Rounded.FavoriteBorder),
-                    measurementValue = points.maxOf { it.y.toInt() }.toString(),
-                    yRange = 40f..90f,
-                    chartDrawables = listOf(
-                        CubicLine(
-                            points = points,
-                            style = Stroke(width = 16f),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                        )
-                    )
+            val points = List(size = 8) { index ->
+                ChartPosition.Point(
+                    x = index.toFloat() / 7f,
+                    y = 60 + random().toFloat() * 30,
                 )
             }
 
             MeasurementCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(240.dp)
-                    .padding(horizontal = 8.dp),
-                measurementUnit = "bpm",
-                measurementTitle = "Pulse",
-                measurementIcon = UiIcon.Vector(Icons.Rounded.FavoriteBorder),
+                modifier = Modifier.fillMaxWidth(),
+                measurementUnit = "уд/мин",
+                measurementTitle = "Пульс",
+                onClick = {},
+                measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+                measurementValue = points.last().y.toInt().toString(),
+                yRange = 40f..120f,
+                chartDrawables = listOf(
+                    CubicArea(
+                        points = points,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.0f)
+                            )
+                        )
+                    ),
+                    CubicLine(
+                        points = points,
+                        style = Stroke(width = 8f),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                )
+            )
+
+            MeasurementCard(
+                modifier = Modifier.fillMaxWidth(),
+                measurementUnit = "кг",
+                measurementTitle = "Вес тела",
+                onClick = {},
+                measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
                 measurementValue = null,
                 yRange = 40f..90f,
                 chartDrawables = emptyList()

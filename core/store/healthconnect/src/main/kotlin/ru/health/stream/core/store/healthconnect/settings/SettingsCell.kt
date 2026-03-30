@@ -4,8 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +13,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import ru.health.stream.core.navigation.LocalRouter
 import ru.health.stream.core.store.healthconnect.navigation.HealthConnectSettings
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.feature.settings.Settings
 
 internal data object SettingsCell : Settings.Cell {
@@ -36,7 +36,7 @@ internal data object SettingsCell : Settings.Cell {
                 })
         ) {
             Icon(
-                imageVector = Icons.Rounded.AccountCircle,
+                imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
             )
             Text(

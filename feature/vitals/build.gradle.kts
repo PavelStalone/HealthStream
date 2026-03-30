@@ -9,17 +9,16 @@ android {
 }
 
 dependencies {
-    api(project(":feature:vitals:data"))
+    api(projects.feature.vitals.data)
 
-    implementation(project(":core:ui"))
-    implementation(project(":core:starter"))
-    implementation(project(":core:navigation"))
+    implementation(projects.core.ui)
+    implementation(projects.core.starter)
+    implementation(projects.core.navigation)
 
-    implementation(project(":feature:chart"))
-    implementation(project(":feature:settings"))
-    implementation(project(":feature:vitals:source"))
+    implementation(projects.feature.chart)
+    implementation(projects.feature.settings)
+    implementation(projects.feature.vitals.source)
 
     implementation(libs.io.github.automapper.annotation)
-
     ksp(libs.io.github.automapper.processor)
 }

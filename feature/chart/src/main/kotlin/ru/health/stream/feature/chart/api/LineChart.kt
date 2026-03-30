@@ -229,7 +229,12 @@ fun PreviewLineChart() {
                 modifier = Modifier.fillMaxSize(),
                 xRange = 0f..10f,
                 yRange = 40f..90f,
-                chartDrawables = listOf(CubicLine(points = points)),
+                chartDrawables = listOf(
+                    CubicLine(
+                        points = points,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                ),
                 chartContent = {
                     points.forEach { point ->
                         Text(

@@ -1,6 +1,7 @@
 package ru.health.stream.feature.vitals.data.model
 
 import kotlinx.datetime.Instant
+import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import kotlin.uuid.Uuid
 
 data class Note(
