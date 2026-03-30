@@ -19,7 +19,7 @@ class CubicArea(
         val firstPoint = sortedPoints.first()
         val lastPoint = sortedPoints.last()
 
-        moveTo(x = firstPoint.x.xChart, y = 0f.yChart)
+        moveTo(x = firstPoint.x.xChart, y = heightRange.start.yChart)
         lineTo(x = firstPoint.x.xChart, y = firstPoint.y.yChart * interpolator)
 
         sortedPoints.zipWithNext { last, current ->
@@ -32,7 +32,7 @@ class CubicArea(
             )
         }
 
-        lineTo(x = lastPoint.x.xChart, y = 0f.yChart)
+        lineTo(x = lastPoint.x.xChart, y = heightRange.start.yChart)
         close()
     }
 
