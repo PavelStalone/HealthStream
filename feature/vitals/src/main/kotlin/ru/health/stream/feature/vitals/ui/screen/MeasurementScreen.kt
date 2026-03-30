@@ -49,9 +49,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +64,7 @@ import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.navigation.LocalRouter
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
@@ -78,7 +79,6 @@ import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.drawable.Scatter
 import ru.health.stream.feature.chart.model.ChartPosition
-import ru.health.stream.feature.vitals.data.model.Period
 import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.feature.vitals.data.navigation.AddMeasurementScreen
 import ru.health.stream.feature.vitals.ui.component.MeasurementTrendCard
@@ -108,6 +108,8 @@ internal fun MeasurementScreen(
 
     var selectedPeriod by remember { mutableStateOf(value = startPeriod) }
     val options = listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year)
+
+    logV("chartState: $chartState")
 
     Column(modifier = modifier) {
         Box(
@@ -229,8 +231,10 @@ internal fun MeasurementScreen(
                                                 listOf(
                                                     Scatter(
                                                         positions = positions,
-                                                        pointColor = Color.Red,
-                                                        rangeColor = Color.Red.copy(alpha = 0.3f),
+                                                        pointColor = MaterialTheme.colorScheme.primary,
+                                                        rangeColor = MaterialTheme.colorScheme.primary.copy(
+                                                            alpha = 0.3f
+                                                        ),
                                                         radiusPoint = 6.dp
                                                     ),
                                                     CubicLine(
@@ -248,8 +252,11 @@ internal fun MeasurementScreen(
                                                                 )
                                                             }
                                                         },
-                                                        color = Color.White,
-                                                        style = Stroke(width = 3f, cap = StrokeCap.Round),
+                                                        color = MaterialTheme.colorScheme.tertiary,
+                                                        style = Stroke(
+                                                            width = 6f,
+                                                            cap = StrokeCap.Round
+                                                        ),
                                                     )
                                                 )
                                             },

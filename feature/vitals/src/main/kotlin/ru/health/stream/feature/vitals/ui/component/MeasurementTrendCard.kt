@@ -53,8 +53,9 @@ internal fun MeasurementTrendCard(
 
     val yLabels = remember(yRange) {
         val step = 10f
-        val start = (yRange.start / step).toInt() * step
-        val end = (yRange.endInclusive / step).toInt() * step
+        val start = yRange.start
+        val end = yRange.endInclusive
+
         generateSequence(seed = start) { it + step }
             .takeWhile { it <= end }
             .toList()
@@ -94,7 +95,9 @@ internal fun MeasurementTrendCard(
         }
         yLabels.forEach { y ->
             Text(
-                modifier = Modifier.bindYAxis(y = y, side = YAxisSide.Left),
+                modifier = Modifier
+                    .bindYAxis(y = y, side = YAxisSide.Left)
+                    .padding(end = 8.dp),
                 text = y.toInt().toString(),
                 color = MaterialTheme.colorScheme.outline,
                 style = MaterialTheme.typography.labelSmall,
