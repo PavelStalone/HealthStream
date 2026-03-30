@@ -64,8 +64,8 @@ import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
-import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.navigation.LocalRouter
+import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.ArrowBack
@@ -109,47 +109,41 @@ internal fun MeasurementScreen(
     var selectedPeriod by remember { mutableStateOf(value = startPeriod) }
     val options = listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year)
 
-    logV("chartState: $chartState")
-
     Column(modifier = modifier) {
-        Box(
+        TopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(all = 8.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            IconButton(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = { router.pop() }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null
-                )
-            }
-            Text(
-                text = UiText.NonTranslatable(
-                    value = measurementType.simpleName ?: "Детали измерения"
-                ).asText(),
-                style = MaterialTheme.typography.titleLarge
-            )
-            IconButton(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                        shape = CircleShape
+            title = UiText.NonTranslatable(
+                value = measurementType.simpleName ?: "Детали измерения"
+            ),
+            navigationIcon = {
+                IconButton(
+                    onClick = { router.pop() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = null
                     )
-                    .align(Alignment.CenterEnd),
-                onClick = { router.push(AddMeasurementScreen(measurementType)) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                }
+            },
+            actions = {
+                IconButton(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                            shape = CircleShape
+                        ),
+                    onClick = { router.push(AddMeasurementScreen(measurementType)) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
-        }
+        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
