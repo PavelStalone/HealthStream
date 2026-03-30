@@ -5,9 +5,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import ru.health.stream.core.ui.icon.DeviceIcons
+import ru.health.stream.core.ui.icon.Icons
 
-val DeviceIcons.Glucose: ImageVector
+val Icons.Device.Glucose: ImageVector
     get() {
         if (_Glucose != null) {
             return _Glucose!!

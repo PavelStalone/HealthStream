@@ -8,12 +8,12 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:common"))
-    implementation(project(":core:monitor"))
-    implementation(project(":core:starter"))
-    implementation(project(":core:communication:ble:lib"))
+    implementation(projects.core.common)
+    implementation(projects.core.monitor)
+    implementation(projects.core.starter)
+    implementation(projects.core.communication.ble.lib)
 
-    implementation(project(":feature:vitals:source"))
+    implementation(projects.feature.vitals.source)
 
     // TODO: remove this after migrate uuid from lib for BloodPressure device - shoplikpavel 2026-01-27
     implementation(libs.com.github.movisens.smart.gatt)

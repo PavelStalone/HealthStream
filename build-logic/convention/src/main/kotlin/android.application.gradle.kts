@@ -1,5 +1,4 @@
 import ru.health.stream.buildlogic.extension.application
-import ru.health.stream.buildlogic.extension.implementation
 import ru.health.stream.buildlogic.extension.libs
 
 plugins {
@@ -10,11 +9,22 @@ plugins {
 }
 
 application {
-    defaultConfig {
+    defaultConfig.apply {
         targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
-    buildFeatures {
+    buildFeatures.apply {
         buildConfig = true
+    }
+}
+
+kotlin {
+    jvmToolchain(jdkVersion = libs.versions.java.get().toInt())
+
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.uuid.ExperimentalUuidApi", // For Kotlin Uuid
+            "-Xannotation-default-target=param-property", // https://youtrack.jetbrains.com/issue/KT-73255
+        )
     }
 }

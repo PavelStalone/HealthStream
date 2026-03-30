@@ -4,15 +4,15 @@ targetSdk = "36"
 compileSdk = "36"
 
 java = "21"
-agp = "8.13.0"
-kotlin = "2.2.21"
-coreKtx = "1.17.0"
+agp = "9.1.0"
+kotlin = "2.3.20"
+coreKtx = "1.18.0"
 org-jetbrains-coroutines = "1.10.2"
 
-nav3Core = "1.0.0"
+nav3Core = "1.0.1"
 coilCompose = "3.4.0"
 lifecycleViewmodelNav3 = "2.10.0"
-material3AdaptiveNav3 = "1.3.0-alpha06"
+material3AdaptiveNav3 = "1.3.0-alpha09"
 
 #region Test
 junit = "4.13.2"
@@ -29,22 +29,22 @@ com-polidea-rxandroidble = "1.19.1"
 
 room = "2.8.4"
 navRouter = "1.0.3"
-datastore = "1.2.0"
+datastore = "1.2.1"
 healthConnect = "1.1.0"
-lifecycleRuntimeKtx = "2.9.4"
-kotlinxSerializationJson = "1.9.0"
-activityCompose = "1.11.0"
-composeBom = "2024.09.00"
-com-google-ksp = "2.2.20-2.0.3"
-com-google-dagger = "2.58"
+lifecycleRuntimeKtx = "2.10.0"
+kotlinxSerializationJson = "1.10.0"
+activityCompose = "1.13.0"
+composeBom = "2026.03.01"
+com-google-ksp = "2.3.6"
+com-google-dagger = "2.59.2"
 androidx-hilt-ext = "1.3.0"
 androidx-hilt-navigation-compose = "1.3.0"
-androidx-lifecycle-viewmodel-compose = "2.9.4"
+androidx-lifecycle-viewmodel-compose = "2.10.0"
 org-gradle-android-cache-fix = "3.0.3"
 jakewharton-timber = "5.0.1"
-kotlinx-datetime = "0.6.2"
+kotlinx-datetime = "0.6.2" # Many ext functions for kotlinx.datetime break on version 0.7.1
 androidx-constraintlayout-compose = "1.1.1"
-androidx-work = "2.10.5"
+androidx-work = "2.11.2"
 
 com-github-movisens-smart-gatt = "3.6.0"
 io-github-automapper = "0.11.0"
@@ -127,13 +127,14 @@ dagger-hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "com-
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "com-google-dagger" }
 
 #region Gradle plugins
-gradlePlugin-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+gradlePlugin-room = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-compose = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-hilt = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "com-google-dagger" }
 gradlePlugin-ksp = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "com-google-ksp" }
 gradlePlugin-cache-fix = { group = "org.gradle.android.cache-fix", name = "org.gradle.android.cache-fix.gradle.plugin", version.ref = "org-gradle-android-cache-fix" }
+gradlePlugin-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 #endregion
 
 [bundles]
@@ -141,16 +142,3 @@ health-stream-ble = ["nordic-ble", "nordic-ble-ktx", "nordic-support-ble-scanner
 health-stream-compose = ["androidx-compose-material3", "androidx-compose-ui", "androidx-compose-runtime", "androidx-compose-ui-tooling-preview", "androidx-constraintlayout-compose", "androidx-activity-compose", "androidx-lifecycle-viewmodel-compose"]
 
 [plugins]
-android-library = { id = "com.android.library", version.ref = "agp" }
-android-application = { id = "com.android.application", version.ref = "agp" }
-
-androidx-room = { id = "androidx.room", version.ref = "room" }
-
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-
-com-google-ksp = { id = "com.google.devtools.ksp", version.ref = "com-google-ksp" }
-com-google-dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "com-google-dagger" }
-org-gradle-android-cache-fix = { id = "org.gradle.android.cache-fix", version.ref = "org-gradle-android-cache-fix" }

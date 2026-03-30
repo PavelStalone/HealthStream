@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    buildFeatures {
+    buildFeatures.apply {
         compose = true
     }
 }

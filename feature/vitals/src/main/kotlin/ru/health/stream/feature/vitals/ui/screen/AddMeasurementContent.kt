@@ -17,10 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -45,6 +41,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.ArrowDropDown
+import ru.health.stream.core.ui.icon.default.Favorite
+import ru.health.stream.core.ui.icon.default.Info
 import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import kotlin.reflect.KClass
 
@@ -118,7 +118,7 @@ internal fun AddMeasurementContent(
                 ),
                 prefix = {
                     Icon(
-                        imageVector = Icons.Rounded.Info,
+                        imageVector = Icons.Default.Info,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -212,7 +212,7 @@ private fun MeasurementTypeSelector(
                 ) {
                     Icon(
                         modifier = Modifier.size(size = 24.dp),
-                        imageVector = Icons.Rounded.FavoriteBorder,
+                        imageVector = Icons.Default.Favorite,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                     )
@@ -224,7 +224,7 @@ private fun MeasurementTypeSelector(
                 }
                 Icon(
                     modifier = Modifier.rotate(degrees = rotation),
-                    imageVector = Icons.Rounded.ArrowDropDown,
+                    imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.outline
                 )

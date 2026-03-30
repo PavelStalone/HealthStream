@@ -6,9 +6,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import ru.health.stream.core.ui.icon.DeviceIcons
+import ru.health.stream.core.ui.icon.Icons
 
-val DeviceIcons.PulseOximeter: ImageVector
+val Icons.Device.PulseOximeter: ImageVector
     get() {
         if (_PulseOximeter != null) {
             return _PulseOximeter!!

@@ -1,4 +1,4 @@
-import java.net.URI
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     includeBuild("build-logic")
@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = URI.create("https://jitpack.io")}
+        maven { setUrl("https://jitpack.io") }
     }
 }
 

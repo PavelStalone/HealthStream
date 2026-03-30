@@ -10,5 +10,5 @@ android {
 dependencies {
     api(libs.jakewharton.timber)
 
-    implementation(project(":core:starter"))
+    implementation(projects.core.starter)
 }

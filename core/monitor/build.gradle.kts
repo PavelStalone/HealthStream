@@ -7,5 +7,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:monitor:timber"))
+    implementation(projects.core.monitor.timber)
 }
