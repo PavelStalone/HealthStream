@@ -5,9 +5,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -31,6 +28,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.fill.Favorite
+import ru.health.stream.core.ui.icon.fill.Settings
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.feature.settings.navigation.SettingsScreen
 import ru.health.stream.feature.vitals.data.navigation.MainVitalsScreen
@@ -75,7 +75,9 @@ class MainActivity : StarterActivity() {
 
         enableEdgeToEdge()
         setContent {
-            HealthStreamTheme {
+            HealthStreamTheme(
+                darkTheme = false // TODO: Remove after release - shoplikpavel 2026-03-30
+            ) {
                 val backStack = rememberNavBackStack(MainVitalsScreen)
 
                 Scaffold(
@@ -153,12 +155,12 @@ private sealed class BottomTab(
     data object Vitals : BottomTab(
         title = "Измерения",
         screen = MainVitalsScreen,
-        icon = Icons.Default.Favorite,
+        icon = Icons.Fill.Favorite,
     )
 
     data object Settings : BottomTab(
         title = "Настройки",
         screen = SettingsScreen,
-        icon = Icons.Default.Settings,
+        icon = Icons.Fill.Settings,
     )
 }

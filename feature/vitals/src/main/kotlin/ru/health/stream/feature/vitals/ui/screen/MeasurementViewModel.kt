@@ -22,7 +22,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
-import ru.health.stream.core.ui.icon.DeviceIcons
+import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.device.BPCuff
 import ru.health.stream.core.ui.icon.device.Pencil
 import ru.health.stream.core.ui.icon.device.PulseOximeter
@@ -165,11 +165,11 @@ internal class MeasurementViewModel @AssistedInject constructor(
         }
 
         val resourceIcon = when (val resource = resource) {
-            is Device.BloodPressure -> UiIcon.Vector(imageVector = DeviceIcons.BPCuff)
-            is Device.PulseOximeter -> UiIcon.Vector(imageVector = DeviceIcons.PulseOximeter)
-            is Device.WeightScale -> UiIcon.Vector(imageVector = DeviceIcons.WeightScale)
+            is Device.BloodPressure -> UiIcon.Vector(imageVector = Icons.Device.BPCuff)
+            is Device.PulseOximeter -> UiIcon.Vector(imageVector = Icons.Device.PulseOximeter)
+            is Device.WeightScale -> UiIcon.Vector(imageVector = Icons.Device.WeightScale)
             is Resource.App -> UiIcon.App(packageName = resource.packageName)
-            Resource.Manual -> UiIcon.Vector(imageVector = DeviceIcons.Pencil)
+            Resource.Manual -> UiIcon.Vector(imageVector = Icons.Device.Pencil)
         }
 
         return UiMeasurement(

@@ -1,9 +1,6 @@
 package ru.health.stream.core.ui.component
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -13,6 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.ArrowBack
+import ru.health.stream.core.ui.icon.default.Settings
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 
@@ -46,7 +46,7 @@ private fun TopBarPreview() {
             navigationIcon = {
                 IconButton(onClick = {}) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Icons.Default.ArrowBack,
                         contentDescription = null
                     )
                 }

@@ -1,5 +1,6 @@
 package ru.health.stream.feature.vitals.ui.screen
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,13 +26,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -68,6 +63,12 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import ru.health.stream.core.navigation.LocalRouter
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.Add
+import ru.health.stream.core.ui.icon.default.ArrowBack
+import ru.health.stream.core.ui.icon.default.Delete
+import ru.health.stream.core.ui.icon.default.Edit
+import ru.health.stream.core.ui.icon.default.KeyboardArrowDown
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
@@ -114,7 +115,7 @@ internal fun MeasurementScreen(
                 onClick = { router.pop() }
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    imageVector = Icons.Default.ArrowBack,
                     contentDescription = null
                 )
             }
@@ -135,7 +136,7 @@ internal fun MeasurementScreen(
                 onClick = { router.push(AddMeasurementScreen(measurementType)) }
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Add,
+                    imageVector = Icons.Default.Add,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -353,6 +354,11 @@ private fun MeasurementDateHeader(
     isExpanded: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val rotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "rotation"
+    )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -369,8 +375,10 @@ private fun MeasurementDateHeader(
             ),
         )
         Icon(
-            modifier = Modifier.size(24.dp),
-            imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+            modifier = Modifier
+                .size(24.dp)
+                .rotate(degrees = rotation),
+            imageVector = Icons.Default.KeyboardArrowDown,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
         )
@@ -544,7 +552,7 @@ private fun SwipeableMeasurementRow(
                         scaleX = 0.8f + 0.2f * progress
                         scaleY = 0.8f + 0.2f * progress
                     },
-                    imageVector = Icons.Outlined.Edit,
+                    imageVector = Icons.Default.Edit,
                     contentDescription = null,
                 )
             }
@@ -562,7 +570,7 @@ private fun SwipeableMeasurementRow(
                         scaleX = 0.8f + 0.2f * progress
                         scaleY = 0.8f + 0.2f * progress
                     },
-                    imageVector = Icons.Outlined.Delete,
+                    imageVector = Icons.Default.Delete,
                     contentDescription = null,
                 )
             }

@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +30,8 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalTimeZone
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.layout.RowByFirstBaseLine
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.drawIcon
@@ -225,7 +225,7 @@ private fun PreviewMeasurementCards() {
                 measurementUnit = "уд/мин",
                 measurementTitle = "Пульс",
                 onClick = {},
-                measurementIcon = UiIcon.Vector(imageVector = Icons.Rounded.FavoriteBorder),
+                measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
                 measurementValue = points.last().y.toInt().toString(),
                 yRange = 40f..120f,
                 chartDrawables = listOf(
@@ -251,7 +251,7 @@ private fun PreviewMeasurementCards() {
                 measurementUnit = "кг",
                 measurementTitle = "Вес тела",
                 onClick = {},
-                measurementIcon = UiIcon.Vector(imageVector = Icons.Rounded.FavoriteBorder),
+                measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
                 measurementValue = null,
                 yRange = 40f..90f,
                 chartDrawables = emptyList()

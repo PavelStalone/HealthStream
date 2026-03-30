@@ -75,7 +75,6 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" } # Need to remove this library and transfer to using Google Fonts icons
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 #endregion
 
@@ -140,6 +139,6 @@ gradlePlugin-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.seri
 
 [bundles]
 health-stream-ble = ["nordic-ble", "nordic-ble-ktx", "nordic-support-ble-scanner", "nordic-android-common-uiscanner", "com-polidea-rxandroidble"]
-health-stream-compose = ["androidx-compose-material3", "androidx-compose-ui", "androidx-compose-runtime", "androidx-compose-ui-tooling-preview", "androidx-constraintlayout-compose", "androidx-activity-compose", "androidx-lifecycle-viewmodel-compose", "androidx-compose-material-icons-extended"]
+health-stream-compose = ["androidx-compose-material3", "androidx-compose-ui", "androidx-compose-runtime", "androidx-compose-ui-tooling-preview", "androidx-constraintlayout-compose", "androidx-activity-compose", "androidx-lifecycle-viewmodel-compose"]
 
 [plugins]

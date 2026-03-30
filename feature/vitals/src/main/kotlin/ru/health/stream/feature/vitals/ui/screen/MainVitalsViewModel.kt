@@ -1,7 +1,5 @@
 package ru.health.stream.feature.vitals.ui.screen
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +12,8 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
+import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.feature.chart.model.ChartPosition
@@ -54,7 +54,7 @@ class MainVitalsViewModel @Inject constructor(
                 UiText.NonTranslatable(toString())
             },
             measurementTitle = UiText.NonTranslatable(value = "Пульс"),
-            measurementIcon = UiIcon.Vector(imageVector = Icons.Rounded.FavoriteBorder),
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
             points = heartRates.map { heartRate ->
                 ChartPosition.Point(
                     x = positionTransformer.transform(date = heartRate.createdAt),

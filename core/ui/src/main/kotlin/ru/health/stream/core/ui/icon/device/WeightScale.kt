@@ -7,9 +7,9 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import ru.health.stream.core.ui.icon.DeviceIcons
+import ru.health.stream.core.ui.icon.Icons
 
-val DeviceIcons.WeightScale: ImageVector
+val Icons.Device.WeightScale: ImageVector
     get() {
         if (_WeightScale != null) {
             return _WeightScale!!
