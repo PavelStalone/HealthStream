@@ -13,7 +13,6 @@ internal fun EntryProviderScope<NavKey>.featureEntryBuilder() {
 
         UserInputScreen(
             modifier = Modifier.fillMaxSize(),
-            onCancel = { router.pop() },
             onSuccess = { router.replaceCurrent(key.destinationKey) },
         )
     }

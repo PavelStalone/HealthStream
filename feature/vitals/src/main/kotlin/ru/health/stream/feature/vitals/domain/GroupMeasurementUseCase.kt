@@ -26,7 +26,7 @@ class GroupMeasurementUseCase {
                 is HeartRate -> measurement.pulse
                 is BloodGlucose -> measurement.level
                 is RespirationRate -> measurement.rate
-                is BodyWeight -> measurement.weight.value
+                is BodyWeight -> measurement.weight.kg
                 is SystolicPressure -> measurement.systolic
                 is DiastolicPressure -> measurement.diastolic
                 is OxygenSaturation -> measurement.saturation
