@@ -122,7 +122,7 @@ internal class AddMeasurementViewModel @AssistedInject constructor(
                 id = Uuid.random().toString(),
                 createdAt = healthMeasurement.createdAt,
                 description = state.note,
-                measurementsId = listOf(healthMeasurement.id)
+                measurementsId = setOf(healthMeasurement.id)
             )
         } else {
             EmptyMetadata

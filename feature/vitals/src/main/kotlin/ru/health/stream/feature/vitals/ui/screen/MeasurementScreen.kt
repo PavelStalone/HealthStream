@@ -50,6 +50,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +65,7 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import ru.health.stream.core.navigation.LocalRouter
+import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.ArrowBack
@@ -73,6 +76,9 @@ import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.drawIcon
+import ru.health.stream.feature.chart.core.drawable.CubicLine
+import ru.health.stream.feature.chart.core.drawable.Scatter
+import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.feature.vitals.data.navigation.AddMeasurementScreen
 import ru.health.stream.feature.vitals.ui.component.MeasurementTrendCard
@@ -104,44 +110,40 @@ internal fun MeasurementScreen(
     val options = listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year)
 
     Column(modifier = modifier) {
-        Box(
+        TopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(all = 8.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            IconButton(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = { router.pop() }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null
-                )
-            }
-            Text(
-                text = UiText.NonTranslatable(
-                    value = measurementType.simpleName ?: "Детали измерения"
-                ).asText(),
-                style = MaterialTheme.typography.titleLarge
-            )
-            IconButton(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                        shape = CircleShape
+            title = UiText.NonTranslatable(
+                value = measurementType.simpleName ?: "Детали измерения" // TODO: Change title name - shoplikpavel 2026-03-31
+            ),
+            navigationIcon = {
+                IconButton(
+                    onClick = { router.pop() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = null
                     )
-                    .align(Alignment.CenterEnd),
-                onClick = { router.push(AddMeasurementScreen(measurementType)) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                }
+            },
+            actions = {
+                IconButton(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                            shape = CircleShape
+                        ),
+                    onClick = { router.push(AddMeasurementScreen(measurementType)) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
-        }
+        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -219,7 +221,39 @@ internal fun MeasurementScreen(
                                                 .height(220.dp),
                                             period = periodState,
                                             yRange = drawableData.yRange,
-                                            chartDrawables = drawableData.drawables,
+                                            chartDrawables = drawableData.positions.flatMap { positions ->
+                                                listOf(
+                                                    Scatter(
+                                                        positions = positions,
+                                                        pointColor = MaterialTheme.colorScheme.primary,
+                                                        rangeColor = MaterialTheme.colorScheme.primary.copy(
+                                                            alpha = 0.3f
+                                                        ),
+                                                        radiusPoint = 6.dp
+                                                    ),
+                                                    CubicLine(
+                                                        points = positions.map { position ->
+                                                            when (position) {
+                                                                is ChartPosition.Point -> position
+                                                                is ChartPosition.Range.Horizontal -> ChartPosition.Point(
+                                                                    position.averageX,
+                                                                    position.y
+                                                                )
+
+                                                                is ChartPosition.Range.Vertical -> ChartPosition.Point(
+                                                                    position.x,
+                                                                    position.averageY
+                                                                )
+                                                            }
+                                                        },
+                                                        color = MaterialTheme.colorScheme.tertiary,
+                                                        style = Stroke(
+                                                            width = 6f,
+                                                            cap = StrokeCap.Round
+                                                        ),
+                                                    )
+                                                )
+                                            },
                                         )
                                     }
                                 }

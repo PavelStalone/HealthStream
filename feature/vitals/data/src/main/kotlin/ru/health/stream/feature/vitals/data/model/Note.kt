@@ -9,11 +9,12 @@ data class Note(
     val createdAt: Instant,
     val description: String,
     val title: String? = null,
-    val measurementsId: List<String> = emptyList(),
+    val measurementsId: Set<String> = emptySet(),
 ) : Metadata.Element {
 
     init {
         Uuid.parse(id) // Check uuid format
+        measurementsId.forEach { measurementId -> Uuid.parse(measurementId) } // Check uuid format
         require(description.isNotBlank()) { "Note description cannot be blank" }
         require(title?.isNotBlank() ?: true) { "Note title cannot be blank" }
     }

@@ -216,7 +216,6 @@ fun PreviewLineChart() {
         ChartPosition.Point(
             x = index.toFloat(),
             y = 40 + random().toFloat() * 50,
-            z = 0f
         )
     }
 

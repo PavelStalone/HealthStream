@@ -53,8 +53,9 @@ internal fun MeasurementTrendCard(
 
     val yLabels = remember(yRange) {
         val step = 10f
-        val start = (yRange.start / step).toInt() * step
-        val end = (yRange.endInclusive / step).toInt() * step
+        val start = yRange.start
+        val end = yRange.endInclusive
+
         generateSequence(seed = start) { it + step }
             .takeWhile { it <= end }
             .toList()
@@ -94,7 +95,9 @@ internal fun MeasurementTrendCard(
         }
         yLabels.forEach { y ->
             Text(
-                modifier = Modifier.bindYAxis(y = y, side = YAxisSide.Left),
+                modifier = Modifier
+                    .bindYAxis(y = y, side = YAxisSide.Left)
+                    .padding(end = 8.dp),
                 text = y.toInt().toString(),
                 color = MaterialTheme.colorScheme.outline,
                 style = MaterialTheme.typography.labelSmall,
@@ -108,13 +111,13 @@ internal fun MeasurementTrendCard(
 private fun PreviewMeasurementTrendCard() {
     MaterialTheme {
         val points = listOf(
-            ChartPosition.Point(0 / 6f, 80f, 0f),
-            ChartPosition.Point(1 / 6f, 92f, 0f),
-            ChartPosition.Point(2 / 6f, 58f, 0f),
-            ChartPosition.Point(3 / 6f, 78f, 0f),
-            ChartPosition.Point(4 / 6f, 70f, 0f),
-            ChartPosition.Point(5 / 6f, 68f, 0f),
-            ChartPosition.Point(6 / 6f, 82f, 0f),
+            ChartPosition.Point(0 / 6f, 80f),
+            ChartPosition.Point(1 / 6f, 92f),
+            ChartPosition.Point(2 / 6f, 58f),
+            ChartPosition.Point(3 / 6f, 78f),
+            ChartPosition.Point(4 / 6f, 70f),
+            ChartPosition.Point(5 / 6f, 68f),
+            ChartPosition.Point(6 / 6f, 82f),
         )
 
         MeasurementTrendCard(

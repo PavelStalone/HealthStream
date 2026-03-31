@@ -59,7 +59,6 @@ class MainVitalsViewModel @Inject constructor(
                 ChartPosition.Point(
                     x = positionTransformer.transform(date = heartRate.createdAt),
                     y = heartRate.pulse.toFloat(),
-                    z = 0f
                 )
             }
         )

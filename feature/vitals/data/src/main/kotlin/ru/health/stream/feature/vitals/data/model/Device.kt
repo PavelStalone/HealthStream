@@ -30,9 +30,11 @@ sealed interface Device : Resource {
     ) : Device
 
     enum class Status {
+
         ATTACHED,
         REJECTED,
         UNKNOWN,
+        ;
     }
 }
 
