@@ -55,4 +55,5 @@ include(":feature:vitals:source")
 include(":feature:settings")
 include(":feature:personal")
 include(":feature:personal:data")
+include(":feature:personal:source")
 // endregion

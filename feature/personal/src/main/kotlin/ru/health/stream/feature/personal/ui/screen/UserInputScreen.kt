@@ -14,17 +14,17 @@ import ru.health.stream.core.ui.model.UiText
 
 @Composable
 fun UserInputScreen(
+    onCancel: () -> Unit,
+    onSuccess: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val router = LocalRouter.current
-
     Column(
         modifier = modifier
     ) {
         TopBar(
             title = UiText.NonTranslatable("Профиль"),
             navigationIcon = {
-                IconButton(onClick = { router.pop() }) {
+                IconButton(onClick = onCancel) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = null
@@ -34,8 +34,8 @@ fun UserInputScreen(
         )
         UserInputContent(
             modifier = Modifier.fillMaxSize(),
-            onSuccess = { router.pop() },
-            onCancel = { router.pop() }
+            onCancel = onCancel,
+            onSuccess = onSuccess,
         )
     }
 }

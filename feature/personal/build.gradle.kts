@@ -16,6 +16,7 @@ dependencies {
     implementation(projects.core.navigation)
 
     implementation(projects.feature.settings)
+    implementation(projects.feature.personal.source)
 
     implementation(libs.io.github.automapper.annotation)
 
