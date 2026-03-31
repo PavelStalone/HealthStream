@@ -1,6 +1,5 @@
 package ru.health.stream.feature.personal.ui.screen
 
-import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,25 +7,29 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import ru.health.stream.core.monitor.logV
 import ru.health.stream.feature.personal.data.model.Email
 import ru.health.stream.feature.personal.data.model.User
 import ru.health.stream.feature.personal.data.model.cm
 import ru.health.stream.feature.personal.data.repository.UserRepository
+import ru.health.stream.feature.personal.ui.model.UserUiState
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @HiltViewModel
 class UserInputViewModel @Inject constructor(
-    private val userRepository: UserRepositoryImpl
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(UserInputUiState())
+    private val _uiState = MutableStateFlow(UserUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val user = userRepository.getUser()?.asUiState() ?: UserUiState()
+
+            _uiState.value = user
+        }
+    }
 
     fun onFirstNameChange(value: String) {
         _uiState.update { it.copy(firstName = value, error = null) }
@@ -54,6 +57,7 @@ class UserInputViewModel @Inject constructor(
 
     fun saveUser(onSuccess: () -> Unit) {
         val state = _uiState.value
+
         viewModelScope.launch {
             try {
                 val user = User(
@@ -71,27 +75,13 @@ class UserInputViewModel @Inject constructor(
             }
         }
     }
+
+    private fun User.asUiState(): UserUiState = UserUiState(
+        gender = gender,
+        email = email.value,
+        birthday = birthday,
+        lastName = lastName,
+        firstName = firstName,
+        heightCm = height.cm.toString(),
+    )
 }
-
-@Singleton
-class UserRepositoryImpl @Inject constructor() : UserRepository {
-
-    override suspend fun getUser(): User {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun saveUser(user: User) {
-        logV("save user called: $user")
-    }
-}
-
-@Immutable
-data class UserInputUiState(
-    val firstName: String = "",
-    val lastName: String = "",
-    val email: String = "",
-    val heightCm: String = "",
-    val gender: Boolean = true, // true for male, false for female
-    val birthday: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    val error: String? = null
-)

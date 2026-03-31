@@ -2,11 +2,10 @@ package ru.health.stream.core.store.datastore.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,6 +14,8 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import ru.health.stream.core.store.datastore.DataStoreUserSource
+import ru.health.stream.feature.personal.source.local.LocalUserSource
 import javax.inject.Singleton
 
 @Module
@@ -31,4 +32,13 @@ internal object DataStoreModule {
         scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
         produceFile = { context.preferencesDataStoreFile(PREFERENCES_NAME) }
     )
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    interface BindModule {
+
+        @Binds
+        @Singleton
+        fun bindLocalUserSource(impl: DataStoreUserSource): LocalUserSource
+    }
 }

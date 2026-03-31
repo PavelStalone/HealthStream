@@ -3,6 +3,7 @@ package ru.health.stream
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -23,8 +24,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import androidx.savedstate.serialization.SavedStateConfiguration
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
@@ -49,6 +54,16 @@ class MainActivity : StarterActivity() {
 
     @Inject
     lateinit var entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
+
+    private val navSavedStateConfiguration = SavedStateConfiguration {
+        serializersModule = SerializersModule {
+            polymorphic(NavKey::class) {
+                subclass(UserInputFlow::class)
+                subclass(SettingsScreen::class)
+                subclass(MainVitalsScreen::class)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +95,7 @@ class MainActivity : StarterActivity() {
                 darkTheme = false // TODO: Remove after release - shoplikpavel 2026-03-30
             ) {
                 val backStack = rememberNavBackStack(
+                    configuration = navSavedStateConfiguration,
                     UserInputFlow(
                         destinationKey = MainVitalsScreen
                     )
@@ -134,19 +150,29 @@ private fun AppBottomBar(
         }
     }
 
-    NavigationBar {
-        tabs.forEach { tab ->
-            NavigationBarItem(
-                selected = tab.screen == activeTabKey,
-                onClick = { onTabClick(tab.screen) },
-                icon = {
-                    Icon(imageVector = tab.icon, contentDescription = tab.title)
-                },
-                label = {
-                    Text(text = tab.title)
-                },
-                alwaysShowLabel = false
-            )
+    val visible by remember(backStack) {
+        derivedStateOf {
+            backStack.last() !is UserInputFlow
+        }
+    }
+
+    AnimatedVisibility(
+        visible = visible
+    ) {
+        NavigationBar {
+            tabs.forEach { tab ->
+                NavigationBarItem(
+                    selected = tab.screen == activeTabKey,
+                    onClick = { onTabClick(tab.screen) },
+                    icon = {
+                        Icon(imageVector = tab.icon, contentDescription = tab.title)
+                    },
+                    label = {
+                        Text(text = tab.title)
+                    },
+                    alwaysShowLabel = false
+                )
+            }
         }
     }
 }

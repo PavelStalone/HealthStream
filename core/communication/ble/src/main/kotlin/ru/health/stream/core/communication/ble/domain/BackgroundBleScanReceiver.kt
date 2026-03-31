@@ -35,8 +35,10 @@ class BackgroundBleScanReceiver : BroadcastReceiver() {
         )
 
         val errorCode = intent.getIntExtra(BluetoothLeScannerCompat.EXTRA_ERROR_CODE, 0)
-        val scanResult: ArrayList<ScanResult>? =
-            intent.getParcelableArrayListExtra(BluetoothLeScannerCompat.EXTRA_LIST_SCAN_RESULT)
+        val scanResult: ArrayList<ScanResult>? = intent.getParcelableArrayListExtra(
+            BluetoothLeScannerCompat.EXTRA_LIST_SCAN_RESULT,
+            ScanResult::class.java
+        )
 
         logD("onReceive with callbackType $callbackType, errorCode $errorCode, scanResults $scanResult")
 
