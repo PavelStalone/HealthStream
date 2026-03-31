@@ -7,12 +7,12 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
 @Immutable
-data class UserUiState(
-    val firstName: String = "",
-    val lastName: String = "",
+internal data class UserUiState(
     val email: String = "",
+    val error: String? = null,
     val heightCm: String = "",
+    val lastName: String = "",
+    val firstName: String = "",
     val gender: Boolean = true, // true for male, false for female
     val birthday: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    val error: String? = null,
 )

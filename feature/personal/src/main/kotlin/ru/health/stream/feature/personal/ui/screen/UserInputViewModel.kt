@@ -16,7 +16,7 @@ import ru.health.stream.feature.personal.ui.model.UserUiState
 import javax.inject.Inject
 
 @HiltViewModel
-class UserInputViewModel @Inject constructor(
+internal class UserInputViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 

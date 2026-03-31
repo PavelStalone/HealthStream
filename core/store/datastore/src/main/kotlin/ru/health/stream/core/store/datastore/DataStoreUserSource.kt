@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import ru.health.stream.core.store.datastore.mapper.asUser
 import ru.health.stream.core.store.datastore.mapper.asUserEntity
+import ru.health.stream.core.store.datastore.model.UserEntity
 import ru.health.stream.feature.personal.data.model.User
 import ru.health.stream.feature.personal.source.local.LocalUserSource
 import javax.inject.Inject

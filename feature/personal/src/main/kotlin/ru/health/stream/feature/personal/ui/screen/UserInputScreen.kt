@@ -49,13 +49,14 @@ import ru.health.stream.feature.personal.ui.component.UserInputField
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun UserInputScreen(
+internal fun UserInputScreen(
     onSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: UserInputViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDatePicker by remember { mutableStateOf(false) }
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
@@ -66,6 +67,7 @@ fun UserInputScreen(
         val confirmEnabled = remember {
             derivedStateOf { datePickerState.selectedDateMillis != null }
         }
+
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
