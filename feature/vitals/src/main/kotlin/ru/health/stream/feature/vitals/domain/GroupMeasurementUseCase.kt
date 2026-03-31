@@ -30,7 +30,6 @@ class GroupMeasurementUseCase {
                 is SystolicPressure -> measurement.systolic
                 is DiastolicPressure -> measurement.diastolic
                 is OxygenSaturation -> measurement.saturation
-                else -> measurement.createdAt
             }
         },
     ): Map<Instant, GroupResult<T>> {

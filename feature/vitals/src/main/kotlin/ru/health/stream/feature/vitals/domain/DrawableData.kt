@@ -61,8 +61,8 @@ data class DrawableData(
                                 items = items,
                                 period = period,
                                 timeZone = timeZone,
+                                positionTransformer = positionTransformer,
                                 groupMeasurementUseCase = groupMeasurementUseCase,
-                                positionTransformer = positionTransformer
                             )
                         }
                     }
@@ -80,7 +80,7 @@ data class DrawableData(
             val result =
                 mutableMapOf<KClass<out HealthMeasurement>, MutableList<HealthMeasurement>>()
 
-            for (measurement in this) {
+            forEach { measurement ->
                 when (measurement) {
                     is BloodPressure -> {
                         result.getOrPut(SystolicPressure::class) { mutableListOf() }
@@ -109,10 +109,9 @@ data class DrawableData(
 
                     is DiastolicPressure -> result.getOrPut(DiastolicPressure::class) { mutableListOf() }
                         .add(measurement)
-
-                    else -> {}
                 }
             }
+
             return result
         }
 

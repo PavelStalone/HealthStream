@@ -115,7 +115,7 @@ internal fun MeasurementScreen(
                 .fillMaxWidth()
                 .padding(all = 8.dp),
             title = UiText.NonTranslatable(
-                value = measurementType.simpleName ?: "Детали измерения"
+                value = measurementType.simpleName ?: "Детали измерения" // TODO: Change title name - shoplikpavel 2026-03-31
             ),
             navigationIcon = {
                 IconButton(
