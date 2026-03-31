@@ -216,7 +216,6 @@ private fun PreviewMeasurementCards() {
                 ChartPosition.Point(
                     x = index.toFloat() / 7f,
                     y = 60 + random().toFloat() * 30,
-                    z = 0f
                 )
             }
 

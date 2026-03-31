@@ -43,6 +43,7 @@ import ru.health.stream.feature.vitals.data.model.measurement.RespirationRate
 import ru.health.stream.feature.vitals.data.model.measurement.SystolicPressure
 import ru.health.stream.feature.vitals.data.repository.MeasurementRepository
 import ru.health.stream.feature.vitals.domain.DrawableData
+import ru.health.stream.feature.vitals.domain.GroupMeasurementUseCase
 import ru.health.stream.feature.vitals.ui.model.UiPeriod
 import ru.health.stream.feature.vitals.ui.model.asPeriod
 import kotlin.reflect.KClass
@@ -101,9 +102,11 @@ internal class MeasurementViewModel @AssistedInject constructor(
         MeasurementsChartState.Main(
             drawableData = DrawableData.create(
                 period = period,
-                dateNow = Clock.System.now(),
-                timeZone = TimeZone.currentSystemDefault(),
                 measurements = measurements,
+                dateNow = Clock.System.now(),
+                coroutineScope = viewModelScope,
+                timeZone = TimeZone.currentSystemDefault(),
+                groupMeasurementUseCase = GroupMeasurementUseCase(),
             )
         )
     }.stateIn(
