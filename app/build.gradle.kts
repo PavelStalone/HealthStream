@@ -43,5 +43,6 @@ dependencies {
 
     implementation(projects.feature.chart)
     implementation(projects.feature.vitals)
+    implementation(projects.feature.personal)
     implementation(projects.feature.settings)
 }

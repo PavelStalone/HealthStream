@@ -60,7 +60,7 @@ data class DrawableData(
                         addPoint(DiastolicPressure::class, x, measurement.diastolic)
                     }
 
-                    is BodyWeight -> addPoint(type, x, measurement.weight.value)
+                    is BodyWeight -> addPoint(type, x, measurement.weight.kg)
                     is HeartRate -> addPoint(type, x, measurement.pulse.toFloat())
                     is SystolicPressure -> addPoint(type, x, measurement.systolic)
                     is DiastolicPressure -> addPoint(type, x, measurement.diastolic)

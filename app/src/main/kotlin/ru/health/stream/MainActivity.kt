@@ -32,6 +32,7 @@ import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.icon.fill.Settings
 import ru.health.stream.core.ui.theme.HealthStreamTheme
+import ru.health.stream.feature.personal.data.navigation.UserInputScreen
 import ru.health.stream.feature.settings.navigation.SettingsScreen
 import ru.health.stream.feature.vitals.data.navigation.MainVitalsScreen
 import ru.health.stream.feature.vitals.data.repository.MeasurementRepository
@@ -78,7 +79,7 @@ class MainActivity : StarterActivity() {
             HealthStreamTheme(
                 darkTheme = false // TODO: Remove after release - shoplikpavel 2026-03-30
             ) {
-                val backStack = rememberNavBackStack(MainVitalsScreen)
+                val backStack = rememberNavBackStack(UserInputScreen)
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),

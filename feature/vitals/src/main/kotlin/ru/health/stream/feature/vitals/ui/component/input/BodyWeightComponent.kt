@@ -18,8 +18,8 @@ import kotlinx.datetime.Clock
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.feature.vitals.data.model.EmptyMetadata
 import ru.health.stream.feature.vitals.data.model.Resource
+import ru.health.stream.feature.vitals.data.model.kg
 import ru.health.stream.feature.vitals.data.model.measurement.BodyWeight
-import ru.health.stream.feature.vitals.data.model.measurement.kg
 import kotlin.uuid.Uuid
 
 class BodyWeightComponent : InputTypeComponent {
