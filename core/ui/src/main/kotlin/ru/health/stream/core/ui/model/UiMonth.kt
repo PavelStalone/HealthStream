@@ -1,8 +1,8 @@
-package ru.health.stream.feature.vitals.ui.model
+package ru.health.stream.core.ui.model
 
 import kotlinx.datetime.format.MonthNames
 
-internal val MonthNames.Companion.RUSSIAN_FULL: MonthNames
+val MonthNames.Companion.RUSSIAN_FULL: MonthNames
     get() = MonthNames(
         listOf(
             "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",

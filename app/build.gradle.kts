@@ -35,6 +35,7 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.store)
     implementation(projects.core.store.room)
+    implementation(projects.core.store.datastore)
     implementation(projects.core.store.healthconnect)
     implementation(projects.core.starter)
     implementation(projects.core.monitor)
@@ -43,5 +44,6 @@ dependencies {
 
     implementation(projects.feature.chart)
     implementation(projects.feature.vitals)
+    implementation(projects.feature.personal)
     implementation(projects.feature.settings)
 }

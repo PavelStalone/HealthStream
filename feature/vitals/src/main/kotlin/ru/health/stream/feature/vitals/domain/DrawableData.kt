@@ -168,7 +168,7 @@ data class DrawableData(
             clazz: KClass<out HealthMeasurement>,
             measurement: HealthMeasurement
         ): Float = when (clazz) {
-            BodyWeight::class -> (measurement as BodyWeight).weight.value
+            BodyWeight::class -> (measurement as BodyWeight).weight.kg
             HeartRate::class -> (measurement as HeartRate).pulse.toFloat()
             BloodGlucose::class -> (measurement as BloodGlucose).level.toFloat()
             SystolicPressure::class -> (measurement as SystolicPressure).systolic

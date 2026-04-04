@@ -43,6 +43,9 @@
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/chart" />
+            <option value="$PROJECT_DIR$/feature/personal" />
+            <option value="$PROJECT_DIR$/feature/personal/data" />
+            <option value="$PROJECT_DIR$/feature/personal/source" />
             <option value="$PROJECT_DIR$/feature/settings" />
             <option value="$PROJECT_DIR$/feature/vitals" />
             <option value="$PROJECT_DIR$/feature/vitals/data" />

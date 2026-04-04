@@ -72,6 +72,7 @@ import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Delete
 import ru.health.stream.core.ui.icon.default.Edit
 import ru.health.stream.core.ui.icon.default.KeyboardArrowDown
+import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
@@ -82,7 +83,6 @@ import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.vitals.data.model.measurement.HealthMeasurement
 import ru.health.stream.feature.vitals.data.navigation.AddMeasurementScreen
 import ru.health.stream.feature.vitals.ui.component.MeasurementTrendCard
-import ru.health.stream.feature.vitals.ui.model.RUSSIAN_FULL
 import ru.health.stream.feature.vitals.ui.model.UiPeriod
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass

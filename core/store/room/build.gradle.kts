@@ -10,6 +10,8 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.personal.source)
+
     implementation(projects.core.store)
     implementation(projects.core.monitor)
 
