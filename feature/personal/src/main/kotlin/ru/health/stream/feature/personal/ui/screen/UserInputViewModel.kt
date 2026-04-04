@@ -59,7 +59,7 @@ internal class UserInputViewModel @Inject constructor(
         val state = _uiState.value
 
         viewModelScope.launch {
-            try {
+            runCatching {
                 val user = User(
                     email = Email(state.email),
                     height = state.heightCm.toDoubleOrNull()?.cm ?: 0.cm,
@@ -68,10 +68,12 @@ internal class UserInputViewModel @Inject constructor(
                     firstName = state.firstName,
                     birthday = state.birthday
                 )
+
                 userRepository.saveUser(user)
+            }.onSuccess {
                 onSuccess()
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+            }.onFailure { throwable ->
+                _uiState.update { state -> state.copy(error = throwable.message) }
             }
         }
     }

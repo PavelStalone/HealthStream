@@ -83,12 +83,12 @@ internal fun UserInputScreen(
                     },
                     enabled = confirmEnabled.value
                 ) {
-                    Text("OK")
+                    Text(text = "OK")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Отмена")
+                    Text(text = "Отмена")
                 }
             }
         ) {
@@ -119,21 +119,18 @@ internal fun UserInputScreen(
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(text = "Основная информация")
-
             UserInputField(
                 value = uiState.firstName,
                 onValueChange = viewModel::onFirstNameChange,
                 label = "Имя",
                 placeholder = "Введите ваше имя"
             )
-
             UserInputField(
                 value = uiState.lastName,
                 onValueChange = viewModel::onLastNameChange,
                 label = "Фамилия",
                 placeholder = "Введите вашу фамилию"
             )
-
             UserInputField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
@@ -141,7 +138,6 @@ internal fun UserInputScreen(
                 placeholder = "example@mail.com",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
-
             val birthdayFormatter = remember {
                 LocalDate.Format {
                     dayOfMonth(Padding.NONE)
@@ -151,7 +147,6 @@ internal fun UserInputScreen(
                     year()
                 }
             }
-
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "Дата рождения",
@@ -183,7 +178,6 @@ internal fun UserInputScreen(
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(text = "Физические данные")
-
             UserInputField(
                 value = uiState.heightCm,
                 onValueChange = viewModel::onHeightChange,
@@ -191,7 +185,6 @@ internal fun UserInputScreen(
                 placeholder = "175",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "Пол",
@@ -202,12 +195,12 @@ internal fun UserInputScreen(
                     FilterChip(
                         selected = uiState.gender,
                         onClick = { viewModel.onGenderChange(true) },
-                        label = { Text("Мужской") }
+                        label = { Text(text = "Мужской") }
                     )
                     FilterChip(
                         selected = !uiState.gender,
                         onClick = { viewModel.onGenderChange(false) },
-                        label = { Text("Женский") }
+                        label = { Text(text = "Женский") }
                     )
                 }
             }
@@ -215,10 +208,10 @@ internal fun UserInputScreen(
 
         uiState.error?.let { error ->
             Text(
+                modifier = Modifier.padding(horizontal = 4.dp),
                 text = error,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
 
@@ -231,7 +224,12 @@ internal fun UserInputScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
         ) {
-            Text(text = "Сохранить", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+            MaterialTheme.typography.bodyLarge
+            Text(
+                text = "Сохранить",
+                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }

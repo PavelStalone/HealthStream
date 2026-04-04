@@ -14,7 +14,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import ru.health.stream.core.store.datastore.DataStoreUserSource
 import ru.health.stream.feature.personal.source.local.LocalUserSource
 import javax.inject.Singleton
 
@@ -32,13 +31,4 @@ internal object DataStoreModule {
         scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
         produceFile = { context.preferencesDataStoreFile(PREFERENCES_NAME) }
     )
-
-    @Module
-    @InstallIn(SingletonComponent::class)
-    interface BindModule {
-
-        @Binds
-        @Singleton
-        fun bindLocalUserSource(impl: DataStoreUserSource): LocalUserSource
-    }
 }

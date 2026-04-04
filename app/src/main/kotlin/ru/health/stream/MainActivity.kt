@@ -28,8 +28,6 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
@@ -50,20 +48,13 @@ class MainActivity : StarterActivity() {
     lateinit var navigationRouter: Router<NavKey>
 
     @Inject
+    lateinit var serializersModule: SerializersModule
+
+    @Inject
     lateinit var measurementRepository: MeasurementRepository
 
     @Inject
     lateinit var entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
-
-    private val navSavedStateConfiguration = SavedStateConfiguration {
-        serializersModule = SerializersModule {
-            polymorphic(NavKey::class) {
-                subclass(UserInputFlow::class)
-                subclass(SettingsScreen::class)
-                subclass(MainVitalsScreen::class)
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,10 +83,13 @@ class MainActivity : StarterActivity() {
         enableEdgeToEdge()
         setContent {
             HealthStreamTheme(
-                darkTheme = false // TODO: Remove after release - shoplikpavel 2026-03-30
+                darkTheme = false, // TODO: Remove after release - shoplikpavel 2026-03-30
+                dynamicColor = false,
             ) {
                 val backStack = rememberNavBackStack(
-                    configuration = navSavedStateConfiguration,
+                    configuration = SavedStateConfiguration {
+                        serializersModule = this@MainActivity.serializersModule
+                    },
                     UserInputFlow(
                         destinationKey = MainVitalsScreen
                     )
@@ -156,9 +150,7 @@ private fun AppBottomBar(
         }
     }
 
-    AnimatedVisibility(
-        visible = visible
-    ) {
+    AnimatedVisibility(visible = visible) {
         NavigationBar {
             tabs.forEach { tab ->
                 NavigationBarItem(
