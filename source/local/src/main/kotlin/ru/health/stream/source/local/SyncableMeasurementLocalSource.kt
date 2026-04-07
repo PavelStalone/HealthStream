@@ -60,7 +60,7 @@ internal class SyncableMeasurementLocalSource @Inject constructor(
                 src.getMeasurementsFlowByRange(start, end, type)
                     .distinctUntilChanged()
                     .collectLatest { externalMeasurements ->
-                        // Синхронизируем внешние данные. При записи в primarySource, основной коллектор (ниже) автоматически получит обновления.
+                        // Синхронизируем внешние данные. При записи в primarySource, основной коллектор (ниже) автоматически получит обновления
                         syncExternalToPrimary(
                             start = start,
                             end = end,
