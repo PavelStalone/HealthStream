@@ -20,4 +20,5 @@ interface LocalMeasurementSource {
     ): Flow<List<T>>
 
     suspend fun <T : Measurement> writeMeasurement(measurement: T): Result<T>
+    suspend fun <T : Measurement> writeMeasurements(measurements: List<T>): Result<List<T>>
 }

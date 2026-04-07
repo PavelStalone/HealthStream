@@ -12,19 +12,27 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat
 import no.nordicsemi.android.support.v18.scanner.ScanFilter
 import no.nordicsemi.android.support.v18.scanner.ScanSettings
 import no.nordicsemi.ui.scanner.scanner.repository.DevicesDataStore
 import ru.health.stream.core.common.di.ApplicationCoroutineScope
 import ru.health.stream.core.common.di.Dispatcher
+import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.starter.ActivityStarter
+import ru.health.stream.core.starter.AppStarter
+import ru.health.stream.data.vitals.api.local.LocalDeviceSource
+import ru.health.stream.data.vitals.api.local.LocalMeasurementSource
+import ru.health.stream.data.vitals.model.Device
+import ru.health.stream.data.vitals.model.copy
 import ru.health.stream.source.remote.ble.BleSystemManager
 import ru.health.stream.source.remote.ble.BleSystemManagerImpl
 import ru.health.stream.source.remote.ble.lib.device.BleDevice
 import ru.health.stream.source.remote.ble.lib.scan.ScanService
 import ru.health.stream.source.remote.ble.lib.scan.ScannerRepository
 import ru.health.stream.source.remote.ble.lib.scan.TimeBasedDeviceConnectionManager
+import ru.health.stream.source.remote.ble.source.BleMeasurementSource
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -85,6 +93,37 @@ internal object BleModule {
                 }
 
                 else -> {}
+            }
+        }
+    }
+
+    @IntoSet
+    @Provides
+    fun provideBleObserver(
+        localDeviceSource: LocalDeviceSource,
+        measurementSource: BleMeasurementSource,
+        localHealthMeasurement: LocalMeasurementSource,
+        @ApplicationCoroutineScope applicationScope: CoroutineScope,
+    ) = object : AppStarter {
+
+        override fun onCreate() {
+            applicationScope.launch {
+                measurementSource.flow.collect { measurement ->
+                    logV("Measurement found: $measurement")
+
+                    val device = measurement.resource as? Device
+
+                    // Save or update connected device
+                    device?.let { device ->
+                        val localDevice = localDeviceSource.getDeviceById(device.id)
+                            .getOrDefault(device)
+                            .copy(lastMeasured = device.lastMeasured)
+
+                        localDeviceSource.writeDevice(localDevice)
+                    }
+
+                    localHealthMeasurement.writeMeasurement(measurement)
+                }
             }
         }
     }

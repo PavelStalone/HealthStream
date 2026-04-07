@@ -53,6 +53,7 @@ internal class RoomMeasurementSource @Inject constructor(
                 }
             }
             .let { flows ->
+                if (flows.isEmpty()) return@let flowOf(emptyList())
                 combine(flows) { measurements -> measurements.reduce(Collection<*>::plus) as List<T> }
             }
 
@@ -70,9 +71,27 @@ internal class RoomMeasurementSource @Inject constructor(
             val measurementClass = measurement::class
             val table = tables.first { table -> measurementClass == table.type }
 
-            table.insert(measurement)
+            table.insertMeasurement(measurement)
             measurement
         }.onFailure { exception ->
             logW("Error while writeMeasurement running", exception)
         }
+
+    override suspend fun <T : Measurement> writeMeasurements(
+        measurements: List<T>
+    ): Result<List<T>> = runCatching {
+        logV("writeMeasurements called: measurements=$measurements")
+
+        val measurementsWithType = measurements.groupBy { measurement -> measurement::class }
+
+        measurementsWithType.forEach { (type, measurements) ->
+            val table = tables.first { table -> type == table.type }
+
+            table.insertMeasurements(measurements as List<Measurement>)
+        }
+
+        measurements
+    }.onFailure { exception ->
+        logW("Error while writeMeasurements running", exception)
+    }
 }

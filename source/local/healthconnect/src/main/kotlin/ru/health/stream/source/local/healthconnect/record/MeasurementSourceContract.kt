@@ -11,4 +11,5 @@ internal interface MeasurementSourceContract<T : Measurement> {
     ): List<T>
 
     suspend fun writeMeasurement(measurement: T): Result<T>
+    suspend fun writeMeasurements(measurements: List<T>): Result<List<T>>
 }

@@ -16,4 +16,7 @@ internal interface MeasurementDao<E> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: E)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(entities: List<E>)
 }

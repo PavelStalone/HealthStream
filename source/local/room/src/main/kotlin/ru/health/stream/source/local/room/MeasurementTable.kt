@@ -11,5 +11,6 @@ internal abstract class MeasurementTable<T : Measurement, E>() : MeasurementDao<
     abstract fun mapToMeasurement(entity: Any?): T
     abstract fun mapToEntity(measurement: T): E
 
-    suspend fun insert(measurement: T) = insert(mapToEntity(measurement))
+    suspend fun insertMeasurement(measurement: T) = insert(mapToEntity(measurement))
+    suspend fun insertMeasurements(measurements: List<T>) = insertAll(measurements.map(::mapToEntity))
 }

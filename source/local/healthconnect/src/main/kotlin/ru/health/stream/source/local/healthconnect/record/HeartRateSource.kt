@@ -88,40 +88,53 @@ internal class HeartRateSource @Inject constructor(
     ): Result<HeartRate> = runCatching {
         logV("writeHeartRate called: measurement=$measurement")
 
-        val metadata = when (val res = measurement.resource) {
-            is Resource.Manual -> Metadata.manualEntryWithId(
-                id = measurement.id,
-                device = DeviceData(type = DeviceData.TYPE_PHONE)
-            )
-
-            is Device -> Metadata.autoRecordedWithId(
-                id = measurement.id,
-                device = DeviceData(
-                    type = DeviceData.TYPE_UNKNOWN,
-                    model = res.id,
-                ),
-            )
-
-            is Resource.App -> throw IllegalArgumentException("Write data from other app not supported")
-        }
-        val instant = measurement.createdAt.toJavaInstant()
-        val heartRateRecord = HeartRateRecord(
-            startTime = instant,
-            samples = listOf(
-                HeartRateRecord.Sample(
-                    time = instant,
-                    beatsPerMinute = measurement.pulse.toLong()
-                )
-            ),
-            endTime = instant,
-            startZoneOffset = null,
-            endZoneOffset = null,
-            metadata = metadata,
-        )
-
-        healthConnectManager.healthConnectClient.insertRecords(records = listOf(heartRateRecord))
+        writeMeasurements(listOf(measurement)).getOrThrow()
         measurement
     }.onFailure { exception ->
         logW("Error while writeHeartRate running", exception)
     }
+
+    override suspend fun writeMeasurements(measurements: List<HeartRate>): Result<List<HeartRate>> =
+        runCatching {
+            logV("writeHeartRate called: measurements=$measurements")
+
+            val heartRateRecords = measurements.map { measurement ->
+                val metadata = when (val res = measurement.resource) {
+                    is Resource.Manual -> Metadata.manualEntryWithId(
+                        id = measurement.id,
+                        device = DeviceData(type = DeviceData.TYPE_PHONE)
+                    )
+
+                    is Device -> Metadata.autoRecordedWithId(
+                        id = measurement.id,
+                        device = DeviceData(
+                            type = DeviceData.TYPE_UNKNOWN,
+                            model = res.id,
+                        ),
+                    )
+
+                    is Resource.App -> throw IllegalArgumentException("Write data from other app not supported")
+                }
+                val instant = measurement.createdAt.toJavaInstant()
+
+                HeartRateRecord(
+                    startTime = instant,
+                    samples = listOf(
+                        HeartRateRecord.Sample(
+                            time = instant,
+                            beatsPerMinute = measurement.pulse.toLong()
+                        )
+                    ),
+                    endTime = instant,
+                    startZoneOffset = null,
+                    endZoneOffset = null,
+                    metadata = metadata,
+                )
+            }
+
+            healthConnectManager.healthConnectClient.insertRecords(records = heartRateRecords)
+            measurements
+        }.onFailure { exception ->
+            logW("Error while writeHeartRate running", exception)
+        }
 }

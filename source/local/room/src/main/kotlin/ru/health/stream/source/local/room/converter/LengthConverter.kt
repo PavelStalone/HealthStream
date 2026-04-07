@@ -2,7 +2,7 @@ package ru.health.stream.source.local.room.converter
 
 import androidx.room.TypeConverter
 import io.github.jacksever.automapper.annotation.AutoConverter
-import ru.health.stream.feature.personal.data.model.Length
+import ru.health.stream.data.personal.model.Length
 
 internal object LengthConverter {
 

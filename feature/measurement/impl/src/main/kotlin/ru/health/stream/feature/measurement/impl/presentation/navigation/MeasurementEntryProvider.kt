@@ -1,0 +1,32 @@
+package ru.health.stream.feature.measurement.impl.presentation.navigation
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import com.arttttt.nav3router.Router
+import ru.health.stream.feature.measurement.api.navigation.AddMeasurementNavKey
+import ru.health.stream.feature.measurement.api.navigation.MeasurementNavKey
+import ru.health.stream.feature.measurement.impl.presentation.screen.AddMeasurementContent
+import ru.health.stream.feature.measurement.impl.presentation.screen.MeasurementScreen
+
+internal fun EntryProviderScope<NavKey>.measurementEntry(router: Router<NavKey>) {
+
+    entry<MeasurementNavKey> { key ->
+        MeasurementScreen(
+            measurementType = key.measurementType,
+            modifier = Modifier.fillMaxSize(),
+            onBackClick = { router.pop() },
+            addMeasurementClick = { measurementType ->
+                router.push(AddMeasurementNavKey(measurementType))
+            },
+        )
+    }
+
+    entry<AddMeasurementNavKey> { key ->
+        AddMeasurementContent(
+            onClose = { router.pop() },
+            measurementType = key.measurementType,
+        )
+    }
+}

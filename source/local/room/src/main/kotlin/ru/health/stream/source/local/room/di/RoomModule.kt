@@ -4,7 +4,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
 import ru.health.stream.data.personal.api.local.LocalUserSource
 import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.source.local.PrimaryMeasurementSource
@@ -22,12 +21,10 @@ internal object RoomModule {
     interface BindModule {
 
         @Binds
-        @IntoSet
         @Singleton
         fun bindPrimaryMeasurementSource(impl: RoomMeasurementSource): PrimaryMeasurementSource
 
         @Binds
-        @IntoSet
         @Singleton
         fun bindDeviceSource(impl: RoomDeviceSource): LocalDeviceSource
 

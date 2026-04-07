@@ -14,7 +14,6 @@ dependencies {
     implementation(libs.androidx.health.connect.client)
 
     implementation(projects.core.ui)
-    implementation(projects.core.store)
     implementation(projects.core.monitor)
     implementation(projects.core.starter)
     implementation(projects.core.navigation)

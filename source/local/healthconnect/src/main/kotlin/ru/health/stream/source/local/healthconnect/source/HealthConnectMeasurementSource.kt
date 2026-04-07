@@ -57,4 +57,22 @@ internal class HealthConnectMeasurementSource @Inject constructor(
     }.onFailure { exception ->
         logW("Error while writeMeasurement running", exception)
     }
+
+    override suspend fun <T : Measurement> writeMeasurements(
+        measurements: List<T>
+    ): Result<List<T>> = runCatching {
+        logV("writeMeasurements called: measurements=$measurements")
+
+        val measurementsWithType = measurements.groupBy { measurement -> measurement::class }
+
+        measurementsWithType.forEach { (type, measurements) ->
+            val record = measurementsSources.first { record -> type == record.type }
+
+            record.writeMeasurements(measurements = measurements)
+        }
+
+        measurements
+    }.onFailure { exception ->
+        logW("Error while writeMeasurements running", exception)
+    }
 }

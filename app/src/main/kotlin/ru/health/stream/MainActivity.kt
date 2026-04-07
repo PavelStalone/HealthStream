@@ -17,28 +17,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.health.connect.client.HealthConnectClient
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import androidx.savedstate.serialization.SavedStateConfiguration
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.serialization.modules.SerializersModule
-import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.icon.fill.Settings
 import ru.health.stream.core.ui.theme.HealthStreamTheme
-import ru.health.stream.feature.personal.data.navigation.UserInputFlow
+import ru.health.stream.feature.home.api.navigation.HomeNavKey
 import ru.health.stream.feature.settings.navigation.SettingsScreen
-import ru.health.stream.feature.vitals.data.navigation.MainVitalsScreen
-import ru.health.stream.feature.vitals.data.repository.MeasurementRepository
+import ru.health.stream.feature.user.api.navigation.UserNavKey
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -48,20 +43,14 @@ class MainActivity : StarterActivity() {
     lateinit var navigationRouter: Router<NavKey>
 
     @Inject
-    lateinit var serializersModule: SerializersModule
-
-    @Inject
-    lateinit var measurementRepository: MeasurementRepository
-
-    @Inject
-    lateinit var entryBuilders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.() -> Unit>
+    lateinit var entryProviders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.(Router<NavKey>) -> Unit>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val availabilityStatus = HealthConnectClient.getSdkStatus(this)
-
-        logI("availabilityStatus: $availabilityStatus")
+//        val availabilityStatus = HealthConnectClient.getSdkStatus(this)
+//
+//        logI("availabilityStatus: $availabilityStatus")
 //        if (availabilityStatus == HealthConnectClient.SDK_UNAVAILABLE) {
 //            return // early return as there is no viable integration
 //        }
@@ -87,11 +76,9 @@ class MainActivity : StarterActivity() {
                 dynamicColor = false,
             ) {
                 val backStack = rememberNavBackStack(
-                    configuration = SavedStateConfiguration {
-                        serializersModule = this@MainActivity.serializersModule
-                    },
-                    UserInputFlow(
-                        destinationKey = MainVitalsScreen
+                    elements = arrayOf(
+                        HomeNavKey,
+                        UserNavKey,
                     )
                 )
 
@@ -109,14 +96,14 @@ class MainActivity : StarterActivity() {
                     NavHost(
                         backStack = backStack,
                         router = navigationRouter,
-                    ) { backStack, onBack, _ ->
+                    ) { backStack, onBack, router ->
                         NavDisplay(
                             modifier = Modifier.padding(paddingValues = innerPadding),
                             onBack = onBack,
                             backStack = backStack,
                             sceneStrategy = DialogSceneStrategy(),
                             entryProvider = entryProvider {
-                                entryBuilders.forEach { builder -> this.builder() }
+                                entryProviders.forEach { provider -> this.provider(router) }
                             },
                         )
                     }
@@ -146,7 +133,7 @@ private fun AppBottomBar(
 
     val visible by remember(backStack) {
         derivedStateOf {
-            backStack.last() !is UserInputFlow
+            backStack.last() !is UserNavKey
         }
     }
 
@@ -177,7 +164,7 @@ private sealed class BottomTab(
 
     data object Vitals : BottomTab(
         title = "Измерения",
-        screen = MainVitalsScreen,
+        screen = HomeNavKey,
         icon = Icons.Fill.Favorite,
     )
 
