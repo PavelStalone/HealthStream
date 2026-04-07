@@ -32,7 +32,7 @@ import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.icon.fill.Settings
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
-import ru.health.stream.feature.settings.navigation.SettingsScreen
+import ru.health.stream.feature.settings.navigation.SettingsNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
 import javax.inject.Inject
 
@@ -170,7 +170,7 @@ private sealed class BottomTab(
 
     data object Settings : BottomTab(
         title = "Настройки",
-        screen = SettingsScreen,
+        screen = SettingsNavKey,
         icon = Icons.Fill.Settings,
     )
 }
