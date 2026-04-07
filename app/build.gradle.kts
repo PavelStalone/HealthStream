@@ -34,13 +34,14 @@ dependencies {
 
     implementation(projects.core.ui)
     implementation(projects.core.store)
-    implementation(projects.core.store.room)
     implementation(projects.core.store.datastore)
-    implementation(projects.core.store.healthconnect)
     implementation(projects.core.starter)
     implementation(projects.core.monitor)
     implementation(projects.core.navigation)
-    implementation(projects.core.communication.ble)
+
+    implementation(projects.source.remote.ble)
+    implementation(projects.source.local.room)
+    implementation(projects.source.local.healthconnect)
 
     implementation(projects.feature.chart)
     implementation(projects.feature.vitals)

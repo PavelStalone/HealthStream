@@ -27,10 +27,6 @@
             <option value="$PROJECT_DIR$/build-logic/convention" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/common" />
-            <option value="$PROJECT_DIR$/core/communication" />
-            <option value="$PROJECT_DIR$/core/communication/ble" />
-            <option value="$PROJECT_DIR$/core/communication/ble/lib" />
-            <option value="$PROJECT_DIR$/core/communication/ktor" />
             <option value="$PROJECT_DIR$/core/monitor" />
             <option value="$PROJECT_DIR$/core/monitor/timber" />
             <option value="$PROJECT_DIR$/core/navigation" />
@@ -38,9 +34,11 @@
             <option value="$PROJECT_DIR$/core/store" />
             <option value="$PROJECT_DIR$/core/store/datastore" />
             <option value="$PROJECT_DIR$/core/store/healthconnect" />
-            <option value="$PROJECT_DIR$/core/store/room" />
             <option value="$PROJECT_DIR$/core/test" />
             <option value="$PROJECT_DIR$/core/ui" />
+            <option value="$PROJECT_DIR$/data" />
+            <option value="$PROJECT_DIR$/data/personal" />
+            <option value="$PROJECT_DIR$/data/vitals" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/chart" />
             <option value="$PROJECT_DIR$/feature/personal" />
@@ -50,6 +48,13 @@
             <option value="$PROJECT_DIR$/feature/vitals" />
             <option value="$PROJECT_DIR$/feature/vitals/data" />
             <option value="$PROJECT_DIR$/feature/vitals/source" />
+            <option value="$PROJECT_DIR$/source" />
+            <option value="$PROJECT_DIR$/source/local" />
+            <option value="$PROJECT_DIR$/source/local/healthconnect" />
+            <option value="$PROJECT_DIR$/source/local/room" />
+            <option value="$PROJECT_DIR$/source/remote" />
+            <option value="$PROJECT_DIR$/source/remote/ble" />
+            <option value="$PROJECT_DIR$/source/remote/ble/lib" />
           </set>
         </option>
       </GradleProjectSettings>
