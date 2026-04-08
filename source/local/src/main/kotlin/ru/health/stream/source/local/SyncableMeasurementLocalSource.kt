@@ -24,7 +24,7 @@ import kotlin.uuid.Uuid
 internal class SyncableMeasurementLocalSource @Inject constructor(
     private val primarySource: PrimaryMeasurementSource,
     private val externalSources: Set<@JvmSuppressWildcards ExternalMeasurementSource>,
-    @Dispatcher(Dispatcher.IO) private val ioDispatcher: CoroutineDispatcher,
+    @param:Dispatcher(Dispatcher.IO) private val ioDispatcher: CoroutineDispatcher,
 ) : LocalMeasurementSource {
 
     private val mutex = Mutex()

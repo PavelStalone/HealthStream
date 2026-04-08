@@ -14,9 +14,9 @@ internal fun EntryProviderScope<NavKey>.measurementEntry(router: Router<NavKey>)
 
     entry<MeasurementNavKey> { key ->
         MeasurementScreen(
-            measurementType = key.measurementType,
             modifier = Modifier.fillMaxSize(),
             onBackClick = { router.pop() },
+            measurementType = key.measurementType,
             addMeasurementClick = { measurementType ->
                 router.push(AddMeasurementNavKey(measurementType))
             },

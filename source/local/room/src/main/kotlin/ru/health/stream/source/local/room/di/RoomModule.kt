@@ -22,7 +22,7 @@ internal object RoomModule {
 
         @Binds
         @Singleton
-        fun bindPrimaryMeasurementSource(impl: RoomMeasurementSource): PrimaryMeasurementSource
+        fun bindUserSource(impl: RoomUserSource): LocalUserSource
 
         @Binds
         @Singleton
@@ -30,6 +30,6 @@ internal object RoomModule {
 
         @Binds
         @Singleton
-        fun bindUserSource(impl: RoomUserSource): LocalUserSource
+        fun bindPrimaryMeasurementSource(impl: RoomMeasurementSource): PrimaryMeasurementSource
     }
 }
