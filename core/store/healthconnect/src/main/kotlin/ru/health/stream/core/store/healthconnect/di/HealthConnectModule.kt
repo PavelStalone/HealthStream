@@ -8,7 +8,6 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import jakarta.inject.Singleton
 import ru.health.stream.core.starter.AppStarter
-import ru.health.stream.core.store.StoreCategory
 import ru.health.stream.core.store.healthconnect.record.HeartRateSource
 import ru.health.stream.core.store.healthconnect.record.MeasurementSource
 import ru.health.stream.core.store.healthconnect.settings.SettingsCell

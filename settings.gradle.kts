@@ -30,30 +30,38 @@ rootProject.name = "HealthStream"
 
 include(":app")
 
-// region Core module
+//region Core module
 include(":core:ui")
 include(":core:test")
-include(":core:store")
-include(":core:store:room")
-include(":core:store:datastore")
-include(":core:store:healthconnect")
 include(":core:common")
 include(":core:starter")
 include(":core:monitor")
 include(":core:monitor:timber")
 include(":core:navigation")
-include(":core:communication:ble")
-include(":core:communication:ble:lib")
-include(":core:communication:ktor")
-// endregion
+include(":core:store:datastore")
+include(":core:store:healthconnect")
+//endregion
 
-// region Feature module
+//region Data module
+include(":data:vitals")
+include(":data:personal")
+//endregion
+
+//region Feature module
 include(":feature:chart")
-include(":feature:vitals")
-include(":feature:vitals:data")
-include(":feature:vitals:source")
 include(":feature:settings")
-include(":feature:personal")
-include(":feature:personal:data")
-include(":feature:personal:source")
-// endregion
+include(":feature:user:api")
+include(":feature:user:impl")
+include(":feature:home:api")
+include(":feature:home:impl")
+include(":feature:measurement:api")
+include(":feature:measurement:impl")
+//endregion
+
+//region Source module
+include(":source:local")
+include(":source:local:room")
+include(":source:local:healthconnect")
+include(":source:remote:ble")
+include(":source:remote:ble:lib")
+//endregion

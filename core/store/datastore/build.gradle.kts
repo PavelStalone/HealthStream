@@ -9,13 +9,13 @@ android {
 }
 
 dependencies {
-    implementation(projects.feature.personal.source)
+    implementation(projects.data.personal)
 
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.datastore.preferences)
     
     implementation(libs.kotlinx.datetime)
-    implementation(libs.io.github.automapper.annotation)
 
+    implementation(libs.io.github.automapper.annotation)
     ksp(libs.io.github.automapper.processor)
 }

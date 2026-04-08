@@ -3,9 +3,6 @@ package ru.health.stream.feature.settings
 import androidx.compose.runtime.Composable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.UUID
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 interface Settings {
 
