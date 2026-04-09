@@ -18,12 +18,14 @@ import ru.health.stream.core.common.di.Dispatcher
 import ru.health.stream.data.vitals.api.local.LocalMeasurementSource
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.copy
+import ru.health.stream.data.vitals.usecase.SetEstimationForMeasurementUseCase
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 
 internal class SyncableMeasurementLocalSource @Inject constructor(
     private val primarySource: PrimaryMeasurementSource,
     private val externalSources: Set<@JvmSuppressWildcards ExternalMeasurementSource>,
+    private val setEstimationForMeasurementUseCase: SetEstimationForMeasurementUseCase,
     @param:Dispatcher(Dispatcher.IO) private val ioDispatcher: CoroutineDispatcher,
 ) : LocalMeasurementSource {
 
@@ -105,7 +107,7 @@ internal class SyncableMeasurementLocalSource @Inject constructor(
                 primaryTimeSet.add(measurementToSave.createdAt)
                 primaryIdSet.add(measurementToSave.id)
 
-                measurementToSave
+                setEstimationForMeasurementUseCase(measurementToSave)
             }
 
             if (measurementsToSave.isNotEmpty()) {

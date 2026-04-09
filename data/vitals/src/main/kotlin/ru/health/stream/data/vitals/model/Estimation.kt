@@ -12,6 +12,7 @@ data class Estimation(
         LOW,
         NORMAL,
         HIGH,
+        EXTRA_HIGH,
         ;
     }
 

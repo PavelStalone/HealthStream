@@ -10,7 +10,7 @@ import kotlinx.datetime.todayIn
 data class User(
     val email: Email,
     val height: Length,
-    val gender: Boolean,
+    val gender: Boolean, // true for male, false for female
     val lastName: String,
     val firstName: String,
     val birthday: LocalDate,
