@@ -59,13 +59,17 @@ class HeartRateAssessor @Inject constructor(
 
         val loadIntensity = (measurement.pulse - resting) / (maxHR - resting)
 
+        println("resting: $resting")
+        println("maxHR: $maxHR")
+        println("loadIntensity: $loadIntensity")
+
         val level = when (loadIntensity) {
             in 0.00..0.60 -> Estimation.Level.NORMAL
             in 0.60..0.80 -> Estimation.Level.HIGH
-            in 0.80..1.00 -> Estimation.Level.EXTRA_HIGH
+            in 0.80..2.00 -> Estimation.Level.EXTRA_HIGH
             else -> Estimation.Level.LOW
         }
 
-        Estimation(estimation = level)
+        Estimation(level = level)
     }.getOrNull()
 }

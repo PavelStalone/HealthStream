@@ -17,7 +17,15 @@ internal object DaoModule {
 
     @Provides
     @Singleton
+    fun provideNoteDao(db: VitalDatabase) = db.noteDao()
+
+    @Provides
+    @Singleton
     fun provideDeviceDao(db: VitalDatabase) = db.deviceDao()
+
+    @Provides
+    @Singleton
+    fun provideResourceDao(db: VitalDatabase) = db.resourceDao()
 
     @Provides
     @Singleton

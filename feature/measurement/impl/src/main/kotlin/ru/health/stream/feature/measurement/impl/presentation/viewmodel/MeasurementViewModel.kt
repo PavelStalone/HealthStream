@@ -160,7 +160,7 @@ internal class MeasurementViewModel @AssistedInject constructor(
         }
 
         val resourceTitle = when (val resource = resource) {
-            is Device.BloodPressure -> UiText.NonTranslatable(value = "Тонометр")
+            is Device.BloodPressureCuff -> UiText.NonTranslatable(value = "Тонометр")
             is Device.PulseOximeter -> UiText.NonTranslatable(value = "Пульсоксиметр")
             is Device.WeightScale -> UiText.NonTranslatable(value = "Весы")
             is Resource.App -> UiText.App(packageName = resource.packageName)
@@ -168,7 +168,7 @@ internal class MeasurementViewModel @AssistedInject constructor(
         }
 
         val resourceIcon = when (val resource = resource) {
-            is Device.BloodPressure -> UiIcon.Vector(imageVector = Icons.Device.BPCuff)
+            is Device.BloodPressureCuff -> UiIcon.Vector(imageVector = Icons.Device.BPCuff)
             is Device.PulseOximeter -> UiIcon.Vector(imageVector = Icons.Device.PulseOximeter)
             is Device.WeightScale -> UiIcon.Vector(imageVector = Icons.Device.WeightScale)
             is Resource.App -> UiIcon.App(packageName = resource.packageName)

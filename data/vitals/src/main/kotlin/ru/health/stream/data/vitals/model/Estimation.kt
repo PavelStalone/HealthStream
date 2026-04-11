@@ -1,7 +1,7 @@
 package ru.health.stream.data.vitals.model
 
 data class Estimation(
-    val estimation: Level,
+    val level: Level,
     val description: String? = null,
 ) : Metadata.Element {
 

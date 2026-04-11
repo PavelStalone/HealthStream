@@ -22,7 +22,7 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.copy
-import ru.health.stream.data.vitals.repository.MeasurementRepository
+import ru.health.stream.data.vitals.usecase.CreateMeasurementUseCase
 import ru.health.stream.feature.measurement.impl.presentation.component.input.BloodGlucoseComponent
 import ru.health.stream.feature.measurement.impl.presentation.component.input.BloodPressureComponent
 import ru.health.stream.feature.measurement.impl.presentation.component.input.BodyWeightComponent
@@ -36,7 +36,7 @@ import kotlin.uuid.Uuid
 @HiltViewModel(assistedFactory = AddMeasurementViewModel.Factory::class)
 internal class AddMeasurementViewModel @AssistedInject constructor(
     @Assisted private val measurementType: KClass<out Measurement>,
-    private val measurementRepository: MeasurementRepository,
+    private val createMeasurementUseCase: CreateMeasurementUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -71,8 +71,9 @@ internal class AddMeasurementViewModel @AssistedInject constructor(
             val measurement = createMeasurementFromState(state).getOrNull()
 
             if (measurement != null) {
-                measurementRepository.createMeasurement(measurement)
-                onSuccess()
+                createMeasurementUseCase(measurement).onSuccess {
+                    onSuccess()
+                }
             }
         }
     }
@@ -122,7 +123,6 @@ internal class AddMeasurementViewModel @AssistedInject constructor(
                 id = Uuid.random().toString(),
                 createdAt = healthMeasurement.createdAt,
                 description = state.note,
-                measurementsId = setOf(healthMeasurement.id)
             )
         } else {
             EmptyMetadata

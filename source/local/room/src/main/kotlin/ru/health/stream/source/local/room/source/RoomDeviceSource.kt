@@ -3,7 +3,7 @@ package ru.health.stream.source.local.room.source
 import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.source.local.room.dao.DeviceDao
-import ru.health.stream.source.local.room.entity.DeviceEntity
+import ru.health.stream.source.local.room.entity.resource.DeviceEntity
 import ru.health.stream.source.local.room.mapper.asDeviceEntityStatus
 import ru.health.stream.source.local.room.mapper.asDeviceStatus
 import javax.inject.Inject
@@ -16,21 +16,21 @@ internal class RoomDeviceSource @Inject constructor(
         val entity = deviceDao.getDeviceById(id = id)
 
         when (entity.type) {
-            Device.PulseOximeter::class.simpleName -> Device.PulseOximeter(
+            DeviceEntity.DeviceType.PULSE_OXIMETER -> Device.PulseOximeter(
                 id = entity.id,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
             )
 
-            Device.WeightScale::class.simpleName -> Device.WeightScale(
+            DeviceEntity.DeviceType.WEIGHT_SCALE -> Device.WeightScale(
                 id = entity.id,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
             )
 
-            Device.BloodPressure::class.simpleName -> Device.BloodPressure(
+            DeviceEntity.DeviceType.BLOOD_PRESSURE_CUFF -> Device.BloodPressureCuff(
                 id = entity.id,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
@@ -48,7 +48,7 @@ internal class RoomDeviceSource @Inject constructor(
                 macAddress = device.macAddress,
                 status = device.status.asDeviceEntityStatus(),
                 lastMeasured = device.lastMeasured,
-                type = device::class.simpleName.toString(),
+                type = DeviceEntity.DeviceType.PULSE_OXIMETER, // TODO: Change - shoplikpavel 2026-04-11
             )
         )
 
