@@ -71,6 +71,7 @@ import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Delete
 import ru.health.stream.core.ui.icon.default.Edit
 import ru.health.stream.core.ui.icon.default.KeyboardArrowDown
+import ru.health.stream.core.ui.layout.RowByFirstBaseLine
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
@@ -457,8 +458,7 @@ private fun MeasurementRow(
                 )
                 Text(
                     text = sourceName,
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 )
@@ -484,10 +484,7 @@ private fun MeasurementRow(
                 )
                 estimation?.content()
             }
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
+            RowByFirstBaseLine {
                 Text(
                     text = value,
                     style = MaterialTheme.typography.titleLarge.copy(
@@ -496,8 +493,8 @@ private fun MeasurementRow(
                     )
                 )
                 Text(
+                    modifier = Modifier.padding(start = 4.dp),
                     text = unit,
-                    modifier = Modifier.padding(bottom = 3.dp),
                     style = MaterialTheme.typography.labelSmall.copy(
                         color = MaterialTheme.colorScheme.outline
                     )
