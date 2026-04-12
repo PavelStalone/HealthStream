@@ -26,9 +26,11 @@ internal data class DeviceEntity(
     }
 
     enum class Status {
+
         UNKNOWN,
         ATTACHED,
         REJECTED,
+        ;
     }
 
     enum class DeviceType {
