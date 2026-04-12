@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import ru.health.stream.source.local.room.entity.DeviceEntity
+import ru.health.stream.source.local.room.entity.resource.DeviceEntity
 
 @Dao
 internal interface DeviceDao {
@@ -14,4 +14,7 @@ internal interface DeviceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: DeviceEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllDevices(entities: List<DeviceEntity>)
 }

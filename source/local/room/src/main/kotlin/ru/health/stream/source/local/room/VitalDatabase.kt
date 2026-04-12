@@ -9,19 +9,23 @@ import ru.health.stream.source.local.room.converter.EmailConverter
 import ru.health.stream.source.local.room.converter.InstantConverter
 import ru.health.stream.source.local.room.converter.LengthConverter
 import ru.health.stream.source.local.room.converter.LocalDateConverter
-import ru.health.stream.source.local.room.converter.ResourceConverter
-import ru.health.stream.source.local.room.converter.StatusConverter
 import ru.health.stream.source.local.room.dao.DeviceDao
 import ru.health.stream.source.local.room.dao.HeartRateDao
+import ru.health.stream.source.local.room.dao.NoteDao
+import ru.health.stream.source.local.room.dao.ResourceDao
 import ru.health.stream.source.local.room.dao.UserDao
-import ru.health.stream.source.local.room.entity.DeviceEntity
+import ru.health.stream.source.local.room.entity.resource.DeviceEntity
 import ru.health.stream.source.local.room.entity.HeartRateEntity
+import ru.health.stream.source.local.room.entity.NoteEntity
 import ru.health.stream.source.local.room.entity.UserEntity
+import ru.health.stream.source.local.room.entity.resource.ResourceEntity
 
 @Database(
     entities = [
         UserEntity::class,
+        NoteEntity::class,
         DeviceEntity::class,
+        ResourceEntity::class,
         HeartRateEntity::class,
     ],
     version = 1
@@ -30,16 +34,16 @@ import ru.health.stream.source.local.room.entity.UserEntity
     value = [
         EmailConverter::class,
         LengthConverter::class,
-        StatusConverter::class,
         InstantConverter::class,
-        ResourceConverter::class,
         LocalDateConverter::class,
     ]
 )
 internal abstract class VitalDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
+    abstract fun noteDao(): NoteDao
     abstract fun deviceDao(): DeviceDao
+    abstract fun resourceDao(): ResourceDao
     abstract fun heartRateDao(): HeartRateDao
 
     companion object {

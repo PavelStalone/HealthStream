@@ -26,7 +26,7 @@ internal object DatabaseModule {
     @Suppress("UNCHECKED_CAST")
     fun provideTables(
         heartRateTable: HeartRateTable,
-    ): List<MeasurementTable<Measurement, *>> = listOf(
-        heartRateTable as MeasurementTable<Measurement, *>,
+    ): List<MeasurementTable<Measurement>> = listOf(
+        heartRateTable as MeasurementTable<Measurement>,
     )
 }

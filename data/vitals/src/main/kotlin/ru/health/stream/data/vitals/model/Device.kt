@@ -15,7 +15,7 @@ sealed interface Device : Resource {
         override val lastMeasured: Instant
     ) : Device
 
-    data class BloodPressure(
+    data class BloodPressureCuff(
         override val id: String,
         override val status: Status,
         override val macAddress: String,
@@ -39,7 +39,7 @@ sealed interface Device : Resource {
 }
 
 fun Device.copy(lastMeasured: Instant): Device = when (this) {
-    is Device.BloodPressure -> copy(lastMeasured = lastMeasured)
+    is Device.BloodPressureCuff -> copy(lastMeasured = lastMeasured)
     is Device.PulseOximeter -> copy(lastMeasured = lastMeasured)
     is Device.WeightScale -> copy(lastMeasured = lastMeasured)
 }

@@ -104,7 +104,6 @@ internal class SyncableMeasurementLocalSource @Inject constructor(
 
                 primaryTimeSet.add(measurementToSave.createdAt)
                 primaryIdSet.add(measurementToSave.id)
-
                 measurementToSave
             }
 

@@ -3,7 +3,6 @@ package ru.health.stream.source.local.room.source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
@@ -15,7 +14,7 @@ import kotlin.reflect.KClass
 
 @Suppress("UNCHECKED_CAST")
 internal class RoomMeasurementSource @Inject constructor(
-    private val tables: List<@JvmSuppressWildcards MeasurementTable<Measurement, *>>,
+    private val tables: List<@JvmSuppressWildcards MeasurementTable<Measurement>>,
 ) : PrimaryMeasurementSource {
 
     override suspend fun <T : Measurement> getMeasurementsByRange(
@@ -27,14 +26,15 @@ internal class RoomMeasurementSource @Inject constructor(
 
         val response = tables.filter { table -> type.java.isAssignableFrom(table.type.java) }
             .flatMap { table ->
-                table.getByRange(start = start, end = end).map { entity ->
-                    table.mapToMeasurement(entity)
-                }
+                table.getMeasurementsByRange(
+                    start = start,
+                    end = end,
+                    type = type,
+                )
             }
 
         logV("Founded measurements: $response")
-
-        response as List<T>
+        response
     }.onFailure { exception ->
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
@@ -48,9 +48,11 @@ internal class RoomMeasurementSource @Inject constructor(
 
         val response = tables.filter { table -> type.java.isAssignableFrom(table.type.java) }
             .map { table ->
-                table.getFlowByRange(start = start, end = end).map { entities ->
-                    entities.map { entity -> table.mapToMeasurement(entity) }
-                }
+                table.getMeasurementsFlowByRange(
+                    start = start,
+                    end = end,
+                    type = type,
+                )
             }
             .let { flows ->
                 if (flows.isEmpty()) return@let flowOf(emptyList())
@@ -58,7 +60,6 @@ internal class RoomMeasurementSource @Inject constructor(
             }
 
         logV("Founded measurements: $response")
-
         response
     }.onFailure { exception ->
         logW("Error while getMeasurementFlowByRange running", exception)
@@ -71,8 +72,7 @@ internal class RoomMeasurementSource @Inject constructor(
             val measurementClass = measurement::class
             val table = tables.first { table -> measurementClass == table.type }
 
-            table.insertMeasurement(measurement)
-            measurement
+            table.writeMeasurement(measurement).getOrThrow()
         }.onFailure { exception ->
             logW("Error while writeMeasurement running", exception)
         }
@@ -87,7 +87,7 @@ internal class RoomMeasurementSource @Inject constructor(
         measurementsWithType.forEach { (type, measurements) ->
             val table = tables.first { table -> type == table.type }
 
-            table.insertMeasurements(measurements as List<Measurement>)
+            table.writeMeasurements(measurements)
         }
 
         measurements

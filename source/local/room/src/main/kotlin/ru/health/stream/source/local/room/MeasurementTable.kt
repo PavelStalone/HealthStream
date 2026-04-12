@@ -1,16 +1,10 @@
 package ru.health.stream.source.local.room
 
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import ru.health.stream.source.local.room.dao.MeasurementDao
+import ru.health.stream.source.local.PrimaryMeasurementSource
 import kotlin.reflect.KClass
 
-internal abstract class MeasurementTable<T : Measurement, E>() : MeasurementDao<E> {
+internal abstract class MeasurementTable<T : Measurement> : PrimaryMeasurementSource {
 
     abstract val type: KClass<T>
-
-    abstract fun mapToMeasurement(entity: Any?): T
-    abstract fun mapToEntity(measurement: T): E
-
-    suspend fun insertMeasurement(measurement: T) = insert(mapToEntity(measurement))
-    suspend fun insertMeasurements(measurements: List<T>) = insertAll(measurements.map(::mapToEntity))
 }
