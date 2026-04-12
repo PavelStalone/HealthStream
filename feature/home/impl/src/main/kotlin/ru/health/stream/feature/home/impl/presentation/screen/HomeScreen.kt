@@ -24,9 +24,9 @@ import ru.health.stream.core.ui.model.asText
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.chart.core.drawable.CubicArea
 import ru.health.stream.feature.chart.core.drawable.CubicLine
+import ru.health.stream.feature.home.impl.presentation.component.MeasurementCard
 import ru.health.stream.feature.home.impl.presentation.viewmodel.HomeViewModel
 import ru.health.stream.feature.home.impl.presentation.viewmodel.WeekCardState
-import ru.health.stream.feature.home.impl.presentation.component.MeasurementCard
 import kotlin.reflect.KClass
 
 @Composable
@@ -56,6 +56,7 @@ internal fun HomeScreen(
                     with(weekCard) {
                         MeasurementCard(
                             modifier = Modifier.fillMaxWidth(),
+                            estimationLevel = estimationLevel,
                             measurementIcon = measurementIcon,
                             measurementUnit = measurementUnit.asText(),
                             measurementTitle = measurementTitle.asText(),

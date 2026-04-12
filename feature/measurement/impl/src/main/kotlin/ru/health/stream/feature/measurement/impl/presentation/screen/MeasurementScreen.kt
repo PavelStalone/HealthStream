@@ -37,7 +37,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,6 +54,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -71,10 +71,13 @@ import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Delete
 import ru.health.stream.core.ui.icon.default.Edit
 import ru.health.stream.core.ui.icon.default.KeyboardArrowDown
+import ru.health.stream.core.ui.layout.RowByFirstBaseLine
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.UiIcon
+import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
+import ru.health.stream.core.ui.model.content
 import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.chart.core.drawable.CubicLine
@@ -364,13 +367,15 @@ internal fun MeasurementScreen(
                                         ) {
                                             MeasurementRow(
                                                 modifier = Modifier,
+                                                type = type,
+                                                isLast = isLast,
                                                 icon = resourceIcon,
-                                                sourceName = resourceTitle.asText(),
-                                                time = createdAt.format(timeFormatter),
-                                                value = value.asText(),
                                                 unit = unit.asText(),
                                                 note = note?.asText(),
-                                                isLast = isLast,
+                                                value = value.asText(),
+                                                estimation = estimation,
+                                                sourceName = resourceTitle.asText(),
+                                                time = createdAt.format(timeFormatter),
                                             )
                                         }
                                     }
@@ -430,104 +435,85 @@ private fun MeasurementRow(
     value: String,
     isLast: Boolean,
     sourceName: String,
+    type: KClass<out Measurement>,
     modifier: Modifier = Modifier,
     note: String? = null,
-    status: String? = null,
+    estimation: UiLevel? = null,
 ) {
     Column(modifier = modifier) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Box(
-                modifier = Modifier
-                    .size(size = 44.dp)
-                    .background(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                    ),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 icon.drawIcon(
-                    modifier = Modifier.size(size = 22.dp),
+                    modifier = Modifier.size(size = 24.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
-            }
-            Column(
-                modifier = Modifier
-                    .weight(weight = 1f)
-                    .padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
                 Text(
                     text = sourceName,
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 )
                 Text(
+                    modifier = Modifier.weight(1f),
                     text = time,
+                    textAlign = TextAlign.End,
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.outline,
                     )
                 )
-                note?.let { note ->
-                    Text(
-                        text = note,
-                        maxLines = 2,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                    )
-                }
             }
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(
-                        text = value,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                Text(
+                    text = type.simpleName
+                        ?: "Неизестно", // TODO: Change text - shoplikpavel 2026-03-17
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
-                    Text(
-                        text = unit,
-                        modifier = Modifier.padding(bottom = 3.dp),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.outline
-                        )
+                )
+                estimation?.content()
+            }
+            RowByFirstBaseLine {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                }
-                status?.let { status ->
-                    Surface(
-                        color = Color(0xFFFFE0B2),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            text = status,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = Color(0xFFE65100),
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        )
-                    }
-                }
+                )
+                Text(
+                    modifier = Modifier.padding(start = 4.dp),
+                    text = unit,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                )
+            }
+            note?.let { note ->
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = note,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                )
             }
         }
 
         if (!isLast) {
             HorizontalDivider(
-                modifier = Modifier.padding(start = 72.dp),
+                modifier = Modifier.padding(horizontal = 24.dp),
                 thickness = 0.5.dp,
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
             )
@@ -543,7 +529,7 @@ private fun SwipeableMeasurementRow(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val actionWidth = 120.dp
+    val actionWidth = 40.dp
     val actionWidthPx = with(LocalDensity.current) { actionWidth.toPx() }
 
     val anchors = remember(actionWidthPx) {
@@ -569,7 +555,7 @@ private fun SwipeableMeasurementRow(
             .height(IntrinsicSize.Min)
             .clipToBounds()
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .width(actionWidth * progress)
@@ -578,7 +564,7 @@ private fun SwipeableMeasurementRow(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
+                    .fillMaxWidth()
                     .background(color = Color(color = 0xFFFFECB3))
                     .clickable(onClick = onEditClick),
                 contentAlignment = Alignment.Center
@@ -596,7 +582,7 @@ private fun SwipeableMeasurementRow(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
+                    .fillMaxWidth()
                     .background(color = Color(color = 0xFFFFCDD2))
                     .clickable(onClick = onDeleteClick),
                 contentAlignment = Alignment.Center,

@@ -8,7 +8,7 @@ import androidx.compose.ui.layout.Layout
 
 @Composable
 fun RowByFirstBaseLine(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) = Layout(
     modifier = modifier,

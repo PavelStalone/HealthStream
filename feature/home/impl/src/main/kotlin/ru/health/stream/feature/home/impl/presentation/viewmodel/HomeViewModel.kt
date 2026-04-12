@@ -15,7 +15,9 @@ import kotlinx.datetime.TimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.model.UiIcon
+import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiText
+import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.Period
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
@@ -60,7 +62,8 @@ class HomeViewModel @Inject constructor(
                     x = positionTransformer.transform(date = heartRate.createdAt),
                     y = heartRate.pulse.toFloat(),
                 )
-            }
+            },
+            estimationLevel = heartRates.firstOrNull()?.metadata[Estimation]?.asUi()
         )
     }.shareIn(
         scope = viewModelScope,
@@ -76,6 +79,13 @@ class HomeViewModel @Inject constructor(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds),
     )
+
+    private fun Estimation.asUi(): UiLevel = when (level) {
+        Estimation.Level.LOW -> UiLevel.LOW
+        Estimation.Level.NORMAL -> UiLevel.NORMAL
+        Estimation.Level.HIGH -> UiLevel.HIGH
+        Estimation.Level.EXTRA_HIGH -> UiLevel.EXTRA_HIGH
+    }
 }
 
 @Immutable
@@ -86,5 +96,6 @@ data class WeekCardState(
     val measurementValue: UiText.NonTranslatable?,
     val measurementTitle: UiText,
     val measurementIcon: UiIcon,
+    val estimationLevel: UiLevel?,
     val points: List<ChartPosition.Point>,
 )
