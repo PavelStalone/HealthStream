@@ -35,3 +35,16 @@ val TertiaryContainerDark = Color(0xFF523F5F)
 val OnTertiaryContainerDark = Color(0xFFF2DAFF)
 val SurfaceDark = Color(0xFF1A1C1E)
 val OnSurfaceDark = Color(0xFFE2E2E6)
+
+
+// Level Colors (Containers)
+val LowLevelContainerColor = Color(0xFFE3F2FD)
+val NormalLevelContainerColor = Color(0xFFE8F5E9)
+val HighLevelContainerColor = Color(0xFFFFF3E0)
+val ExtraHighLevelContainerColor = Color(0xFFFFEBEE)
+
+// Level Colors (Content/Text)
+val LowLevelContentColor = Color(0xFF1565C0)
+val NormalLevelContentColor = Color(0xFF2E7D32)
+val HighLevelContentColor = Color(0xFFE65100)
+val ExtraHighLevelContentColor = Color(0xFFC62828)

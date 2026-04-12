@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,12 +27,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
+import ru.health.stream.core.ui.component.EstimationLevel
 import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.layout.RowByFirstBaseLine
 import ru.health.stream.core.ui.model.UiIcon
+import ru.health.stream.core.ui.model.UiLevel
+import ru.health.stream.core.ui.model.content
 import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.data.vitals.model.Period
 import ru.health.stream.feature.chart.api.LineChart
@@ -47,13 +49,14 @@ import java.lang.Math.random
 @Composable
 internal fun MeasurementCard(
     onClick: () -> Unit,
-    measurementUnit: String,
-    measurementValue: String?,
-    measurementTitle: String,
     measurementIcon: UiIcon,
+    measurementUnit: String,
+    measurementTitle: String,
+    measurementValue: String?,
     yRange: ClosedFloatingPointRange<Float>,
     modifier: Modifier = Modifier,
     animation: Boolean = true,
+    estimationLevel: UiLevel? = null,
     chartDrawables: List<Drawable> = emptyList(),
     firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
     period: Period = Period.Week(firstDayOfWeek = firstDayOfWeek),
@@ -118,19 +121,7 @@ internal fun MeasurementCard(
                         ),
                     )
                 }
-                Text(
-                    modifier = Modifier
-                        .background(
-                            color = Color(color = 0xFFE8F5E9),
-                            shape = CircleShape
-                        )
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    text = "Норма",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = Color(color = 0xFF2E7D32),
-                        fontWeight = FontWeight.Bold,
-                    ),
-                )
+                estimationLevel?.content()
             }
 
             if (measurementValue != null) {

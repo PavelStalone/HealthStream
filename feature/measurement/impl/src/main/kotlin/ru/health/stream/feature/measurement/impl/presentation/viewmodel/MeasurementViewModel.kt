@@ -28,8 +28,10 @@ import ru.health.stream.core.ui.icon.device.Pencil
 import ru.health.stream.core.ui.icon.device.PulseOximeter
 import ru.health.stream.core.ui.icon.device.WeightScale
 import ru.health.stream.core.ui.model.UiIcon
+import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.data.vitals.model.Device
+import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.Note
 import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.BloodGlucose
@@ -177,16 +179,25 @@ internal class MeasurementViewModel @AssistedInject constructor(
 
         return UiMeasurement(
             id = id,
+            type = this::class,
             createdAt = createdAt,
-            resourceTitle = resourceTitle,
             resourceIcon = resourceIcon,
+            resourceTitle = resourceTitle,
             title = UiText.NonTranslatable(
                 value = this::class.simpleName ?: "Неизвестно"
             ), // TODO: Change text - shoplikpavel 2026-03-17
-            value = UiText.NonTranslatable(value = value),
+            estimation = metadata[Estimation]?.asUi(),
             unit = UiText.NonTranslatable(value = unit),
-            note = metadata[Note]?.let { note -> UiText.NonTranslatable(value = note.description) }
+            value = UiText.NonTranslatable(value = value),
+            note = metadata[Note]?.let { note -> UiText.NonTranslatable(value = note.description) },
         )
+    }
+
+    private fun Estimation.asUi(): UiLevel = when (level) {
+        Estimation.Level.LOW -> UiLevel.LOW
+        Estimation.Level.NORMAL -> UiLevel.NORMAL
+        Estimation.Level.HIGH -> UiLevel.HIGH
+        Estimation.Level.EXTRA_HIGH -> UiLevel.EXTRA_HIGH
     }
 
     @AssistedFactory
@@ -219,13 +230,15 @@ data class MeasurementGroup(
 @Immutable
 data class UiMeasurement(
     val id: String,
-    val createdAt: Instant,
-    val resourceTitle: UiText,
-    val resourceIcon: UiIcon,
-    val title: UiText,
-    val value: UiText,
     val unit: UiText,
     val note: UiText?,
+    val title: UiText,
+    val value: UiText,
+    val createdAt: Instant,
+    val estimation: UiLevel?,
+    val resourceIcon: UiIcon,
+    val resourceTitle: UiText,
+    val type: KClass<out Measurement>,
 )
 
 @Immutable
