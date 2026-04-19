@@ -34,6 +34,44 @@ sealed interface Period {
     fun calculateRange(date: Instant, timeZone: TimeZone): ClosedRange<Instant>
 
     /**
+     * Представляет период в один час
+     */
+    data object OneHour : Period {
+
+        override fun calculateRange(
+            date: Instant,
+            timeZone: TimeZone
+        ): ClosedRange<Instant> {
+            val localDateTime = date.toLocalDateTime(timeZone)
+            val start = localDateTime.date.atStartOfDayIn(timeZone)
+                .plus(localDateTime.hour, DateTimeUnit.HOUR, timeZone)
+            val end = start.plus(1, DateTimeUnit.HOUR, timeZone)
+
+            return start..end
+        }
+    }
+
+    /**
+     * Представляет период в 6 часов
+     */
+    data object SixHour : Period {
+
+        override fun calculateRange(
+            date: Instant,
+            timeZone: TimeZone
+        ): ClosedRange<Instant> {
+            val localDateTime = date.toLocalDateTime(timeZone)
+
+            val hour = (localDateTime.hour / 6) * 6
+            val start = localDateTime.date.atStartOfDayIn(timeZone)
+                .plus(hour, DateTimeUnit.HOUR, timeZone)
+            val end = start.plus(6, DateTimeUnit.HOUR, timeZone)
+
+            return start..end
+        }
+    }
+
+    /**
      * Представляет период в один день (24 часа)
      */
     data object Day : Period {

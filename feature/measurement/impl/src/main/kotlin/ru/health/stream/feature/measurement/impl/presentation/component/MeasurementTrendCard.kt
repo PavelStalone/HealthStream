@@ -48,6 +48,7 @@ internal fun MeasurementTrendCard(
 
             is Period.Week -> period.getDisplay(locale = locale)
             Period.Year -> Period.Year.getDisplay(locale = locale)
+            else -> emptyMap()
         }
     }
 

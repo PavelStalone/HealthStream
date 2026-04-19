@@ -64,6 +64,7 @@ include(":feature:measurement:impl")
 //region Source module
 include(":source:local")
 include(":source:local:room")
+include(":source:local:file")
 include(":source:local:healthconnect")
 include(":source:remote:ble")
 include(":source:remote:ble:lib")

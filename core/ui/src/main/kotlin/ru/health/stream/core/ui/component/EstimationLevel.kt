@@ -2,7 +2,6 @@ package ru.health.stream.core.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +21,9 @@ fun EstimationLevel(
         modifier = modifier
             .background(
                 color = containerColor,
-                shape = CircleShape
+                shape = MaterialTheme.shapes.medium
             )
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+            .padding(horizontal = 6.dp, vertical = 2.dp),
         text = text,
         style = MaterialTheme.typography.labelMedium.copy(
             color = contentColor,

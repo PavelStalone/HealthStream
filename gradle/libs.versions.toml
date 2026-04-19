@@ -27,6 +27,7 @@ nordic-android-common-uiscanner = "1.0.11"
 com-polidea-rxandroidble = "1.19.1"
 #endregion
 
+itext7Core = "9.6.0"
 room = "2.8.4"
 navRouter = "1.0.3"
 datastore = "1.2.1"
@@ -52,6 +53,8 @@ io-github-automapper = "0.11.0"
 [libraries]
 io-github-automapper-processor = { group = "io.github.jacksever.automapper", name = "processor", version.ref = "io-github-automapper" }
 io-github-automapper-annotation = { group = "io.github.jacksever.automapper", name = "annotation", version.ref = "io-github-automapper" }
+
+itext7-core = { module = "com.itextpdf.android:itext-core-android", version.ref = "itext7Core" }
 
 io-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 

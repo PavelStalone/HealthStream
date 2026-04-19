@@ -9,4 +9,6 @@ android {
 
 dependencies {
     implementation(libs.io.coil.compose)
+
+    implementation(projects.data.vitals)
 }

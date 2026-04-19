@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.createFontFamilyResolver
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -32,6 +33,7 @@ import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.icon.fill.Settings
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
+import ru.health.stream.feature.report.api.navigation.ReportNavKey
 import ru.health.stream.feature.settings.navigation.SettingsNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
 import javax.inject.Inject
@@ -47,6 +49,8 @@ class MainActivity : StarterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        createFontFamilyResolver(this)
 
 //        val availabilityStatus = HealthConnectClient.getSdkStatus(this)
 //
@@ -78,7 +82,7 @@ class MainActivity : StarterActivity() {
                 val backStack = rememberNavBackStack(
                     elements = arrayOf(
                         HomeNavKey,
-                        UserNavKey,
+                        ReportNavKey,
                     )
                 )
 
