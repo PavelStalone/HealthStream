@@ -9,7 +9,7 @@ enum class ReportEstimation(
 ) {
 
     LOW(
-        color = RED,
+        color = ACCENT,
         text = "Понижено",
         backgroundColor = DeviceRgb(0xFD, 0xE8, 0xE8),
     ),

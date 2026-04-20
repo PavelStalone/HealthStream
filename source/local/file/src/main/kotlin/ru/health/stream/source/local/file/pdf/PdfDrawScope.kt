@@ -34,19 +34,20 @@ import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants
+import com.itextpdf.kernel.pdf.extgstate.PdfExtGState
 import ru.health.stream.feature.chart.model.path.DashPathEffect
 import java.io.ByteArrayOutputStream
 
 class PdfDrawScope(
     val pageSize: Size,
     val pdfCanvas: PdfCanvas,
-    val verticalMargin: Offset,
-    val horizontalMargin: Offset,
+    val verticalMargin: Offset = Offset(0f, 0f), // bottom, top
+    val horizontalMargin: Offset = Offset(0f, 0f), // start, end
 ) : DrawScope {
 
     private val planeSize = Size(
         width = pageSize.width - horizontalMargin.run { x + y },
-        height = pageSize.height - verticalMargin.run { x + y },
+        height = pageSize.height - verticalMargin.y,
     )
 
     override val drawContext: DrawContext = object : DrawContext {
@@ -162,16 +163,18 @@ class PdfDrawScope(
         fontSize: Float = 12f,
         color: Color = Color.Black
     ) {
-        pdfCanvas.beginText()
-        pdfCanvas.setFontAndSize(font, fontSize)
-        pdfCanvas.setFillColor(color.asPdf())
+        withAlpha(color.alpha) {
+            pdfCanvas.beginText()
+            pdfCanvas.setFontAndSize(font, fontSize)
+            pdfCanvas.setFillColor(color.asPdf())
 
-        val x = (horizontalMargin.x + offset.x).toDouble()
-        val y = (verticalMargin.x + offset.y).toDouble()
+            val x = (horizontalMargin.x + offset.x).toDouble()
+            val y = (verticalMargin.x + offset.y).toDouble()
 
-        pdfCanvas.moveText(x, y)
-        pdfCanvas.showText(text)
-        pdfCanvas.endText()
+            pdfCanvas.moveText(x, y)
+            pdfCanvas.showText(text)
+            pdfCanvas.endText()
+        }
     }
 
     override fun drawLine(
@@ -211,23 +214,25 @@ class PdfDrawScope(
         colorFilter: ColorFilter?,
         blendMode: BlendMode
     ) {
-        if (pathEffect is DashPathEffect) {
-            pdfCanvas.setLineDash(pathEffect.intervals, pathEffect.phase)
-        }
+        withAlpha(alpha = color.alpha) {
+            if (pathEffect is DashPathEffect) {
+                pdfCanvas.setLineDash(pathEffect.intervals, pathEffect.phase)
+            }
 
-        pdfCanvas.setStrokeColor(color.asPdf())
-        pdfCanvas.setLineWidth(strokeWidth)
-        pdfCanvas.setLineCapStyle(cap.asPdf())
-        pdfCanvas.moveTo(
-            (horizontalMargin.x + start.x).toDouble(),
-            (verticalMargin.x + start.y).toDouble()
-        )
-        pdfCanvas.lineTo(
-            (horizontalMargin.x + end.x).toDouble(),
-            (verticalMargin.x + end.y).toDouble()
-        )
-        pdfCanvas.stroke()
-        pdfCanvas.setLineDash(0f)
+            pdfCanvas.setStrokeColor(color.asPdf())
+            pdfCanvas.setLineWidth(strokeWidth)
+            pdfCanvas.setLineCapStyle(cap.asPdf())
+            pdfCanvas.moveTo(
+                (horizontalMargin.x + start.x).toDouble(),
+                (verticalMargin.x + start.y).toDouble()
+            )
+            pdfCanvas.lineTo(
+                (horizontalMargin.x + end.x).toDouble(),
+                (verticalMargin.x + end.y).toDouble()
+            )
+            pdfCanvas.stroke()
+            pdfCanvas.setLineDash(0f)
+        }
     }
 
     override fun drawRect(
@@ -261,23 +266,25 @@ class PdfDrawScope(
         colorFilter: ColorFilter?,
         blendMode: BlendMode
     ) {
-        val x = (horizontalMargin.x + topLeft.x).toDouble()
-        val y = (verticalMargin.x + topLeft.y).toDouble()
-        val w = size.width.toDouble()
-        val h = size.height.toDouble()
+        withAlpha(alpha = color.alpha) {
+            val x = (horizontalMargin.x + topLeft.x).toDouble()
+            val y = (verticalMargin.x + topLeft.y - size.height).toDouble()
+            val w = size.width.toDouble()
+            val h = size.height.toDouble()
 
-        when (style) {
-            Fill -> {
-                pdfCanvas.setFillColor(color.asPdf())
-                pdfCanvas.rectangle(x, y, w, h)
-                pdfCanvas.fill()
-            }
+            when (style) {
+                Fill -> {
+                    pdfCanvas.setFillColor(color.asPdf())
+                    pdfCanvas.rectangle(x, y, w, h)
+                    pdfCanvas.fill()
+                }
 
-            is Stroke -> {
-                pdfCanvas.setStrokeColor(color.asPdf())
-                pdfCanvas.setLineWidth(style.width)
-                pdfCanvas.rectangle(x, y, w, h)
-                pdfCanvas.stroke()
+                is Stroke -> {
+                    pdfCanvas.setStrokeColor(color.asPdf())
+                    pdfCanvas.setLineWidth(style.width)
+                    pdfCanvas.rectangle(x, y, w, h)
+                    pdfCanvas.stroke()
+                }
             }
         }
     }
@@ -424,18 +431,20 @@ class PdfDrawScope(
         val x = (horizontalMargin.x + center.x).toDouble()
         val y = (verticalMargin.x + center.y).toDouble()
 
-        when (style) {
-            Fill -> {
-                pdfCanvas.setFillColor(color.asPdf())
-                pdfCanvas.circle(x, y, radius.toDouble())
-                pdfCanvas.fill()
-            }
+        withAlpha(alpha = color.alpha) {
+            when (style) {
+                Fill -> {
+                    pdfCanvas.setFillColor(color.asPdf())
+                    pdfCanvas.circle(x, y, radius.toDouble())
+                    pdfCanvas.fill()
+                }
 
-            is Stroke -> {
-                pdfCanvas.setStrokeColor(color.asPdf())
-                pdfCanvas.setLineWidth(style.width)
-                pdfCanvas.circle(x, y, radius.toDouble())
-                pdfCanvas.stroke()
+                is Stroke -> {
+                    pdfCanvas.setStrokeColor(color.asPdf())
+                    pdfCanvas.setLineWidth(style.width)
+                    pdfCanvas.circle(x, y, radius.toDouble())
+                    pdfCanvas.stroke()
+                }
             }
         }
     }
@@ -594,24 +603,26 @@ class PdfDrawScope(
             }
         } while (pathMeasure.nextContour())
 
-        when (style) {
-            Fill -> {
-                pdfCanvas.setFillColor(color.asPdf())
-                pdfCanvas.fill()
-            }
-
-            is Stroke -> {
-                pdfCanvas.setStrokeColor(color.asPdf())
-                pdfCanvas.setLineWidth(style.width)
-                pdfCanvas.setLineCapStyle(style.cap.asPdf())
-
-                val pathEffect = style.pathEffect
-                if (pathEffect is DashPathEffect) {
-                    pdfCanvas.setLineDash(pathEffect.intervals, pathEffect.phase)
+        withAlpha(alpha = color.alpha) {
+            when (style) {
+                Fill -> {
+                    pdfCanvas.setFillColor(color.asPdf())
+                    pdfCanvas.fill()
                 }
 
-                pdfCanvas.stroke()
-                pdfCanvas.setLineDash(0f)
+                is Stroke -> {
+                    pdfCanvas.setStrokeColor(color.asPdf())
+                    pdfCanvas.setLineWidth(style.width)
+                    pdfCanvas.setLineCapStyle(style.cap.asPdf())
+
+                    val pathEffect = style.pathEffect
+                    if (pathEffect is DashPathEffect) {
+                        pdfCanvas.setLineDash(pathEffect.intervals, pathEffect.phase)
+                    }
+
+                    pdfCanvas.stroke()
+                    pdfCanvas.setLineDash(0f)
+                }
             }
         }
     }
@@ -723,6 +734,20 @@ class PdfDrawScope(
     }
 
     private fun Color.asPdf(): DeviceRgb = DeviceRgb(red, green, blue)
+
+    private fun withAlpha(alpha: Float, block: () -> Unit) {
+        if (alpha >= 1f) {
+            block()
+        } else {
+            pdfCanvas.saveState()
+            val gState = PdfExtGState().setFillOpacity(alpha)
+                .setStrokeOpacity(alpha)
+
+            pdfCanvas.setExtGState(gState)
+            block()
+            pdfCanvas.restoreState()
+        }
+    }
 
     private fun StrokeCap.asPdf(): Int = when (this) {
         StrokeCap.Butt -> PdfCanvasConstants.LineCapStyle.BUTT

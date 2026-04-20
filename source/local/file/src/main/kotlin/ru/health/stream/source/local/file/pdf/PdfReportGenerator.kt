@@ -1,6 +1,5 @@
 package ru.health.stream.source.local.file.pdf
 
-
 import android.content.Context
 import androidx.collection.FloatFloatPair
 import androidx.compose.ui.geometry.Offset
@@ -26,12 +25,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
-import kotlinx.datetime.format.DateTimeComponents
+import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
@@ -50,27 +51,29 @@ import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.SystolicPressure
 import ru.health.stream.data.vitals.usecase.DateTransformerUseCase
 import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.chart.core.drawable.GridLines
 import ru.health.stream.feature.chart.core.drawable.Scatter
 import ru.health.stream.feature.chart.model.ChartPosition
+import ru.health.stream.feature.chart.model.path.DashPathEffect
 import ru.health.stream.source.local.file.ReportGenerator
 import ru.health.stream.source.local.file.model.ACCENT
-import ru.health.stream.source.local.file.model.BORDER
+import ru.health.stream.source.local.file.model.Area
 import ru.health.stream.source.local.file.model.HEADER_BG
 import ru.health.stream.source.local.file.model.Mean
 import ru.health.stream.source.local.file.model.MeasurementSection
 import ru.health.stream.source.local.file.model.MeasurementSummary
 import ru.health.stream.source.local.file.model.ReportEstimation
 import ru.health.stream.source.local.file.model.STRIPE_BG
-import ru.health.stream.source.local.file.model.TEXT_DARK
 import ru.health.stream.source.local.file.model.TEXT_MUTED
 import java.io.File
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 
-internal class PdfDemoReportGenerator(
+internal class PdfReportGenerator(
     @ApplicationContext private val context: Context,
 ) : ReportGenerator {
 
@@ -330,20 +333,17 @@ internal class PdfDemoReportGenerator(
             measurementsSummary[newSection::class] = newSummary
         }
 
-        logV("measurements grouped")
-
         PdfWriter(outputFile).use { writer ->
             PdfDocument(writer).use { pdf ->
                 Document(pdf).use { doc ->
                     buildTitlePage(
-                        user = user,
-                        doc = doc,
                         pdf = pdf,
+                        user = user,
+                        timeZone = timeZone,
                         dateRange = dateRange,
                     )
 
                     doc.add(AreaBreak())
-
                     buildSummaryTable(
                         doc = doc,
                         summaries = measurementsSummary.values.toList(),
@@ -358,6 +358,12 @@ internal class PdfDemoReportGenerator(
                             timeZone = timeZone,
                             sections = sections,
                             dateRange = dateRange,
+                            areas = mapOf(
+                                ReportEstimation.LOW to listOf(Area(yRange = 0f..60f)),
+                                ReportEstimation.NORMAL to listOf(Area(yRange = 60f..140f)),
+                                ReportEstimation.HIGH to listOf(Area(yRange = 140f..170f)),
+                                ReportEstimation.EXTRA_HIGH to listOf(Area(yRange = 170f..220f)),
+                            )
                         )
                     }
 
@@ -376,21 +382,21 @@ internal class PdfDemoReportGenerator(
         context.assets.open("fonts/arial.ttf").readBytes(),
         PdfEncodings.IDENTITY_H,
         PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
-    )
+    )!!
     val fontBold = PdfFontFactory.createFont(
         context.assets.open("fonts/arial_bolditalic.ttf").readBytes(),
         PdfEncodings.IDENTITY_H,
         PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
-    )
+    )!!
 
     // ── Title Page ────────────────────────────────────────────────────
     private fun buildTitlePage(
         user: User?,
-        doc: Document,
         pdf: PdfDocument,
+        timeZone: TimeZone,
         dateRange: ClosedRange<Instant>,
     ) {
-        val dateNow = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val dateNow = Clock.System.todayIn(timeZone)
 
         val page = pdf.addNewPage()
         val c = PdfCanvas(page.newContentStreamBefore(), page.resources, pdf)
@@ -433,7 +439,7 @@ internal class PdfDemoReportGenerator(
         c.setFontAndSize(font, 18f)
         c.setFillColor(DeviceRgb(200, 210, 220))
         c.moveText(60.0, h - 200.0)
-        c.showText("Cгенерирован приложением HealthStream")
+        c.showText("Создан приложением HealthStream")
         c.endText()
 
         // Info block
@@ -441,11 +447,11 @@ internal class PdfDemoReportGenerator(
         c.rectangle(60.0, h * 0.60, 300.0, 50.0)
         c.fill()
 
-        val timeFormatter = DateTimeComponents.Format {
-            monthName(names = MonthNames.RUSSIAN_FULL)
-            char(value = ' ')
+        val timeFormatter = LocalDateTime.Format {
             dayOfMonth(Padding.NONE)
-            chars(value = ", ")
+            char(value = '.')
+            monthNumber()
+            char(value = '.')
             year()
             char(value = ' ')
             hour()
@@ -457,23 +463,22 @@ internal class PdfDemoReportGenerator(
         c.setFontAndSize(font, 11f)
         c.setFillColor(HEADER_BG)
         c.moveText(75.0, h * 0.60 + 28.0)
-        c.showText("Отчет сгенерирован на")
+        c.showText("Отчет создан за период")
         c.moveText(0.0, -15.0)
         c.showText(
-            "${dateRange.start.format(timeFormatter)} - ${
-                dateRange.endInclusive.format(
-                    timeFormatter
-                )
+            "${
+                dateRange.start.toLocalDateTime(timeZone).format(timeFormatter)
+            } - ${
+                dateRange.endInclusive.toLocalDateTime(timeZone).format(timeFormatter)
             }"
         )
         c.endText()
 
-
         val dateFormatter = LocalDate.Format {
-            monthName(names = MonthNames.RUSSIAN_FULL)
-            char(value = ' ')
             dayOfMonth(Padding.NONE)
-            chars(value = ", ")
+            char(value = '.')
+            monthNumber()
+            char(value = '.')
             year()
         }
 
@@ -497,7 +502,7 @@ internal class PdfDemoReportGenerator(
                     append(" ")
                     append("Пол: ")
                     append(if (user.gender) "мужской" else "женский")
-                    append(", рост: ${user.height.cm} сантиметров")
+                    append(". Рост: ${user.height.cm} сантиметров")
                 }
             )
             c.endText()
@@ -742,14 +747,23 @@ internal class PdfDemoReportGenerator(
         timeZone: TimeZone,
         dateRange: ClosedRange<Instant>,
         sections: List<MeasurementSection>,
+        areas: Map<ReportEstimation, List<Area>> = emptyMap(),
     ) {
         val dateTransformerUseCase = DateTransformerUseCase(
             period = period,
             timeZone = timeZone,
             dateRange = dateRange,
         )
-
         val section = sections.first()
+        val page = pdf.lastPage
+        val c = PdfCanvas(page.newContentStreamBefore(), page.resources, pdf)
+        val ps = pdf.defaultPageSize
+        val pW = ps.width
+        val pH = 400f
+
+        var yMin = Float.MAX_VALUE
+        var yMax = Float.MIN_VALUE
+        val positionMap: MutableMap<Int, MutableList<ChartPosition>> = mutableMapOf()
 
         doc.add(
             Paragraph("График показаний: ${section.typeName}")
@@ -761,36 +775,17 @@ internal class PdfDemoReportGenerator(
         )
 
         doc.add(
-            Paragraph("Данные представлены в группированном виде. Точки означают минимумы и максимумы диапазонов, а линия их среднее арифметическое")
+            Paragraph("Данные представлены в группированном виде. Диапазоны показывают минимумы и максимумы значений, а линия их среднее арифметическое")
                 .setFont(font)
                 .setFontSize(10f)
                 .setMarginBottom(16f)
                 .setFontColor(TEXT_MUTED)
         )
 
-        val page = pdf.addNewPage()
-        val c = PdfCanvas(page.newContentStreamBefore(), page.resources, pdf)
-        val ps = pdf.defaultPageSize
-        val pW = ps.width
-        val pH = ps.height
-
-        val mL = 70.0
-        val mR = 50.0
-        val mT = 60.0
-        val mB = 80.0
-        val cL = mL
-        val cB = pH - mB
-        val cR = pW - mR
-        val cT = mT
-        val cW = cR - cL
-        val cH = cB - cT
-
-        var yMin = Float.MAX_VALUE
-        var yMax = Float.MIN_VALUE
-        val positionMap: MutableMap<Int, MutableList<ChartPosition>> = mutableMapOf()
-
         sections.forEach { section ->
-            val x = dateTransformerUseCase(section.dateRange.start)
+            val x = dateTransformerUseCase(
+                section.dateRange.start.plus((section.dateRange.endInclusive - section.dateRange.start) / 2)
+            )
 
             when (section) {
                 is MeasurementSection.BloodGlucose -> {
@@ -961,8 +956,8 @@ internal class PdfDemoReportGenerator(
         val drawScope = PdfDrawScope(
             pdfCanvas = c,
             pageSize = Size(width = pW, height = pH),
-            verticalMargin = Offset(x = 60f, y = 80f),
-            horizontalMargin = Offset(x = 70f, y = 50f),
+            verticalMargin = Offset(x = ps.height - pH - 200f, y = 0f),
+            horizontalMargin = Offset(x = 50f, y = 20f),
         )
 
         val chart = PdfChartDrawScopeImpl(
@@ -971,21 +966,118 @@ internal class PdfDemoReportGenerator(
             heightRange = yMin..yMax,
         )
 
-        val step = 2f
-        val start = yMin
-        val end = yMax
+        val step = 10f
+        val start = floor(yMin / step) * step
+        val end = ceil(yMax / step) * step
         val yLabels = generateSequence(seed = start) { it + step }
             .takeWhile { it <= end }
             .toList()
 
+        val dateTimeFormatter = when (period) {
+            Period.OneHour -> LocalDateTime.Format {
+                hour()
+                char(value = ':')
+                minute()
+            }
+
+            Period.SixHour -> LocalDateTime.Format {
+                dayOfMonth()
+                char('.')
+                monthNumber()
+                char(value = '\n')
+                hour()
+                char(value = ':')
+                minute()
+            }
+
+            Period.Day -> LocalDateTime.Format {
+                dayOfMonth(padding = Padding.NONE)
+            }
+
+            is Period.Week -> LocalDateTime.Format {
+                dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
+            }
+
+            Period.Month -> LocalDateTime.Format {
+                monthName(names = MonthNames.RUSSIAN_FULL)
+            }
+
+            Period.Year -> LocalDateTime.Format {
+                year(padding = Padding.NONE)
+            }
+        }
+        val xLabels: MutableMap<Float, String> = mutableMapOf()
+
+        var lastRange = period.calculateRange(dateRange.start, timeZone)
+        val lastTime = period.calculateRange(dateRange.endInclusive, timeZone).start
+
+        do {
+            val x = dateTransformerUseCase(lastRange.start)
+            val name = lastRange.start.toLocalDateTime(timeZone).format(dateTimeFormatter)
+            xLabels[x] = name
+
+            lastRange = period.calculateRange(lastRange.endInclusive.plus(1.minutes), timeZone)
+        } while (lastRange.start <= lastTime)
 
         with(chart) {
-            drawRect(Color.Cyan, topLeft = Offset(x = 0f, y = 0f))
-            GridLines(
-                values = yLabels,
-                color = Color.Gray,
-            ).run {
-                draw(1f)
+            val yLabelRange = yLabels.first()..yLabels.last()
+
+            areas.forEach { (estimation, areaList) ->
+                areaList.forEach { area ->
+                    val colors = estimation.color.colorValue
+
+                    if (area.yRange.start in yLabelRange || area.yRange.endInclusive in yLabelRange) {
+                        val yMaxBound = min(area.yRange.endInclusive.yChart, yLabels.last().yChart)
+                        val yMinBound = max(area.yRange.start.yChart, yLabels.first().yChart)
+
+                        drawRect(
+                            size = size.copy(height = yMaxBound - yMinBound),
+                            topLeft = Offset(x = 0f, y = yMaxBound),
+                            color = Color(
+                                red = colors[0],
+                                green = colors[1],
+                                blue = colors[2],
+                                alpha = 0.2f,
+                            ),
+                        )
+                    }
+                }
+            }
+
+            yLabels.forEach { yPos ->
+                drawLine(
+                    strokeWidth = 1f,
+                    color = Color.LightGray.copy(alpha = 0.5f),
+                    start = Offset(x = -5f, y = yPos.yChart),
+                    end = Offset(x = size.width, y = yPos.yChart),
+                )
+                drawText(
+                    font = font,
+                    fontSize = 10f,
+                    text = yPos.toInt().toString(),
+                    offset = Offset(x = -30f, y = yPos.yChart - 4f),
+                )
+            }
+            xLabels.forEach { (xPos, name) ->
+                drawLine(
+                    strokeWidth = 1f,
+                    color = Color.LightGray,
+                    start = Offset(x = xPos.xChart, y = yLabels.first().yChart - 5f),
+                    end = Offset(x = xPos.xChart, y = size.height),
+                    pathEffect = DashPathEffect(intervals = floatArrayOf(5f, 5f), phase = 0f)
+                )
+
+                name.split('\n').forEachIndexed { index, line ->
+                    drawText(
+                        text = line,
+                        font = font,
+                        fontSize = 6f,
+                        offset = Offset(
+                            x = xPos.xChart - 8f,
+                            y = yLabels.first().yChart - 15f - (index * 8f)
+                        ),
+                    )
+                }
             }
             positionMap.forEach { (i, positions) ->
                 if (i % 2 == 0) {
@@ -999,160 +1091,51 @@ internal class PdfDemoReportGenerator(
                     }
                 } else {
                     @Suppress("UNCHECKED_CAST")
+                    val points = positions as List<ChartPosition.Point>
+
                     CubicLine(
-                        color = Color.Green,
+                        color = Color.Gray,
                         style = Stroke(width = 2f),
-                        points = positions as List<ChartPosition.Point>,
+                        points = points,
                     ).run {
                         draw(1f)
                     }
+
+                    points.forEach { point ->
+                        val color = areas.firstNotNullOfOrNull { (estimation, areas) ->
+                            if (areas.any { area -> point.y in area.yRange }) {
+                                val colors = estimation.color.colorValue
+
+                                Color(
+                                    red = colors[0],
+                                    green = colors[1],
+                                    blue = colors[2],
+                                )
+                            } else {
+                                null
+                            }
+                        }
+
+                        drawCircle(
+                            radius = 4.dp.toPx(),
+                            color = color ?: Color.Cyan,
+                            center = Offset(x = point.x.xChart, y = point.y.yChart)
+                        )
+                    }
                 }
-            }
-            yLabels.forEach { y ->
-                drawText(
-                    font = font,
-                    text = y.toInt().toString(),
-                    offset = Offset(x = 0f.xChart - 25f, y = y.yChart),
-                )
             }
         }
 
-//        fun toX(dx: Double) = cL + (dx / 19.0) * cW
-//        fun toY(dy: Double) = cB - ((dy - yMin) / yRange) * cH
-//
-//        // Normal zone
-//        c.setFillColor(DeviceRgb(0xE8, 0xF5, 0xE9))
-//        c.rectangle(cL, toY(6.1), cW, toY(3.9) - toY(6.1))
-//        c.fill()
-//
-//        // Warning zones
-//        c.setFillColor(DeviceRgb(0xFE, 0xF3, 0xCD))
-//        c.rectangle(cL, toY(7.0), cW, toY(6.1) - toY(7.0))
-//        c.fill()
-//        c.rectangle(cL, toY(3.9), cW, toY(3.5) - toY(3.9))
-//        c.fill()
-//
-//        // Critical zone
-//        c.setFillColor(DeviceRgb(0xFD, 0xE8, 0xE8))
-//        c.rectangle(cL, toY(7.8), cW, toY(7.0) - toY(7.8))
-//        c.fill()
-//
-//        // Horizontal grid + Y labels
-//        for (y in 4..10) {
-//            val py = toY(y.toDouble())
-//            c.setStrokeColor(DeviceRgb(0xE5, 0xE8, 0xEA))
-//            c.setLineWidth(0.5f)
-//            c.moveTo(cL, py); c.lineTo(cR, py); c.stroke()
-//            c.beginText(); c.setFontAndSize(font, 9f); c.setFillColor(TEXT_MUTED)
-//            c.moveText(cL - 10.0, py - 3.0); c.showText("$y.0"); c.endText()
-//        }
-//
-//        // Axes
-//        c.setStrokeColor(BORDER); c.setLineWidth(1f)
-//        c.moveTo(cL, cT); c.lineTo(cL, cB); c.stroke()
-//        c.moveTo(cL, cB); c.lineTo(cR, cB); c.stroke()
-//
-//        // X labels
-//        c.setFontAndSize(font, 8f); c.setFillColor(TEXT_MUTED)
-//        for (i in 0..19 step 2) {
-//            val px = toX(i.toDouble())
-//            c.beginText(); c.moveText(px - 12.0, cB + 14.0)
-//            c.showText("Day ${i + 1}"); c.endText()
-//            c.setStrokeColor(BORDER); c.setLineWidth(0.5f)
-//            c.moveTo(px, cB); c.lineTo(px, cB + 5.0); c.stroke()
-//        }
-//
-//        // Normal range dashed lines
-//        c.setStrokeColor(GREEN); c.setLineWidth(1f)
-//        c.setLineDash(6f, 3f)
-//        c.moveTo(cL, toY(3.9)); c.lineTo(cR, toY(3.9)); c.stroke()
-//        c.moveTo(cL, toY(6.1)); c.lineTo(cR, toY(6.1)); c.stroke()
-//        c.setLineDash(0f)
-//
-//        // Data line
-//        c.setStrokeColor(LINE_COLOR); c.setLineWidth(2f)
-//        c.moveTo(toX(points[0].first), toY(points[0].second))
-//        for (i in 1 until points.size) c.lineTo(toX(points[i].first), toY(points[i].second))
-//        c.stroke()
-//
-//        // Data points
-//        points.forEachIndexed { idx, (x, y) ->
-//            val px = toX(x)
-//            val py = toY(y)
-//            val col = when {
-//                y > 7.0 -> RED; y > 6.1 -> YELLOW; y < 3.9 -> RED; else -> ACCENT
-//            }
-//            c.setFillColor(col); c.circle(px, py, 4.0); c.fill()
-//            c.setFillColor(DeviceRgb(255, 255, 255)); c.circle(px, py, 2.0); c.fill()
-//        }
-//
-//        // Axis titles
-//        c.beginText(); c.setFontAndSize(fontBold, 11f); c.setFillColor(TEXT_DARK)
-//        c.moveText(cL, cB + 35.0); c.showText("Observation day"); c.endText()
-//        c.beginText(); c.setFontAndSize(fontBold, 11f); c.setFillColor(TEXT_DARK)
-//        c.moveText(15.0, (cT + cB) / 2); c.showText("mmol/l"); c.endText()
-//
-//        // Legend
-//        val lx = cR - 180.0;
-//        val ly = cT + 10.0
-//        c.setFillColor(DeviceRgb(255, 255, 255)); c.rectangle(
-//            lx - 8.0,
-//            ly - 55.0,
-//            185.0,
-//            70.0
-//        ); c.fill()
-//        c.setStrokeColor(BORDER); c.setLineWidth(0.5f); c.rectangle(
-//            lx - 8.0,
-//            ly - 55.0,
-//            185.0,
-//            70.0
-//        ); c.stroke()
-//        drawLegend(c, lx, ly, DeviceRgb(0xE8, 0xF5, 0xE9), "Normal (3.9 - 6.1)")
-//        drawLegend(c, lx, ly - 18.0, DeviceRgb(0xFE, 0xF3, 0xCD), "Warning (6.1 - 7.0)")
-//        drawLegend(c, lx, ly - 36.0, DeviceRgb(0xFD, 0xE8, 0xE8), "Critical (> 7.0)")
-//
-//        // Max/Min labels
-//        val maxP = points.maxByOrNull { it.second }!!
-//        val minP = points.minByOrNull { it.second }!!
-//        c.beginText(); c.setFontAndSize(fontBold, 9f); c.setFillColor(RED)
-//        c.moveText(toX(maxP.first) - 15.0, toY(maxP.second) + 10.0)
-//        c.showText("%.1f".format(maxP.second)); c.endText()
-//        c.beginText(); c.setFontAndSize(fontBold, 9f); c.setFillColor(ACCENT)
-//        c.moveText(toX(minP.first) - 15.0, toY(minP.second) - 12.0)
-//        c.showText("%.1f".format(minP.second)); c.endText()
-
         c.release()
 
-        // Stats below chart
-        doc.add(Paragraph("").setMarginTop((cH + 50.0).toFloat()))
+        doc.add(Paragraph("").setMarginTop(pH + 70f))
         doc.add(
-            Paragraph("Chart Statistics")
-                .setFont(fontBold).setFontSize(15f).setFontColor(ACCENT)
-                .setMarginTop(10f).setMarginBottom(8f)
+            Paragraph("Оценки измерений могут быть не точными для вашего организма. Рекомендуем обратиться к врачу, если у вас возникают трудности")
+                .setFont(font)
+                .setFontSize(15f)
+                .setFontColor(TEXT_MUTED)
+                .setMarginTop(10f)
+                .setMarginBottom(8f)
         )
-//
-//        val avg = points.map { it.second }.average()
-//        val above = points.count { it.second > 6.1 }
-//        val below = points.count { it.second < 3.9 }
-//        doc.add(
-//            Paragraph(
-//                "Average: %.1f mmol/l | Min: %.1f | Max: %.1f | Above norm: %d | Below norm: %d | Points: %d".format(
-//                    avg, minP.second, maxP.second, above, below, points.size
-//                )
-//            )
-//                .setFont(font).setFontSize(10f).setFontColor(TEXT_DARK)
-//        )
-    }
-
-    private fun drawLegend(c: PdfCanvas, x: Double, y: Double, color: DeviceRgb, text: String) {
-        c.setFillColor(color); c.rectangle(x, y - 2.0, 14.0, 14.0); c.fill()
-        c.setStrokeColor(BORDER); c.setLineWidth(0.5f); c.rectangle(
-            x,
-            y - 2.0,
-            14.0,
-            14.0
-        ); c.stroke()
-        c.beginText(); c.setFontAndSize(font, 9f); c.setFillColor(TEXT_DARK)
-        c.moveText(x + 20.0, y + 7.0); c.showText(text); c.endText()
     }
 }
