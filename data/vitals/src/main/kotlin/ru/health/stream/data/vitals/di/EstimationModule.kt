@@ -10,7 +10,7 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 
 @Module
 @InstallIn(SingletonComponent::class)
-object EstimationModule {
+internal object EstimationModule {
 
     @Provides
     @Suppress("UNCHECKED_CAST")

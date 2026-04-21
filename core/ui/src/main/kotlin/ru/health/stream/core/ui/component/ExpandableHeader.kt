@@ -99,7 +99,7 @@ fun ExpandableHeader(
 
 @Composable
 @DeviceThemePreviews
-fun ExpandableHeaderPreview() {
+private fun ExpandableHeaderPreview() {
     val formatter = DateTimeComponents.Format {
         monthName(names = MonthNames.RUSSIAN_FULL)
         char(value = ' ')

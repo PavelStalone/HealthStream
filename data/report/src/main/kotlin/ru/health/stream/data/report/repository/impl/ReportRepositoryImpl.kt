@@ -9,7 +9,7 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import java.net.URI
 import javax.inject.Inject
 
-class ReportRepositoryImpl @Inject constructor(
+internal class ReportRepositoryImpl @Inject constructor(
     private val userRepository: UserRepository,
     private val fileGenerator: ReportFileGenerator,
 ) : ReportRepository {

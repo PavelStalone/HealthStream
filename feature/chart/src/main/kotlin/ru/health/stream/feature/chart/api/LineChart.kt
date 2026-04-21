@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
@@ -52,8 +51,6 @@ fun LineChart(
             animationSpec = tween(2000),
         )
     }
-
-    rememberTextMeasurer()
 
     Layout(
         modifier = modifier,
@@ -214,7 +211,7 @@ private enum class Node {
 
 @Preview
 @Composable
-fun PreviewLineChart() {
+private fun PreviewLineChart() {
     val points = List(11) { index ->
         ChartPosition.Point(
             x = index.toFloat(),

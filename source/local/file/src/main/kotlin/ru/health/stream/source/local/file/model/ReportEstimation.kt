@@ -12,7 +12,7 @@ internal enum class ReportEstimation(
     LOW(
         color = ACCENT,
         text = "Понижено",
-        backgroundColor = DeviceRgb(0xFD, 0xE8, 0xE8),
+        backgroundColor = LOW_LEVEL_CONTAINER,
     ),
     NORMAL(
         color = GREEN,
@@ -21,12 +21,12 @@ internal enum class ReportEstimation(
     HIGH(
         color = YELLOW,
         text = "Повышено",
-        backgroundColor = DeviceRgb(0xFE, 0xF7, 0xE0),
+        backgroundColor = HIGH_LEVEL_CONTAINER,
     ),
     EXTRA_HIGH(
         color = RED,
         text = "Критично",
-        backgroundColor = DeviceRgb(0xFD, 0xE8, 0xE8),
+        backgroundColor = EXTRA_HIGH_LEVEL_CONTAINER,
     ),
     ;
 }

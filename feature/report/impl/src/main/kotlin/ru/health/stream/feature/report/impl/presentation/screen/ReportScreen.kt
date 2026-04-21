@@ -88,7 +88,7 @@ import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewMod
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ReportScreen(
+internal fun ReportScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ReportViewModel = hiltViewModel(),
@@ -432,7 +432,7 @@ private val timeFormatter = LocalDateTime.Format {
 
 @Preview
 @Composable
-fun DateRangePreview() {
+private fun DateRangePreview() {
     HealthStreamTheme(
         dynamicColor = false
     ) {

@@ -131,8 +131,7 @@ internal fun MeasurementScreen(
             }
         )
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(all = 16.dp),
         ) {
             item {

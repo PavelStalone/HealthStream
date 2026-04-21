@@ -47,13 +47,9 @@ import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.days
 
-sealed interface ReportUiEvent {
-    data class ShareFile(val uri: Uri, val format: ReportFormat) : ReportUiEvent
-}
-
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
-class ReportViewModel @Inject constructor(
+internal class ReportViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
     private val measurementRepository: MeasurementRepository,
     @Dispatcher(Dispatcher.IO) val ioDispatcher: CoroutineDispatcher,
@@ -204,7 +200,13 @@ class ReportViewModel @Inject constructor(
 }
 
 @Immutable
-data class MeasurementGroup(
+internal sealed interface ReportUiEvent {
+
+    data class ShareFile(val uri: Uri, val format: ReportFormat) : ReportUiEvent
+}
+
+@Immutable
+internal data class MeasurementGroup(
     val id: String,
     val date: LocalDate,
     val measurements: List<UiMeasurement>

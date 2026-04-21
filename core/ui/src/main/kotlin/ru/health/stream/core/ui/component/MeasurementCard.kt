@@ -303,7 +303,7 @@ fun MeasurementCard(
 
 @Composable
 @DeviceThemePreviews
-fun PreviewMeasurementCard() {
+private fun PreviewMeasurementCard() {
     HealthStreamTheme(
         dynamicColor = false,
     ) {
@@ -330,7 +330,6 @@ fun PreviewMeasurementCard() {
                 value = "72",
                 sourceName = "Пульсоксиметр",
                 type = "Пульс",
-//                note = "Текст заметки",
                 estimation = UiLevel.NORMAL,
             )
 
@@ -343,8 +342,6 @@ fun PreviewMeasurementCard() {
                 value = "72",
                 sourceName = "Пульсоксиметр",
                 type = "Пульс",
-//                note = "Текст заметки",
-//                estimation = UiLevel.NORMAL,
             )
 
             MeasurementCard(

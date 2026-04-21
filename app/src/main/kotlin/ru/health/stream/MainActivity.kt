@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.createFontFamilyResolver
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -50,8 +49,6 @@ class MainActivity : StarterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        createFontFamilyResolver(this)
-
 //        val availabilityStatus = HealthConnectClient.getSdkStatus(this)
 //
 //        logI("availabilityStatus: $availabilityStatus")
@@ -83,6 +80,7 @@ class MainActivity : StarterActivity() {
                     elements = arrayOf(
                         HomeNavKey,
                         ReportNavKey,
+                        UserNavKey,
                     )
                 )
 

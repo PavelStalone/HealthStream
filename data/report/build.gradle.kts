@@ -6,8 +6,8 @@ plugins {
 dependencies {
     api(libs.kotlinx.datetime)
 
-    implementation(projects.data.personal)
     implementation(projects.data.vitals)
+    implementation(projects.data.personal)
 
     implementation(projects.core.common)
 }

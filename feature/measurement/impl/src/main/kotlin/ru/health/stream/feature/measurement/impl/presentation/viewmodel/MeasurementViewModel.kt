@@ -144,7 +144,7 @@ internal class MeasurementViewModel @AssistedInject constructor(
 }
 
 @Immutable
-sealed interface MeasurementsState {
+internal sealed interface MeasurementsState {
 
     data object Loading : MeasurementsState
 
@@ -154,14 +154,14 @@ sealed interface MeasurementsState {
 }
 
 @Immutable
-data class MeasurementGroup(
+internal data class MeasurementGroup(
     val id: String,
     val date: Instant,
     val measurements: List<UiMeasurement>
 )
 
 @Immutable
-sealed interface MeasurementsChartState {
+internal sealed interface MeasurementsChartState {
 
     data object Loading : MeasurementsChartState
 
