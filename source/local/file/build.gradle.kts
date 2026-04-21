@@ -14,6 +14,7 @@ dependencies {
     implementation(projects.data.personal)
 
     implementation(projects.core.ui)
+    implementation(projects.core.common)
     implementation(projects.core.monitor)
     implementation(projects.core.starter)
 

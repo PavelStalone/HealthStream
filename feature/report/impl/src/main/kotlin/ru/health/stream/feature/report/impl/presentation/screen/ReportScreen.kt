@@ -2,6 +2,7 @@ package ru.health.stream.feature.report.impl.presentation.screen
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -56,7 +57,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
@@ -85,7 +85,6 @@ import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportUiEvent
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewModel
-import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -96,18 +95,6 @@ fun ReportScreen(
 ) {
     val context = LocalContext.current
     val timeZone = LocalTimeZone.current
-    val dateFormatter = LocalDate.Format {
-        dayOfMonth(Padding.NONE)
-        char(value = ' ')
-        monthName(names = MonthNames.RUSSIAN_FULL)
-        char(value = ' ')
-        year()
-    }
-    val timeFormatter = LocalDateTime.Format {
-        hour()
-        char(value = ':')
-        minute()
-    }
 
     val reportFormat by viewModel.reportFormat.collectAsStateWithLifecycle()
     val dateRange by viewModel.selectedDateRange.collectAsStateWithLifecycle()
@@ -127,7 +114,7 @@ fun ReportScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is ReportUiEvent.ShareFile -> {
-                    shareFile(context, event.file, event.format)
+                    shareFile(context, event.uri, event.format)
                 }
             }
         }
@@ -171,12 +158,12 @@ fun ReportScreen(
                         onClick = { showDatePicker = true },
                         prefixIcon = UiIcon.Vector(Icons.Default.Calendar),
                         actionIcon = UiIcon.Vector(Icons.Default.KeyboardArrowDown),
-                        startDate = dateRange.start.toLocalDateTime(timeZone).date.format(
-                            dateFormatter
-                        ),
-                        endDate = dateRange.endInclusive.toLocalDateTime(timeZone).date.format(
-                            dateFormatter
-                        ),
+                        startDate = dateRange.start
+                            .toLocalDateTime(timeZone).date
+                            .format(dateFormatter),
+                        endDate = dateRange.endInclusive
+                            .toLocalDateTime(timeZone).date
+                            .format(dateFormatter),
                     )
 
                     Text(
@@ -366,17 +353,9 @@ fun ReportScreen(
     }
 }
 
-private fun shareFile(context: Context, file: File, format: ReportFormat) {
-    val authority = "${context.packageName}.fileprovider"
-    val uri = FileProvider.getUriForFile(context, authority, file)
-
-    val mimeType = when (format) {
-        ReportFormat.PDF -> "application/pdf"
-        ReportFormat.CSV -> "text/csv"
-    }
-
+private fun shareFile(context: Context, uri: Uri, format: ReportFormat) {
     val intent = Intent(Intent.ACTION_SEND).apply {
-        type = mimeType
+        type = if (format == ReportFormat.PDF) "application/pdf" else "text/csv"
         putExtra(Intent.EXTRA_STREAM, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
@@ -436,6 +415,19 @@ fun DateRange(
             )
         }
     }
+}
+
+private val dateFormatter = LocalDate.Format {
+    dayOfMonth(Padding.NONE)
+    char(value = ' ')
+    monthName(names = MonthNames.RUSSIAN_FULL)
+    char(value = ' ')
+    year()
+}
+private val timeFormatter = LocalDateTime.Format {
+    hour()
+    char(value = ':')
+    minute()
 }
 
 @Preview

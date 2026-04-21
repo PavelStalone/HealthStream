@@ -1,43 +1,124 @@
 package ru.health.stream.source.local.file
 
+import android.content.ContentValues
 import android.content.Context
+import android.os.Environment
+import android.provider.MediaStore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import jakarta.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
+import ru.health.stream.core.common.di.Dispatcher
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.data.personal.model.User
 import ru.health.stream.data.report.api.ReportFileGenerator
 import ru.health.stream.data.report.model.ReportFormat
+import ru.health.stream.data.vitals.domain.estimation.MeasurementAnalyzer
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.source.local.file.pdf.PdfReportGenerator
-import java.io.File
-
+import java.net.URI
+import javax.inject.Inject
 
 internal class ReportFileGeneratorImpl @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val measurementAnalyzer: MeasurementAnalyzer,
+    @Dispatcher(Dispatcher.IO) val ioDispatcher: CoroutineDispatcher,
 ) : ReportFileGenerator {
 
-    private val pdfGenerator: ReportGenerator = PdfReportGenerator(context)
+    private val pdfGenerator: ReportGenerator = PdfReportGenerator(
+        context = context,
+        measurementAnalyzer = measurementAnalyzer,
+    )
 
     override suspend fun generateFile(
         user: User?,
         format: ReportFormat,
         dateRange: ClosedRange<Instant>,
         measurements: List<Measurement>
-    ): File {
+    ): URI {
         logV("PdfGenerator called: user: $user, format: $format, measurements: ${measurements.size}, dateRange: $dateRange")
 
-        val file = File(context.cacheDir, "report.pdf")
+        return withContext(ioDispatcher) {
+            val fileName = createFileName(format)
+            val contentUri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, format.toMimeType())
+                put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    "${Environment.DIRECTORY_DOCUMENTS}/HealthStreamApp"
+                )
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+            val uri = context.contentResolver.insert(contentUri, contentValues)
+                ?: throw IllegalStateException("Failed to create MediaStore entry")
 
-        pdfGenerator.generateFile(
-            user = user,
-            outputFile = file,
-            dateRange = dateRange,
-            measurements = measurements,
-        )
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    when (format) {
+                        ReportFormat.PDF -> pdfGenerator.generate(
+                            user = user,
+                            dateRange = dateRange,
+                            outputStream = outputStream,
+                            measurements = measurements,
+                        )
 
-        logV("PdfGenerator finish")
+                        ReportFormat.CSV -> {
+                            // TODO: Implement CSV generator if needed
+                        }
+                    }
+                }
 
-        return file
+                contentValues.clear()
+                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                context.contentResolver.update(uri, contentValues, null, null)
+
+                logV("PdfGenerator finish: $uri")
+                URI(uri.toString())
+            } catch (e: Exception) {
+                context.contentResolver.delete(uri, null, null)
+                throw e
+            }
+        }
+    }
+
+    private fun createFileName(format: ReportFormat): String {
+        val timestamp = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .format(LocalDateTimeFormatter)
+        val extension = when (format) {
+            ReportFormat.PDF -> "pdf"
+            ReportFormat.CSV -> "csv"
+        }
+
+        return "Report_$timestamp.$extension"
+    }
+
+    private fun ReportFormat.toMimeType(): String = when (this) {
+        ReportFormat.PDF -> "application/pdf"
+        ReportFormat.CSV -> "text/csv"
+    }
+
+    companion object {
+
+        private val LocalDateTimeFormatter = LocalDateTime.Format {
+            dayOfMonth()
+            char('.')
+            monthNumber()
+            char('.')
+            year()
+            char('_')
+            hour()
+            char('-')
+            minute()
+            char('-')
+            second()
+        }
     }
 }

@@ -8,9 +8,20 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import ru.health.stream.data.vitals.model.Estimation
+import ru.health.stream.data.vitals.model.Note
+import ru.health.stream.data.vitals.model.measurement.BloodGlucose
+import ru.health.stream.data.vitals.model.measurement.BloodPressure
+import ru.health.stream.data.vitals.model.measurement.BodyWeight
+import ru.health.stream.data.vitals.model.measurement.DiastolicPressure
+import ru.health.stream.data.vitals.model.measurement.HeartRate
+import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
+import ru.health.stream.data.vitals.model.measurement.RespirationRate
+import ru.health.stream.data.vitals.model.measurement.SystolicPressure
 import kotlin.time.Duration.Companion.days
 
-sealed class MeasurementSection(
+internal sealed class MeasurementSection(
     val typeName: String,
     val valueText: String,
     open val note: String?,
@@ -165,13 +176,73 @@ private val timeFormatter = LocalDateTime.Format {
     minute()
 }
 
-data class Mean(
-    val mean: Double,
-    val count: Int = 1
-) {
+internal fun Measurement.asMeasurementSection(
+    timeZone: TimeZone,
+    measurementDateRange: ClosedRange<Instant>,
+): MeasurementSection {
+    val mNote = metadata[Note]?.description
+    val mEstimation = metadata[Estimation]?.level?.asReportEstimation()
 
-    fun add(value: Double): Mean = Mean(
-        mean = mean + (value - mean) / (count + 1),
-        count = count + 1
-    )
+    return when (this) {
+        is HeartRate -> MeasurementSection.HeartRate(
+            note = mNote,
+            timeZone = timeZone,
+            reportEstimation = mEstimation,
+            pulseRange = pulse..pulse,
+            dateRange = measurementDateRange,
+            pulseMean = Mean(pulse.toDouble()),
+        )
+
+        is BodyWeight -> MeasurementSection.BodyWeight(
+            note = mNote,
+            timeZone = timeZone,
+            reportEstimation = mEstimation,
+            dateRange = measurementDateRange,
+            weightMean = Mean(weight.kg.toDouble()),
+            weightRange = weight.kg..weight.kg,
+        )
+
+        is BloodGlucose -> MeasurementSection.BloodGlucose(
+            note = mNote,
+            timeZone = timeZone,
+            levelMean = Mean(level),
+            reportEstimation = mEstimation,
+            levelRange = level..level,
+            dateRange = measurementDateRange,
+        )
+
+        is BloodPressure -> MeasurementSection.BloodPressure(
+            note = mNote,
+            timeZone = timeZone,
+            reportEstimation = mEstimation,
+            dateRange = measurementDateRange,
+            systolicRange = systolic..systolic,
+            diastolicRange = diastolic..diastolic,
+            systolicMean = Mean(systolic.toDouble()),
+            diastolicMean = Mean(diastolic.toDouble()),
+            minBpByDifference = FloatFloatPair(systolic, diastolic),
+            maxBpByDifference = FloatFloatPair(systolic, diastolic),
+        )
+
+        is RespirationRate -> MeasurementSection.RespirationRate(
+            note = mNote,
+            timeZone = timeZone,
+            rateMean = Mean(rate),
+            rateRange = rate..rate,
+            reportEstimation = mEstimation,
+            dateRange = measurementDateRange,
+        )
+
+        is OxygenSaturation -> MeasurementSection.OxygenSaturation(
+            note = mNote,
+            timeZone = timeZone,
+            reportEstimation = mEstimation,
+            dateRange = measurementDateRange,
+            saturationMean = Mean(saturation.toDouble()),
+            saturationRange = saturation..saturation,
+        )
+
+        is SystolicPressure -> TODO()
+        is DiastolicPressure -> TODO()
+    }
 }

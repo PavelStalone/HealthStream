@@ -37,18 +37,17 @@ import kotlinx.datetime.todayIn
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.data.personal.model.User
+import ru.health.stream.data.vitals.domain.estimation.MeasurementAnalyzer
 import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.Note
 import ru.health.stream.data.vitals.model.Period
 import ru.health.stream.data.vitals.model.measurement.BloodGlucose
 import ru.health.stream.data.vitals.model.measurement.BloodPressure
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
-import ru.health.stream.data.vitals.model.measurement.DiastolicPressure
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.model.measurement.RespirationRate
-import ru.health.stream.data.vitals.model.measurement.SystolicPressure
 import ru.health.stream.data.vitals.usecase.DateTransformerUseCase
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.drawable.Scatter
@@ -56,15 +55,15 @@ import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.chart.model.path.DashPathEffect
 import ru.health.stream.source.local.file.ReportGenerator
 import ru.health.stream.source.local.file.model.ACCENT
-import ru.health.stream.source.local.file.model.Area
 import ru.health.stream.source.local.file.model.HEADER_BG
-import ru.health.stream.source.local.file.model.Mean
 import ru.health.stream.source.local.file.model.MeasurementSection
 import ru.health.stream.source.local.file.model.MeasurementSummary
 import ru.health.stream.source.local.file.model.ReportEstimation
 import ru.health.stream.source.local.file.model.STRIPE_BG
 import ru.health.stream.source.local.file.model.TEXT_MUTED
-import java.io.File
+import ru.health.stream.source.local.file.model.asMeasurementSection
+import ru.health.stream.source.local.file.model.asReportEstimation
+import java.io.OutputStream
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -75,270 +74,44 @@ import kotlin.time.Duration.Companion.minutes
 
 internal class PdfReportGenerator(
     @ApplicationContext private val context: Context,
+    private val measurementAnalyzer: MeasurementAnalyzer,
 ) : ReportGenerator {
 
-    private fun <T : Comparable<T>> ClosedRange<T>.changeRange(value: T): ClosedRange<T> {
-        val newStart = if (value < start) value else start
-        val newEnd = if (value > endInclusive) value else endInclusive
-
-        return newStart..newEnd
-    }
-
-    private fun <T : Comparable<T>> ClosedRange<T>.changeRange(
-        value: ClosedRange<T>
-    ): ClosedRange<T> = changeRange(value.start).changeRange(value.endInclusive)
-
-    private fun String?.merge(other: String?): String? = when {
-        this == null -> other
-        other == null -> this
-        else -> "$this | $other"
-    }
-
-    private fun ReportEstimation?.changeByPriority(other: ReportEstimation?): ReportEstimation? =
-        when {
-            this == null -> other
-            other == null -> this
-            (ordinal < other.ordinal && other != ReportEstimation.NORMAL) -> other
-            else -> this
-        }
-
-    private fun FloatFloatPair.changeByMin(other: FloatFloatPair): FloatFloatPair = when {
-        first - second < other.first - other.second -> this
-        else -> other
-    }
-
-    private fun FloatFloatPair.changeByMax(other: FloatFloatPair): FloatFloatPair = when {
-        first - second > other.first - other.second -> this
-        else -> other
-    }
-
-    override suspend fun generateFile(
+    override suspend fun generate(
         user: User?,
-        outputFile: File,
+        outputStream: OutputStream,
         dateRange: ClosedRange<Instant>,
         measurements: List<Measurement>, // Уже отсортированный по created_at
-    ): File {
-        logV("generateFile called: ${measurements.size}")
+    ) {
+        logV("generate called: ${measurements.size}")
 
+        val period = getPeriodByRange(dateRange)
         val timeZone = TimeZone.currentSystemDefault()
+        val (measurementSections, measurementsSummary) = calculateMeasurementsData(
+            period = period,
+            timeZone = timeZone,
+            measurements = measurements,
+        )
 
-        val measurementsSummary: MutableMap<KClass<out MeasurementSection>, MeasurementSummary> =
-            mutableMapOf()
-        val measurementSections: MutableMap<KClass<out Measurement>, MutableList<MeasurementSection>> =
-            mutableMapOf()
-
-        val dateRangeDuration = dateRange.endInclusive - dateRange.start
-        val period = when {
-            dateRangeDuration <= 1.days -> Period.OneHour
-            dateRangeDuration <= 7.days -> Period.SixHour
-            dateRangeDuration <= 31.days -> Period.Day
-            else -> Period.Month
-        }
-
-        measurements.forEach { measurement ->
-            val measurementDateRange = period.calculateRange(
-                date = measurement.createdAt,
-                timeZone = timeZone,
-            )
-
-            val sections =
-                measurementSections.getOrPut(key = measurement::class) { mutableListOf() }
-            val lastSection = sections.lastOrNull()
-
-            val mNote = measurement[Note]?.description
-            val mEstimation = measurement[Estimation]?.let { estimation ->
-                when (estimation.level) {
-                    Estimation.Level.LOW -> ReportEstimation.LOW
-                    Estimation.Level.NORMAL -> ReportEstimation.NORMAL
-                    Estimation.Level.HIGH -> ReportEstimation.HIGH
-                    Estimation.Level.EXTRA_HIGH -> ReportEstimation.EXTRA_HIGH
-                }
-            }
-
-            val newSection =
-                if (lastSection != null && lastSection.dateRange == measurementDateRange) {
-                    sections.removeAt(sections.lastIndex)
-
-                    with(lastSection) {
-                        when (this) {
-                            is MeasurementSection.BloodGlucose -> copy(
-                                note = note.merge(mNote),
-                                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                                levelMean = levelMean.add((measurement as BloodGlucose).level),
-                                levelRange = levelRange.changeRange(measurement.level),
-                            )
-
-                            is MeasurementSection.BloodPressure -> copy(
-                                note = note.merge(mNote),
-                                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                                systolicMean = systolicMean.add((measurement as BloodPressure).systolic.toDouble()),
-                                diastolicMean = systolicMean.add(measurement.diastolic.toDouble()),
-                                systolicRange = systolicRange.changeRange(measurement.systolic),
-                                diastolicRange = diastolicRange.changeRange(measurement.diastolic),
-                                minBpByDifference = minBpByDifference.changeByMin(measurement.run {
-                                    FloatFloatPair(systolic, diastolic)
-                                }),
-                                maxBpByDifference = maxBpByDifference.changeByMax(measurement.run {
-                                    FloatFloatPair(systolic, diastolic)
-                                }),
-                            )
-
-                            is MeasurementSection.BodyWeight -> copy(
-                                note = note.merge(mNote),
-                                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                                weightMean = weightMean.add((measurement as BodyWeight).weight.kg.toDouble()),
-                                weightRange = weightRange.changeRange(measurement.weight.kg),
-                            )
-
-                            is MeasurementSection.HeartRate -> copy(
-                                note = note.merge(mNote),
-                                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                                pulseMean = pulseMean.add((measurement as HeartRate).pulse.toDouble()),
-                                pulseRange = pulseRange.changeRange(measurement.pulse),
-                            )
-
-                            is MeasurementSection.OxygenSaturation -> copy(
-                                note = note.merge(mNote),
-                                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                                saturationMean = saturationMean.add((measurement as OxygenSaturation).saturation.toDouble()),
-                                saturationRange = saturationRange.changeRange(measurement.saturation),
-                            )
-
-                            is MeasurementSection.RespirationRate -> copy(
-                                note = note.merge(mNote),
-                                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                                rateMean = rateMean.add((measurement as RespirationRate).rate),
-                                rateRange = rateRange.changeRange(measurement.rate),
-                            )
-                        }
-                    }
-                } else {
-                    with(measurement) {
-                        when (this) {
-                            is HeartRate -> MeasurementSection.HeartRate(
-                                note = mNote,
-                                timeZone = timeZone,
-                                reportEstimation = mEstimation,
-                                pulseRange = pulse..pulse,
-                                dateRange = measurementDateRange,
-                                pulseMean = Mean(pulse.toDouble()),
-                            )
-
-                            is BodyWeight -> MeasurementSection.BodyWeight(
-                                note = mNote,
-                                timeZone = timeZone,
-                                reportEstimation = mEstimation,
-                                dateRange = measurementDateRange,
-                                weightMean = Mean(weight.kg.toDouble()),
-                                weightRange = weight.kg..weight.kg,
-                            )
-
-                            is BloodGlucose -> MeasurementSection.BloodGlucose(
-                                note = mNote,
-                                timeZone = timeZone,
-                                levelMean = Mean(level),
-                                reportEstimation = mEstimation,
-                                levelRange = level..level,
-                                dateRange = measurementDateRange,
-                            )
-
-                            is BloodPressure -> MeasurementSection.BloodPressure(
-                                note = mNote,
-                                timeZone = timeZone,
-                                reportEstimation = mEstimation,
-                                dateRange = measurementDateRange,
-                                systolicRange = systolic..systolic,
-                                diastolicRange = diastolic..diastolic,
-                                systolicMean = Mean(systolic.toDouble()),
-                                diastolicMean = Mean(diastolic.toDouble()),
-                                minBpByDifference = FloatFloatPair(systolic, diastolic),
-                                maxBpByDifference = FloatFloatPair(systolic, diastolic),
-                            )
-
-                            is RespirationRate -> MeasurementSection.RespirationRate(
-                                note = mNote,
-                                timeZone = timeZone,
-                                rateMean = Mean(rate),
-                                rateRange = rate..rate,
-                                reportEstimation = mEstimation,
-                                dateRange = measurementDateRange,
-                            )
-
-                            is OxygenSaturation -> MeasurementSection.OxygenSaturation(
-                                note = mNote,
-                                timeZone = timeZone,
-                                reportEstimation = mEstimation,
-                                dateRange = measurementDateRange,
-                                saturationMean = Mean(saturation.toDouble()),
-                                saturationRange = saturation..saturation,
-                            )
-
-                            is SystolicPressure -> TODO()
-                            is DiastolicPressure -> TODO()
-                        }
-                    }
-                }
-
-            sections.add(newSection)
-
-            val summary = measurementsSummary[newSection::class]
-            val newSummary = if (summary == null) {
-                MeasurementSummary(
-                    counts = 1,
-                    section = newSection,
-                    estimationsCount = mEstimation?.let { estimation -> mapOf(estimation to 1) }
-                        ?: emptyMap()
-                )
-            } else {
-                val summaryMap = summary.estimationsCount
-
-                MeasurementSummary(
-                    counts = summary.counts + 1,
-                    section = with(summary.section) {
-                        when (this) {
-                            is MeasurementSection.BloodGlucose -> copy(
-                                levelRange = levelRange.changeRange((newSection as MeasurementSection.BloodGlucose).levelRange),
-                            )
-
-                            is MeasurementSection.BloodPressure -> copy(
-                                systolicRange = systolicRange.changeRange((newSection as MeasurementSection.BloodPressure).systolicRange),
-                                diastolicRange = diastolicRange.changeRange(newSection.diastolicRange),
-                                minBpByDifference = minBpByDifference.changeByMin(newSection.minBpByDifference),
-                                maxBpByDifference = maxBpByDifference.changeByMax(newSection.maxBpByDifference),
-                            )
-
-                            is MeasurementSection.BodyWeight -> copy(
-                                weightRange = weightRange.changeRange((newSection as MeasurementSection.BodyWeight).weightRange),
-                            )
-
-                            is MeasurementSection.HeartRate -> copy(
-                                pulseRange = pulseRange.changeRange((newSection as MeasurementSection.HeartRate).pulseRange),
-                            )
-
-                            is MeasurementSection.OxygenSaturation -> copy(
-                                saturationRange = saturationRange.changeRange((newSection as MeasurementSection.OxygenSaturation).saturationRange),
-                            )
-
-                            is MeasurementSection.RespirationRate -> copy(
-                                rateRange = rateRange.changeRange((newSection as MeasurementSection.RespirationRate).rateRange),
-                            )
-                        }
-                    },
-                    estimationsCount = mEstimation?.let { estimation ->
-                        summaryMap + (estimation to (summaryMap[estimation] ?: 0) + 1)
-                    } ?: summaryMap
-                )
-            }
-
-            measurementsSummary[newSection::class] = newSummary
-        }
-
-        PdfWriter(outputFile).use { writer ->
+        PdfWriter(outputStream).use { writer ->
             PdfDocument(writer).use { pdf ->
+                val font = PdfFontFactory.createFont(
+                    context.assets.open("fonts/arial.ttf").readBytes(),
+                    PdfEncodings.IDENTITY_H,
+                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
+                )!!
+                val fontBold = PdfFontFactory.createFont(
+                    context.assets.open("fonts/arial_bolditalic.ttf").readBytes(),
+                    PdfEncodings.IDENTITY_H,
+                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
+                )!!
+
                 Document(pdf).use { doc ->
                     buildTitlePage(
                         pdf = pdf,
                         user = user,
+                        font = font,
+                        fontBold = fontBold,
                         timeZone = timeZone,
                         dateRange = dateRange,
                     )
@@ -346,53 +119,51 @@ internal class PdfReportGenerator(
                     doc.add(AreaBreak())
                     buildSummaryTable(
                         doc = doc,
+                        font = font,
+                        fontBold = fontBold,
                         summaries = measurementsSummary.values.toList(),
                     )
 
-                    measurementSections.forEach { (_, sections) ->
+                    measurementSections.forEach { (type, sections) ->
+                        val levels = measurementAnalyzer
+                            .levels(date = dateRange.endInclusive, type = type)
+                            .mapKeys { (key, _) -> key.asReportEstimation() }
+
+                        logV("CalculatedLevels: $levels")
+
                         doc.add(AreaBreak())
                         buildChartPage(
                             doc = doc,
                             pdf = pdf,
+                            font = font,
+                            areas = levels,
                             period = period,
+                            fontBold = fontBold,
                             timeZone = timeZone,
                             sections = sections,
                             dateRange = dateRange,
-                            areas = mapOf(
-                                ReportEstimation.LOW to listOf(Area(yRange = 0f..60f)),
-                                ReportEstimation.NORMAL to listOf(Area(yRange = 60f..140f)),
-                                ReportEstimation.HIGH to listOf(Area(yRange = 140f..170f)),
-                                ReportEstimation.EXTRA_HIGH to listOf(Area(yRange = 170f..220f)),
-                            )
                         )
                     }
 
                     measurementSections.forEach { (_, sections) ->
                         doc.add(AreaBreak())
-                        buildBigTable(doc = doc, sections = sections.toList())
+                        buildBigTable(
+                            doc = doc,
+                            font = font,
+                            fontBold = fontBold,
+                            sections = sections.toList(),
+                        )
                     }
                 }
             }
         }
-
-        return outputFile
     }
 
-    val font = PdfFontFactory.createFont(
-        context.assets.open("fonts/arial.ttf").readBytes(),
-        PdfEncodings.IDENTITY_H,
-        PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
-    )!!
-    val fontBold = PdfFontFactory.createFont(
-        context.assets.open("fonts/arial_bolditalic.ttf").readBytes(),
-        PdfEncodings.IDENTITY_H,
-        PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
-    )!!
-
-    // ── Title Page ────────────────────────────────────────────────────
     private fun buildTitlePage(
         user: User?,
+        font: PdfFont,
         pdf: PdfDocument,
+        fontBold: PdfFont,
         timeZone: TimeZone,
         dateRange: ClosedRange<Instant>,
     ) {
@@ -403,17 +174,14 @@ internal class PdfReportGenerator(
         val w = pdf.defaultPageSize.width
         val h = pdf.defaultPageSize.height
 
-        // Dark top block
         c.setFillColor(HEADER_BG)
         c.rectangle(0.0, h * 0.55, w.toDouble(), h * 0.45)
         c.fill()
 
-        // Accent line
         c.setFillColor(ACCENT)
         c.rectangle(0.0, h * 0.55, w.toDouble(), 3.0)
         c.fill()
 
-        // Decorative circles
         c.setStrokeColor(DeviceRgb(255, 255, 255))
         c.setLineWidth(1f)
         c.circle(w - 60.0, h - 80.0, 90.0)
@@ -422,12 +190,10 @@ internal class PdfReportGenerator(
         c.circle(w - 120.0, h - 180.0, 50.0)
         c.stroke()
 
-        // Vertical accent
         c.setFillColor(ACCENT)
         c.rectangle(40.0, h * 0.42, 3.0, 120.0)
         c.fill()
 
-        // Title text
         c.beginText()
         c.setFontAndSize(fontBold, 36f)
         c.setFillColor(DeviceRgb(255, 255, 255))
@@ -442,7 +208,6 @@ internal class PdfReportGenerator(
         c.showText("Создан приложением HealthStream")
         c.endText()
 
-        // Info block
         c.setFillColor(DeviceRgb(230, 235, 240))
         c.rectangle(60.0, h * 0.60, 300.0, 50.0)
         c.fill()
@@ -482,7 +247,6 @@ internal class PdfReportGenerator(
             year()
         }
 
-        // Bottom text
         user?.let {
             c.setFontAndSize(font, 12f)
             c.setFillColor(TEXT_MUTED)
@@ -511,26 +275,10 @@ internal class PdfReportGenerator(
         c.release()
     }
 
-    private fun Cell.defaultCell(
-        padding: Float = 5f,
-        backgroundColor: DeviceRgb? = null,
-    ): Cell = setBackgroundColor(backgroundColor)
-        .setPadding(padding)
-        .setTextAlignment(TextAlignment.CENTER)
-
-    private fun countParagraph(
-        count: Int,
-        fontSize: Float = 9f,
-        font: PdfFont = this.font,
-        fontColor: DeviceRgb? = null,
-    ): Paragraph = Paragraph(if (count <= 0) "0" else "$count")
-        .setFont(font)
-        .setFontSize(fontSize)
-        .run { fontColor?.let { color -> setFontColor(color) } ?: this }
-        .run { if (count <= 0) setFontColor(TEXT_MUTED) else this }
-
     private fun buildSummaryTable(
         doc: Document,
+        font: PdfFont,
+        fontBold: PdfFont,
         summaries: List<MeasurementSummary>,
     ) {
         doc.add(
@@ -574,7 +322,7 @@ internal class PdfReportGenerator(
                         .setFontSize(9f)
                 ).defaultCell(backgroundColor = backgroundColor),
 
-                Cell().add(countParagraph(count = summary.counts))
+                Cell().add(countParagraph(count = summary.counts, font = font))
                     .defaultCell(backgroundColor = backgroundColor),
 
                 *ReportEstimation.entries.map { estimation ->
@@ -635,9 +383,10 @@ internal class PdfReportGenerator(
         doc.add(table)
     }
 
-    // ── Big Multi-Page Table ──────────────────────────────────────────
     private fun buildBigTable(
         doc: Document,
+        font: PdfFont,
+        fontBold: PdfFont,
         sections: List<MeasurementSection>,
     ) {
         val firstSection = sections.first()
@@ -647,7 +396,6 @@ internal class PdfReportGenerator(
                 .setFont(fontBold).setFontSize(22f).setFontColor(HEADER_BG)
                 .setMarginTop(20f).setMarginBottom(6f)
         )
-
         doc.add(
             Paragraph("Таблица со всеми измерениями в отсортированном порядке. Оценка измерений в строке показывается сперва с самым высоким приоритетом за заданный период")
                 .setFont(font)
@@ -661,16 +409,14 @@ internal class PdfReportGenerator(
         var i = 1
 
         sections.chunked(size = 1000).forEachIndexed { index, chunk ->
-            logV("Calculate table: $index section - ${i}")
-
             val table = Table(UnitValue.createPointArray(cw)).apply {
                 setWidth(UnitValue.createPercentValue(100f))
             }
 
-            for (h in listOf("#", "Время", "Значение", "Оценка", "Заметка")) {
+            listOf("#", "Время", "Значение", "Оценка", "Заметка").forEach { header ->
                 table.addHeaderCell(
                     Cell().add(
-                        Paragraph(h).setFont(fontBold).setFontSize(9f)
+                        Paragraph(header).setFont(fontBold).setFontSize(9f)
                             .setFontColor(DeviceRgb(255, 255, 255))
                     )
                         .setBackgroundColor(HEADER_BG).setPadding(6f)
@@ -739,15 +485,16 @@ internal class PdfReportGenerator(
         }
     }
 
-    // ── Chart Page (PdfCanvas) ───────────────────────────────────────
     private fun buildChartPage(
         doc: Document,
+        font: PdfFont,
         period: Period,
         pdf: PdfDocument,
+        fontBold: PdfFont,
         timeZone: TimeZone,
         dateRange: ClosedRange<Instant>,
         sections: List<MeasurementSection>,
-        areas: Map<ReportEstimation, List<Area>> = emptyMap(),
+        areas: Map<ReportEstimation, List<ClosedRange<Float>>> = emptyMap(),
     ) {
         val dateTransformerUseCase = DateTransformerUseCase(
             period = period,
@@ -773,7 +520,6 @@ internal class PdfReportGenerator(
                 .setMarginBottom(6f)
                 .setFontColor(HEADER_BG)
         )
-
         doc.add(
             Paragraph("Данные представлены в группированном виде. Диапазоны показывают минимумы и максимумы значений, а линия их среднее арифметическое")
                 .setFont(font)
@@ -959,7 +705,6 @@ internal class PdfReportGenerator(
             verticalMargin = Offset(x = ps.height - pH - 200f, y = 0f),
             horizontalMargin = Offset(x = 50f, y = 20f),
         )
-
         val chart = PdfChartDrawScopeImpl(
             drawScope = drawScope,
             widthRange = 0f..1f,
@@ -995,7 +740,7 @@ internal class PdfReportGenerator(
             }
 
             is Period.Week -> LocalDateTime.Format {
-                dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
+                dayOfWeek(names = RUSSIAN_ABBREVIATED)
             }
 
             Period.Month -> LocalDateTime.Format {
@@ -1006,16 +751,17 @@ internal class PdfReportGenerator(
                 year(padding = Padding.NONE)
             }
         }
+
         val xLabels: MutableMap<Float, String> = mutableMapOf()
+        val lastTime = period.calculateRange(dateRange.endInclusive, timeZone).start
 
         var lastRange = period.calculateRange(dateRange.start, timeZone)
-        val lastTime = period.calculateRange(dateRange.endInclusive, timeZone).start
 
         do {
             val x = dateTransformerUseCase(lastRange.start)
             val name = lastRange.start.toLocalDateTime(timeZone).format(dateTimeFormatter)
-            xLabels[x] = name
 
+            xLabels[x] = name
             lastRange = period.calculateRange(lastRange.endInclusive.plus(1.minutes), timeZone)
         } while (lastRange.start <= lastTime)
 
@@ -1026,9 +772,9 @@ internal class PdfReportGenerator(
                 areaList.forEach { area ->
                     val colors = estimation.color.colorValue
 
-                    if (area.yRange.start in yLabelRange || area.yRange.endInclusive in yLabelRange) {
-                        val yMaxBound = min(area.yRange.endInclusive.yChart, yLabels.last().yChart)
-                        val yMinBound = max(area.yRange.start.yChart, yLabels.first().yChart)
+                    if (area.start in yLabelRange || area.endInclusive in yLabelRange) {
+                        val yMaxBound = min(area.endInclusive.yChart, yLabels.last().yChart)
+                        val yMinBound = max(area.start.yChart, yLabels.first().yChart)
 
                         drawRect(
                             size = size.copy(height = yMaxBound - yMinBound),
@@ -1103,7 +849,7 @@ internal class PdfReportGenerator(
 
                     points.forEach { point ->
                         val color = areas.firstNotNullOfOrNull { (estimation, areas) ->
-                            if (areas.any { area -> point.y in area.yRange }) {
+                            if (areas.any { area -> point.y in area }) {
                                 val colors = estimation.color.colorValue
 
                                 Color(
@@ -1130,7 +876,7 @@ internal class PdfReportGenerator(
 
         doc.add(Paragraph("").setMarginTop(pH + 70f))
         doc.add(
-            Paragraph("Оценки измерений могут быть не точными для вашего организма. Рекомендуем обратиться к врачу, если у вас возникают трудности")
+            Paragraph("Оценки измерений могут быть неточными для вашего организма. Рекомендуем обратиться к врачу, если у вас возникают трудности")
                 .setFont(font)
                 .setFontSize(15f)
                 .setFontColor(TEXT_MUTED)
@@ -1138,4 +884,228 @@ internal class PdfReportGenerator(
                 .setMarginBottom(8f)
         )
     }
+
+    private fun <T : Comparable<T>> ClosedRange<T>.changeRange(value: T): ClosedRange<T> {
+        val newStart = if (value < start) value else start
+        val newEnd = if (value > endInclusive) value else endInclusive
+
+        return newStart..newEnd
+    }
+
+    private fun <T : Comparable<T>> ClosedRange<T>.changeRange(
+        value: ClosedRange<T>
+    ): ClosedRange<T> = changeRange(value.start).changeRange(value.endInclusive)
+
+    private fun String?.merge(other: String?): String? = when {
+        this == null -> other
+        other == null -> this
+        else -> "$this | $other"
+    }
+
+    private fun ReportEstimation?.changeByPriority(other: ReportEstimation?): ReportEstimation? =
+        when {
+            this == null -> other
+            other == null -> this
+            (ordinal < other.ordinal && other != ReportEstimation.NORMAL) -> other
+            else -> this
+        }
+
+    private fun FloatFloatPair.changeByMin(other: FloatFloatPair): FloatFloatPair = when {
+        first - second < other.first - other.second -> this
+        else -> other
+    }
+
+    private fun FloatFloatPair.changeByMax(other: FloatFloatPair): FloatFloatPair = when {
+        first - second > other.first - other.second -> this
+        else -> other
+    }
+
+    private fun getPeriodByRange(
+        dateRange: ClosedRange<Instant>
+    ): Period {
+        val dateRangeDuration = dateRange.endInclusive - dateRange.start
+
+        return when {
+            dateRangeDuration <= 1.days -> Period.OneHour
+            dateRangeDuration <= 7.days -> Period.SixHour
+            dateRangeDuration <= 31.days -> Period.Day
+            else -> Period.Month
+        }
+    }
+
+    private fun MeasurementSection.mergeWithMeasurement(measurement: Measurement): MeasurementSection {
+        val mNote = measurement[Note]?.description
+        val mEstimation = measurement[Estimation]?.level?.asReportEstimation()
+
+        return when (this) {
+            is MeasurementSection.BloodGlucose -> copy(
+                note = note.merge(mNote),
+                reportEstimation = reportEstimation.changeByPriority(mEstimation),
+                levelMean = levelMean.add((measurement as BloodGlucose).level),
+                levelRange = levelRange.changeRange(measurement.level),
+            )
+
+            is MeasurementSection.BloodPressure -> copy(
+                note = note.merge(mNote),
+                reportEstimation = reportEstimation.changeByPriority(mEstimation),
+                systolicMean = systolicMean.add((measurement as BloodPressure).systolic.toDouble()),
+                diastolicMean = systolicMean.add(measurement.diastolic.toDouble()),
+                systolicRange = systolicRange.changeRange(measurement.systolic),
+                diastolicRange = diastolicRange.changeRange(measurement.diastolic),
+                minBpByDifference = minBpByDifference.changeByMin(measurement.run {
+                    FloatFloatPair(systolic, diastolic)
+                }),
+                maxBpByDifference = maxBpByDifference.changeByMax(measurement.run {
+                    FloatFloatPair(systolic, diastolic)
+                }),
+            )
+
+            is MeasurementSection.BodyWeight -> copy(
+                note = note.merge(mNote),
+                reportEstimation = reportEstimation.changeByPriority(mEstimation),
+                weightMean = weightMean.add((measurement as BodyWeight).weight.kg.toDouble()),
+                weightRange = weightRange.changeRange(measurement.weight.kg),
+            )
+
+            is MeasurementSection.HeartRate -> copy(
+                note = note.merge(mNote),
+                reportEstimation = reportEstimation.changeByPriority(mEstimation),
+                pulseMean = pulseMean.add((measurement as HeartRate).pulse.toDouble()),
+                pulseRange = pulseRange.changeRange(measurement.pulse),
+            )
+
+            is MeasurementSection.OxygenSaturation -> copy(
+                note = note.merge(mNote),
+                reportEstimation = reportEstimation.changeByPriority(mEstimation),
+                saturationMean = saturationMean.add((measurement as OxygenSaturation).saturation.toDouble()),
+                saturationRange = saturationRange.changeRange(measurement.saturation),
+            )
+
+            is MeasurementSection.RespirationRate -> copy(
+                note = note.merge(mNote),
+                reportEstimation = reportEstimation.changeByPriority(mEstimation),
+                rateMean = rateMean.add((measurement as RespirationRate).rate),
+                rateRange = rateRange.changeRange(measurement.rate),
+            )
+        }
+    }
+
+    private fun MeasurementSummary.mergeWithMeasurementSection(
+        measurement: Measurement,
+        measurementSection: MeasurementSection,
+    ): MeasurementSummary {
+        val mEstimation = measurement[Estimation]?.level?.asReportEstimation()
+
+        return MeasurementSummary(
+            counts = counts + 1,
+            section = with(section) {
+                when (this) {
+                    is MeasurementSection.BloodGlucose -> copy(
+                        levelRange = levelRange.changeRange((measurementSection as MeasurementSection.BloodGlucose).levelRange),
+                    )
+
+                    is MeasurementSection.BloodPressure -> copy(
+                        systolicRange = systolicRange.changeRange((measurementSection as MeasurementSection.BloodPressure).systolicRange),
+                        diastolicRange = diastolicRange.changeRange(measurementSection.diastolicRange),
+                        minBpByDifference = minBpByDifference.changeByMin(measurementSection.minBpByDifference),
+                        maxBpByDifference = maxBpByDifference.changeByMax(measurementSection.maxBpByDifference),
+                    )
+
+                    is MeasurementSection.BodyWeight -> copy(
+                        weightRange = weightRange.changeRange((measurementSection as MeasurementSection.BodyWeight).weightRange),
+                    )
+
+                    is MeasurementSection.HeartRate -> copy(
+                        pulseRange = pulseRange.changeRange((measurementSection as MeasurementSection.HeartRate).pulseRange),
+                    )
+
+                    is MeasurementSection.OxygenSaturation -> copy(
+                        saturationRange = saturationRange.changeRange((measurementSection as MeasurementSection.OxygenSaturation).saturationRange),
+                    )
+
+                    is MeasurementSection.RespirationRate -> copy(
+                        rateRange = rateRange.changeRange((measurementSection as MeasurementSection.RespirationRate).rateRange),
+                    )
+                }
+            },
+            estimationsCount = mEstimation?.let { estimation ->
+                estimationsCount + (estimation to (estimationsCount[estimation] ?: 0) + 1)
+            } ?: estimationsCount
+        )
+    }
+
+    private fun calculateMeasurementsData(
+        period: Period,
+        timeZone: TimeZone,
+        measurements: List<Measurement>,
+    ): Pair<Map<KClass<out Measurement>, List<MeasurementSection>>, Map<KClass<out MeasurementSection>, MeasurementSummary>> {
+        val measurementsSummary: MutableMap<KClass<out MeasurementSection>, MeasurementSummary> =
+            mutableMapOf()
+        val measurementSections: MutableMap<KClass<out Measurement>, MutableList<MeasurementSection>> =
+            mutableMapOf()
+
+        measurements.forEach { measurement ->
+            val periodRange = period.calculateRange(
+                date = measurement.createdAt,
+                timeZone = timeZone,
+            )
+
+            val sections =
+                measurementSections.getOrPut(key = measurement::class) { mutableListOf() }
+            val lastSection = sections.lastOrNull()
+
+            val newSection = if (lastSection != null && lastSection.dateRange == periodRange) {
+                sections.removeAt(sections.lastIndex)
+                lastSection.mergeWithMeasurement(measurement)
+            } else {
+                measurement.asMeasurementSection(
+                    timeZone = timeZone,
+                    measurementDateRange = periodRange,
+                )
+            }
+
+            sections.add(newSection)
+
+            val mEstimation = measurement[Estimation]?.level?.asReportEstimation()
+            val newSummary = measurementsSummary[newSection::class]
+                ?.mergeWithMeasurementSection(
+                    measurement = measurement,
+                    measurementSection = newSection,
+                )
+                ?: MeasurementSummary(
+                    counts = 1,
+                    section = newSection,
+                    estimationsCount = mEstimation?.let { estimation -> mapOf(estimation to 1) }
+                        ?: emptyMap()
+                )
+
+            measurementsSummary[newSection::class] = newSummary
+        }
+
+        return measurementSections to measurementsSummary
+    }
+
+    private fun Cell.defaultCell(
+        padding: Float = 5f,
+        backgroundColor: DeviceRgb? = null,
+    ): Cell = setBackgroundColor(backgroundColor)
+        .setPadding(padding)
+        .setTextAlignment(TextAlignment.CENTER)
+
+    private fun countParagraph(
+        count: Int,
+        fontSize: Float = 9f,
+        font: PdfFont,
+        fontColor: DeviceRgb? = null,
+    ): Paragraph = Paragraph(if (count <= 0) "0" else "$count")
+        .setFont(font)
+        .setFontSize(fontSize)
+        .run { fontColor?.let { color -> setFontColor(color) } ?: this }
+        .run { if (count <= 0) setFontColor(TEXT_MUTED) else this }
 }
+
+private val RUSSIAN_ABBREVIATED: DayOfWeekNames = DayOfWeekNames(
+    listOf(
+        "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"
+    )
+)

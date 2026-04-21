@@ -1,13 +1,12 @@
 package ru.health.stream.data.report.repository.impl
 
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
 import ru.health.stream.data.personal.repository.UserRepository
 import ru.health.stream.data.report.api.ReportFileGenerator
 import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.data.report.repository.ReportRepository
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import java.io.File
+import java.net.URI
 import javax.inject.Inject
 
 class ReportRepositoryImpl @Inject constructor(
@@ -19,7 +18,7 @@ class ReportRepositoryImpl @Inject constructor(
         format: ReportFormat,
         dateRange: ClosedRange<Instant>,
         measurements: List<Measurement>,
-    ): File {
+    ): URI {
         val user = userRepository.getUser()
 
         return fileGenerator.generateFile(

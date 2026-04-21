@@ -1,8 +1,9 @@
 package ru.health.stream.source.local.file.model
 
 import com.itextpdf.kernel.colors.DeviceRgb
+import ru.health.stream.data.vitals.model.Estimation
 
-enum class ReportEstimation(
+internal enum class ReportEstimation(
     val text: String,
     val color: DeviceRgb,
     val backgroundColor: DeviceRgb? = null,
@@ -28,4 +29,11 @@ enum class ReportEstimation(
         backgroundColor = DeviceRgb(0xFD, 0xE8, 0xE8),
     ),
     ;
+}
+
+internal fun Estimation.Level.asReportEstimation(): ReportEstimation = when (this) {
+    Estimation.Level.LOW -> ReportEstimation.LOW
+    Estimation.Level.NORMAL -> ReportEstimation.NORMAL
+    Estimation.Level.HIGH -> ReportEstimation.HIGH
+    Estimation.Level.EXTRA_HIGH -> ReportEstimation.EXTRA_HIGH
 }

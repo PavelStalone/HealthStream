@@ -37,12 +37,14 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants
 import com.itextpdf.kernel.pdf.extgstate.PdfExtGState
 import ru.health.stream.feature.chart.model.path.DashPathEffect
 import java.io.ByteArrayOutputStream
+import kotlin.math.cos
+import kotlin.math.sin
 
-class PdfDrawScope(
+internal class PdfDrawScope(
     val pageSize: Size,
     val pdfCanvas: PdfCanvas,
-    val verticalMargin: Offset = Offset(0f, 0f), // bottom, top
-    val horizontalMargin: Offset = Offset(0f, 0f), // start, end
+    val verticalMargin: Offset = Offset.Zero,
+    val horizontalMargin: Offset = Offset.Zero,
 ) : DrawScope {
 
     private val planeSize = Size(
@@ -57,14 +59,10 @@ class PdfDrawScope(
         override var size: Size = planeSize
 
         override val transform: DrawTransform = object : DrawTransform {
+
             override var size: Size = context.size
 
-            override fun inset(
-                left: Float,
-                top: Float,
-                right: Float,
-                bottom: Float
-            ) {
+            override fun inset(left: Float, top: Float, right: Float, bottom: Float) {
                 translate(left, top)
                 size = Size(
                     width = size.width - (left + right),
@@ -111,8 +109,8 @@ class PdfDrawScope(
 
             override fun rotate(degrees: Float, pivot: Offset) {
                 val radians = Math.toRadians(degrees.toDouble())
-                val cos = Math.cos(radians)
-                val sin = Math.sin(radians)
+                val cos = cos(radians)
+                val sin = sin(radians)
 
                 // Сдвиг к точке вращения, поворот, сдвиг обратно
                 translate(pivot.x, pivot.y)
@@ -139,7 +137,7 @@ class PdfDrawScope(
 
             override fun transform(matrix: Matrix) {
                 val values = matrix.values
-                // Matrix в Compose 4x4, PdfCanvas ждет 3x3 Affine (a, b, c, d, e, f)
+
                 this@PdfDrawScope.pdfCanvas.concatMatrix(
                     values[Matrix.ScaleX].toDouble(),
                     values[Matrix.SkewY].toDouble(),
@@ -152,9 +150,9 @@ class PdfDrawScope(
         }
     }
 
-    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
-    override val density: Float = drawContext.density.density
     override val fontScale: Float = 1f
+    override val density: Float = drawContext.density.density
+    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
 
     fun drawText(
         text: String,
@@ -389,18 +387,20 @@ class PdfDrawScope(
         val h = size.height.toDouble()
         val r = cornerRadius.x.toDouble()
 
-        when (style) {
-            Fill -> {
-                pdfCanvas.setFillColor(color.asPdf())
-                pdfCanvas.roundRectangle(x, y, w, h, r)
-                pdfCanvas.fill()
-            }
+        withAlpha(alpha = color.alpha) {
+            when (style) {
+                Fill -> {
+                    pdfCanvas.setFillColor(color.asPdf())
+                    pdfCanvas.roundRectangle(x, y, w, h, r)
+                    pdfCanvas.fill()
+                }
 
-            is Stroke -> {
-                pdfCanvas.setStrokeColor(color.asPdf())
-                pdfCanvas.setLineWidth(style.width)
-                pdfCanvas.roundRectangle(x, y, w, h, r)
-                pdfCanvas.stroke()
+                is Stroke -> {
+                    pdfCanvas.setStrokeColor(color.asPdf())
+                    pdfCanvas.setLineWidth(style.width)
+                    pdfCanvas.roundRectangle(x, y, w, h, r)
+                    pdfCanvas.stroke()
+                }
             }
         }
     }
@@ -477,18 +477,20 @@ class PdfDrawScope(
         val x2 = x1 + size.width
         val y2 = y1 + size.height
 
-        when (style) {
-            Fill -> {
-                pdfCanvas.setFillColor(color.asPdf())
-                pdfCanvas.ellipse(x1, y1, x2, y2)
-                pdfCanvas.fill()
-            }
+        withAlpha(alpha = color.alpha) {
+            when (style) {
+                Fill -> {
+                    pdfCanvas.setFillColor(color.asPdf())
+                    pdfCanvas.ellipse(x1, y1, x2, y2)
+                    pdfCanvas.fill()
+                }
 
-            is Stroke -> {
-                pdfCanvas.setStrokeColor(color.asPdf())
-                pdfCanvas.setLineWidth(style.width)
-                pdfCanvas.ellipse(x1, y1, x2, y2)
-                pdfCanvas.stroke()
+                is Stroke -> {
+                    pdfCanvas.setStrokeColor(color.asPdf())
+                    pdfCanvas.setLineWidth(style.width)
+                    pdfCanvas.ellipse(x1, y1, x2, y2)
+                    pdfCanvas.stroke()
+                }
             }
         }
     }
@@ -538,28 +540,30 @@ class PdfDrawScope(
         val x2 = x1 + size.width
         val y2 = y1 + size.height
 
-        if (useCenter) {
-            val cx = x1 + size.width / 2
-            val cy = y1 + size.height / 2
-            pdfCanvas.moveTo(cx, cy)
-        }
-
-        pdfCanvas.arc(x1, y1, x2, y2, startAngle.toDouble(), sweepAngle.toDouble())
-
-        if (useCenter) {
-            pdfCanvas.lineTo(x1 + size.width / 2, y1 + size.height / 2)
-        }
-
-        when (style) {
-            Fill -> {
-                pdfCanvas.setFillColor(color.asPdf())
-                pdfCanvas.fill()
+        withAlpha(alpha = color.alpha) {
+            if (useCenter) {
+                val cx = x1 + size.width / 2
+                val cy = y1 + size.height / 2
+                pdfCanvas.moveTo(cx, cy)
             }
 
-            is Stroke -> {
-                pdfCanvas.setStrokeColor(color.asPdf())
-                pdfCanvas.setLineWidth(style.width)
-                pdfCanvas.stroke()
+            pdfCanvas.arc(x1, y1, x2, y2, startAngle.toDouble(), sweepAngle.toDouble())
+
+            if (useCenter) {
+                pdfCanvas.lineTo(x1 + size.width / 2, y1 + size.height / 2)
+            }
+
+            when (style) {
+                Fill -> {
+                    pdfCanvas.setFillColor(color.asPdf())
+                    pdfCanvas.fill()
+                }
+
+                is Stroke -> {
+                    pdfCanvas.setStrokeColor(color.asPdf())
+                    pdfCanvas.setLineWidth(style.width)
+                    pdfCanvas.stroke()
+                }
             }
         }
     }

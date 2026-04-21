@@ -1,6 +1,8 @@
 package ru.health.stream.feature.report.impl.presentation.viewmodel
 
+import android.net.Uri
 import androidx.compose.runtime.Immutable
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +29,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.common.di.Dispatcher
 import ru.health.stream.core.ui.model.UiMeasurement
@@ -42,13 +43,12 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.repository.MeasurementRepository
-import java.io.File
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.days
 
 sealed interface ReportUiEvent {
-    data class ShareFile(val file: File, val format: ReportFormat) : ReportUiEvent
+    data class ShareFile(val uri: Uri, val format: ReportFormat) : ReportUiEvent
 }
 
 @HiltViewModel
@@ -189,7 +189,7 @@ class ReportViewModel @Inject constructor(
                 dateRange = _selectedDateRange.value,
             )
 
-            _events.emit(ReportUiEvent.ShareFile(result, _reportFormat.value))
+            _events.emit(ReportUiEvent.ShareFile(result.toString().toUri(), _reportFormat.value))
         }
     }
 

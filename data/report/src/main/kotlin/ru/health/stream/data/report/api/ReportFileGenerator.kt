@@ -4,7 +4,7 @@ import kotlinx.datetime.Instant
 import ru.health.stream.data.personal.model.User
 import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import java.io.File
+import java.net.URI
 
 interface ReportFileGenerator {
 
@@ -13,5 +13,5 @@ interface ReportFileGenerator {
         format: ReportFormat,
         dateRange: ClosedRange<Instant>,
         measurements: List<Measurement>,
-    ): File
+    ): URI
 }

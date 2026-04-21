@@ -20,9 +20,9 @@ class HeartRateAssessor @Inject constructor(
 
     override val type: KClass<HeartRate> = HeartRate::class
 
-    private var restingHR: Double? = null
+    private var restingHR: Float? = null
 
-    suspend fun calculateRestingHR(start: Instant): Double {
+    suspend fun calculateRestingHR(start: Instant): Float {
         val buffer = restingHR
 
         if (buffer != null) return buffer
@@ -34,38 +34,51 @@ class HeartRateAssessor @Inject constructor(
         ).map { heartRate -> heartRate.pulse }
             .filter { pulse -> pulse in 40..100 }
             .average()
+            .toFloat()
 
         if (!currentRestingHR.isNaN()) {
             restingHR = currentRestingHR
             return currentRestingHR
         }
 
-        return 70.0
+        return 70f
     }
 
     // Метод Карвонена
     override suspend fun analyze(measurement: HeartRate): Estimation? = runCatching {
+        val levels = requireNotNull(levels(measurement.createdAt))
+        val level = levels.firstNotNullOf { (level, ranges) ->
+            if (ranges.any { range -> measurement.pulse.toFloat() in range }) level else null
+        }
+
+        Estimation(level = level)
+    }.getOrNull()
+
+    override suspend fun levels(
+        date: Instant,
+    ): Map<Estimation.Level, List<ClosedRange<Float>>> = runCatching {
         val user = requireNotNull(userRepository.getUser())
         val userAge = user.datePeriodAfterBirthday(
             localDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         ).years
 
-        val resting = calculateRestingHR(start = measurement.createdAt)
+        val resting = calculateRestingHR(start = date)
+
         val maxHR = if (user.gender) {
             208 - (0.7 * userAge) // Формула Танака
         } else {
             206 - (0.88 * userAge) // Формула Марты Гулати
-        }
+        }.toFloat()
 
-        val loadIntensity = (measurement.pulse - resting) / (maxHR - resting)
+        val pulseByIntensity = { intensity: Float -> (maxHR - resting) * intensity + resting }
 
-        val level = when (loadIntensity) {
-            in 0.00..0.60 -> Estimation.Level.NORMAL
-            in 0.60..0.80 -> Estimation.Level.HIGH
-            in 0.80..2.00 -> Estimation.Level.EXTRA_HIGH
-            else -> Estimation.Level.LOW
-        }
+        val lowHR = (resting * 0.8f)
 
-        Estimation(level = level)
-    }.getOrNull()
+        return mapOf(
+            Estimation.Level.LOW to listOf(0f..lowHR),
+            Estimation.Level.NORMAL to listOf(lowHR..pulseByIntensity(0.5f)),
+            Estimation.Level.HIGH to listOf(pulseByIntensity(0.5f)..pulseByIntensity(0.8f)),
+            Estimation.Level.EXTRA_HIGH to listOf(pulseByIntensity(0.8f)..Float.MAX_VALUE),
+        )
+    }.getOrElse { emptyMap() }
 }
