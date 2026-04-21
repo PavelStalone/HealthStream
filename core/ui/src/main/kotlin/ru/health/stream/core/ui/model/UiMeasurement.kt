@@ -143,7 +143,6 @@ fun Measurement.asUi(): UiMeasurement {
         )
     }
 
-
     return UiMeasurement(
         id = id,
         type = type,

@@ -35,6 +35,19 @@ internal class ReportFileGeneratorImpl @Inject constructor(
         context = context,
         measurementAnalyzer = measurementAnalyzer,
     )
+    private val localDateTimeFormatter = LocalDateTime.Format {
+        dayOfMonth()
+        char('.')
+        monthNumber()
+        char('.')
+        year()
+        char('_')
+        hour()
+        char('-')
+        minute()
+        char('-')
+        second()
+    }
 
     override suspend fun generateFile(
         user: User?,
@@ -42,7 +55,7 @@ internal class ReportFileGeneratorImpl @Inject constructor(
         dateRange: ClosedRange<Instant>,
         measurements: List<Measurement>
     ): URI {
-        logV("PdfGenerator called: user: $user, format: $format, measurements: ${measurements.size}, dateRange: $dateRange")
+        logV("generateFile called: user: $user, format: $format, measurements: ${measurements.size}, dateRange: $dateRange")
 
         return withContext(ioDispatcher) {
             val fileName = createFileName(format)
@@ -59,7 +72,7 @@ internal class ReportFileGeneratorImpl @Inject constructor(
             val uri = context.contentResolver.insert(contentUri, contentValues)
                 ?: throw IllegalStateException("Failed to create MediaStore entry")
 
-            try {
+            runCatching {
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     when (format) {
                         ReportFormat.PDF -> pdfGenerator.generate(
@@ -81,17 +94,16 @@ internal class ReportFileGeneratorImpl @Inject constructor(
 
                 logV("PdfGenerator finish: $uri")
                 URI(uri.toString())
-            } catch (e: Exception) {
+            }.onFailure {
                 context.contentResolver.delete(uri, null, null)
-                throw e
-            }
+            }.getOrThrow()
         }
     }
 
     private fun createFileName(format: ReportFormat): String {
         val timestamp = Clock.System.now()
             .toLocalDateTime(TimeZone.currentSystemDefault())
-            .format(LocalDateTimeFormatter)
+            .format(localDateTimeFormatter)
         val extension = when (format) {
             ReportFormat.PDF -> "pdf"
             ReportFormat.CSV -> "csv"
@@ -103,22 +115,5 @@ internal class ReportFileGeneratorImpl @Inject constructor(
     private fun ReportFormat.toMimeType(): String = when (this) {
         ReportFormat.PDF -> "application/pdf"
         ReportFormat.CSV -> "text/csv"
-    }
-
-    companion object {
-
-        private val LocalDateTimeFormatter = LocalDateTime.Format {
-            dayOfMonth()
-            char('.')
-            monthNumber()
-            char('.')
-            year()
-            char('_')
-            hour()
-            char('-')
-            minute()
-            char('-')
-            second()
-        }
     }
 }

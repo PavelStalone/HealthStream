@@ -83,9 +83,10 @@ internal class ReportViewModel @Inject constructor(
         MeasurementQuery(
             from = dateRange.start,
             to = dateRange.endInclusive,
-            types = dataTypes.map { it.toMeasurementClass() }
+            types = dataTypes.map { type -> type.toMeasurementClass() }
         )
-    }.distinctUntilChanged()
+    }
+        .distinctUntilChanged()
         .mapLatest { (to, from, types) ->
             types.asFlow()
                 .flatMapMerge(concurrency = 3) { type ->
@@ -98,10 +99,12 @@ internal class ReportViewModel @Inject constructor(
                             )
                         )
                     }.flowOn(ioDispatcher)
-                }.toList()
+                }
+                .toList()
                 .flatten()
                 .sortedByDescending { measurement -> measurement.createdAt }
-        }.stateIn(
+        }
+        .stateIn(
             scope = viewModelScope,
             initialValue = emptyList(),
             started = SharingStarted.WhileSubscribed(3000),
@@ -124,12 +127,6 @@ internal class ReportViewModel @Inject constructor(
         scope = viewModelScope,
         initialValue = emptyList(),
         started = SharingStarted.WhileSubscribed(3000),
-    )
-
-    private data class MeasurementQuery(
-        val to: Instant,
-        val from: Instant,
-        val types: List<KClass<out Measurement>>,
     )
 
     fun expandMeasurementGroup(id: String) {
@@ -197,6 +194,12 @@ internal class ReportViewModel @Inject constructor(
         UiMeasurement.Type.RESPIRATION_RATE -> RespirationRate::class
         UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturation::class
     }
+
+    private data class MeasurementQuery(
+        val to: Instant,
+        val from: Instant,
+        val types: List<KClass<out Measurement>>,
+    )
 }
 
 @Immutable

@@ -9,7 +9,7 @@ import ru.health.stream.source.local.file.ReportFileGeneratorImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal interface PDFModule {
+internal interface PdfModule {
 
     @Binds
     fun bindReportFileGenerator(impl: ReportFileGeneratorImpl): ReportFileGenerator

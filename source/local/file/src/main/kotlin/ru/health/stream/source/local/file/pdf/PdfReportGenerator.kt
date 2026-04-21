@@ -95,16 +95,20 @@ internal class PdfReportGenerator(
 
         PdfWriter(outputStream).use { writer ->
             PdfDocument(writer).use { pdf ->
-                val font = PdfFontFactory.createFont(
-                    context.assets.open("fonts/arial.ttf").readBytes(),
-                    PdfEncodings.IDENTITY_H,
-                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
-                )!!
-                val fontBold = PdfFontFactory.createFont(
-                    context.assets.open("fonts/arial_bolditalic.ttf").readBytes(),
-                    PdfEncodings.IDENTITY_H,
-                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
-                )!!
+                val font = requireNotNull(
+                    PdfFontFactory.createFont(
+                        context.assets.open("fonts/arial.ttf").readBytes(),
+                        PdfEncodings.IDENTITY_H,
+                        PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
+                    )
+                )
+                val fontBold = requireNotNull(
+                    PdfFontFactory.createFont(
+                        context.assets.open("fonts/arial_bolditalic.ttf").readBytes(),
+                        PdfEncodings.IDENTITY_H,
+                        PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
+                    )
+                )
 
                 Document(pdf).use { doc ->
                     buildTitlePage(
@@ -289,7 +293,7 @@ internal class PdfReportGenerator(
 
         doc.add(
             Paragraph(
-                "Здесь можно увидеть общее количество отклонений, рассчитанными алгоритмом"
+                "Здесь отображается общее количество отклонений, рассчитанное алгоритмом"
             ).setFont(font).setFontSize(10f).setFontColor(TEXT_MUTED).setMarginBottom(12f)
         )
 
@@ -344,7 +348,7 @@ internal class PdfReportGenerator(
                 ).defaultCell(backgroundColor = backgroundColor),
             )
 
-            cs.forEach { table.addCell(it) }
+            cs.forEach { cell -> table.addCell(cell) }
         }
 
         val backgroundColor = if (summaries.size % 2 == 0) STRIPE_BG else null
@@ -378,7 +382,7 @@ internal class PdfReportGenerator(
             Cell().defaultCell(backgroundColor = backgroundColor),
         )
 
-        cs.forEach { table.addFooterCell(it) }
+        cs.forEach { cell -> table.addFooterCell(cell) }
 
         doc.add(table)
     }
@@ -393,15 +397,18 @@ internal class PdfReportGenerator(
 
         doc.add(
             Paragraph("Таблица измерений: ${firstSection.typeName}")
-                .setFont(fontBold).setFontSize(22f).setFontColor(HEADER_BG)
-                .setMarginTop(20f).setMarginBottom(6f)
+                .setFontSize(22f)
+                .setFont(fontBold)
+                .setMarginTop(20f)
+                .setMarginBottom(6f)
+                .setFontColor(HEADER_BG)
         )
         doc.add(
-            Paragraph("Таблица со всеми измерениями в отсортированном порядке. Оценка измерений в строке показывается сперва с самым высоким приоритетом за заданный период")
+            Paragraph("Таблица со всеми измерениями, отсортированными по порядку. Оценка в строке отображается с учётом приоритета: сначала показываются измерения с самым высоким приоритетом за заданный период")
                 .setFont(font)
                 .setFontSize(10f)
-                .setFontColor(TEXT_MUTED)
                 .setMarginBottom(12f)
+                .setFontColor(TEXT_MUTED)
         )
 
         val cw = floatArrayOf(30f, 90f, 80f, 65f, 120f)
@@ -416,10 +423,13 @@ internal class PdfReportGenerator(
             listOf("#", "Время", "Значение", "Оценка", "Заметка").forEach { header ->
                 table.addHeaderCell(
                     Cell().add(
-                        Paragraph(header).setFont(fontBold).setFontSize(9f)
+                        Paragraph(header)
+                            .setFontSize(9f)
+                            .setFont(fontBold)
                             .setFontColor(DeviceRgb(255, 255, 255))
                     )
-                        .setBackgroundColor(HEADER_BG).setPadding(6f)
+                        .setPadding(6f)
+                        .setBackgroundColor(HEADER_BG)
                         .setTextAlignment(TextAlignment.CENTER)
                 )
             }
@@ -436,8 +446,8 @@ internal class PdfReportGenerator(
                             .setFontSize(8f)
                             .setFontColor(TEXT_MUTED)
                     )
-                        .setBackgroundColor(backgroundColor)
                         .setPadding(5f)
+                        .setBackgroundColor(backgroundColor)
                         .setTextAlignment(TextAlignment.CENTER),
 
                     Cell().add(
@@ -445,26 +455,26 @@ internal class PdfReportGenerator(
                             .setFont(font)
                             .setFontSize(9f)
                     )
-                        .setBackgroundColor(backgroundColor)
-                        .setPadding(5f),
+                        .setPadding(5f)
+                        .setBackgroundColor(backgroundColor),
 
                     Cell().add(
                         Paragraph(section.valueText)
                             .setFont(font)
                             .setFontSize(9f)
                     )
-                        .setBackgroundColor(backgroundColor)
                         .setPadding(5f)
+                        .setBackgroundColor(backgroundColor)
                         .setTextAlignment(TextAlignment.CENTER),
 
                     Cell().add(
                         Paragraph(section.reportEstimation?.text ?: "")
-                            .setFont(fontBold)
                             .setFontSize(9f)
+                            .setFont(fontBold)
                             .setFontColor(section.reportEstimation?.color)
                     )
-                        .setBackgroundColor(backgroundColor)
                         .setPadding(5f)
+                        .setBackgroundColor(backgroundColor)
                         .setTextAlignment(TextAlignment.CENTER),
 
                     Cell().add(
@@ -473,11 +483,11 @@ internal class PdfReportGenerator(
                             .setFontSize(8f)
                             .setFontColor(TEXT_MUTED)
                     )
-                        .setBackgroundColor(backgroundColor)
-                        .setPadding(5f),
+                        .setPadding(5f)
+                        .setBackgroundColor(backgroundColor),
                 )
 
-                cs.forEach { table.addCell(it) }
+                cs.forEach { cell -> table.addCell(cell) }
                 i++
             }
 
@@ -521,7 +531,7 @@ internal class PdfReportGenerator(
                 .setFontColor(HEADER_BG)
         )
         doc.add(
-            Paragraph("Данные представлены в группированном виде. Диапазоны показывают минимумы и максимумы значений, а линия их среднее арифметическое")
+            Paragraph("Данные представлены в сгруппированном виде. Диапазоны показывают минимальные и максимальные значения, а линия — их среднее арифметическое")
                 .setFont(font)
                 .setFontSize(10f)
                 .setMarginBottom(16f)
@@ -714,8 +724,8 @@ internal class PdfReportGenerator(
         val step = 10f
         val start = floor(yMin / step) * step
         val end = ceil(yMax / step) * step
-        val yLabels = generateSequence(seed = start) { it + step }
-            .takeWhile { it <= end }
+        val yLabels = generateSequence(seed = start) { y -> y + step }
+            .takeWhile { y -> y <= end }
             .toList()
 
         val dateTimeFormatter = when (period) {
@@ -876,7 +886,7 @@ internal class PdfReportGenerator(
 
         doc.add(Paragraph("").setMarginTop(pH + 70f))
         doc.add(
-            Paragraph("Оценки измерений могут быть неточными для вашего организма. Рекомендуем обратиться к врачу, если у вас возникают трудности")
+            Paragraph("Оценки измерений могут быть неточными для вашего организма. Рекомендуем обратиться к врачу, если у вас возникают затруднения")
                 .setFont(font)
                 .setFontSize(15f)
                 .setFontColor(TEXT_MUTED)

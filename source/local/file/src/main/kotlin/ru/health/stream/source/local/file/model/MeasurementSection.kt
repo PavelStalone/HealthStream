@@ -116,7 +116,7 @@ internal sealed class MeasurementSection(
         note = note,
         timeZone = timeZone,
         dateRange = dateRange,
-        typeName = "Сатурация (SpO2)",
+        typeName = "Сатурация (SpO₂)",
         reportEstimation = reportEstimation,
         valueText = "${saturationRange.start} - ${saturationRange.endInclusive} %",
     )
@@ -132,7 +132,7 @@ internal sealed class MeasurementSection(
         note = note,
         timeZone = timeZone,
         dateRange = dateRange,
-        typeName = "Сатурация (SpO2)",
+        typeName = "Частота дыхания",
         reportEstimation = reportEstimation,
         valueText = "${rateRange.start} - ${rateRange.endInclusive} вдох/мин",
     )

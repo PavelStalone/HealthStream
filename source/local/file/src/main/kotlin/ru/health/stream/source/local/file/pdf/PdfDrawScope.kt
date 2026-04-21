@@ -760,4 +760,3 @@ internal class PdfDrawScope(
         else -> PdfCanvasConstants.LineCapStyle.BUTT
     }
 }
-

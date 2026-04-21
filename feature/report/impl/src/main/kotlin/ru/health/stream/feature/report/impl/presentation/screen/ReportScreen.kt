@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePickerDialog
@@ -86,8 +85,8 @@ import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportUiEvent
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 internal fun ReportScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -149,8 +148,8 @@ internal fun ReportScreen(
                 ) {
                     Text(
                         text = "Конфигурация отчета",
+                        fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
                     )
 
                     Text(text = "Период", style = MaterialTheme.typography.bodyMedium)
@@ -203,11 +202,8 @@ internal fun ReportScreen(
                     }
 
                     Button(
-                        onClick = { viewModel.generateReport() },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42A5F5)),
-                        enabled = true
+                        onClick = { viewModel.generateReport() },
                     ) {
                         Text("Сгенерировать отчет", color = Color.White, fontSize = 18.sp)
                     }
@@ -293,8 +289,8 @@ internal fun ReportScreen(
                                         measurementIcon = type.icon,
                                         note = note?.asText(),
                                         estimation = estimation,
-                                        onEditClick = {},
-                                        onDeleteClick = {},
+                                        onEditClick = {}, // TODO: Add on click method in edit callback - pavelshoplik 21-04-2026
+                                        onDeleteClick = {}, // TODO: Add on click method in delete callback - pavelshoplik 21-04-2026
                                         onCardClick = {
                                             if (isMeasurementBanned) {
                                                 viewModel.unbanMeasurement(id)
@@ -321,32 +317,34 @@ internal fun ReportScreen(
 
     if (showDatePicker) {
         DatePickerDialog(
+            modifier = Modifier.fillMaxSize(),
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val start = dateState.selectedStartDateMillis?.let {
-                            Instant.fromEpochMilliseconds(it)
+                        val start = dateState.selectedStartDateMillis?.let { date ->
+                            Instant.fromEpochMilliseconds(epochMilliseconds = date)
                         }
-                        val end =
-                            dateState.selectedEndDateMillis?.let { Instant.fromEpochMilliseconds(it) }
+                        val end = dateState.selectedEndDateMillis?.let { date ->
+                            Instant.fromEpochMilliseconds(epochMilliseconds = date)
+                        }
                         if (start != null && end != null) {
                             viewModel.onDateRangeChange(start, end)
                         }
                         showDatePicker = false
                     }
                 ) {
-                    Text("ОК")
+                    Text(text = "ОК")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Отмена")
+                    Text(text = "Отмена")
                 }
             }
         ) {
             DateRangePicker(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxSize(),
                 state = dateState,
             )
         }
