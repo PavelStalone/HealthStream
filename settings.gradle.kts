@@ -44,6 +44,7 @@ include(":core:store:healthconnect")
 
 //region Data module
 include(":data:vitals")
+include(":data:report")
 include(":data:personal")
 //endregion
 
@@ -54,6 +55,8 @@ include(":feature:user:api")
 include(":feature:user:impl")
 include(":feature:home:api")
 include(":feature:home:impl")
+include(":feature:report:api")
+include(":feature:report:impl")
 include(":feature:measurement:api")
 include(":feature:measurement:impl")
 //endregion
@@ -61,6 +64,7 @@ include(":feature:measurement:impl")
 //region Source module
 include(":source:local")
 include(":source:local:room")
+include(":source:local:file")
 include(":source:local:healthconnect")
 include(":source:remote:ble")
 include(":source:remote:ble:lib")

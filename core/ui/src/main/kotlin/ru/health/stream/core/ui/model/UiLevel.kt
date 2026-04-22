@@ -35,7 +35,7 @@ enum class UiLevel(
         containerColor = HighLevelContainerColor,
     ),
     EXTRA_HIGH(
-        text = UiText.NonTranslatable("Очень высокий"),
+        text = UiText.NonTranslatable("Критический"),
         contentColor = ExtraHighLevelContentColor,
         containerColor = ExtraHighLevelContainerColor,
     ),

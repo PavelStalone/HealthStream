@@ -38,6 +38,7 @@
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/data/personal" />
+            <option value="$PROJECT_DIR$/data/report" />
             <option value="$PROJECT_DIR$/data/vitals" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/chart" />
@@ -47,12 +48,16 @@
             <option value="$PROJECT_DIR$/feature/measurement" />
             <option value="$PROJECT_DIR$/feature/measurement/api" />
             <option value="$PROJECT_DIR$/feature/measurement/impl" />
+            <option value="$PROJECT_DIR$/feature/report" />
+            <option value="$PROJECT_DIR$/feature/report/api" />
+            <option value="$PROJECT_DIR$/feature/report/impl" />
             <option value="$PROJECT_DIR$/feature/settings" />
             <option value="$PROJECT_DIR$/feature/user" />
             <option value="$PROJECT_DIR$/feature/user/api" />
             <option value="$PROJECT_DIR$/feature/user/impl" />
             <option value="$PROJECT_DIR$/source" />
             <option value="$PROJECT_DIR$/source/local" />
+            <option value="$PROJECT_DIR$/source/local/file" />
             <option value="$PROJECT_DIR$/source/local/healthconnect" />
             <option value="$PROJECT_DIR$/source/local/room" />
             <option value="$PROJECT_DIR$/source/remote" />

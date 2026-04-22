@@ -187,7 +187,10 @@ data class DrawableData(
             val dt = instant.toLocalDateTime(timeZone)
 
             return when (period) {
-                is Period.Day -> {
+                Period.OneHour -> period.calculateRange(date = instant, timeZone = timeZone).start
+                Period.SixHour -> period.calculateRange(date = instant, timeZone = timeZone).start
+
+                Period.Day -> {
                     LocalDateTime(dt.year, dt.month, dt.dayOfMonth, dt.hour, 0).toInstant(timeZone)
                 }
 
@@ -195,12 +198,12 @@ data class DrawableData(
                     LocalDateTime(dt.year, dt.month, dt.dayOfMonth, 0, 0).toInstant(timeZone)
                 }
 
-                is Period.Month -> {
+                Period.Month -> {
                     val groupStartDay = ((dt.dayOfMonth - 1) / 2) * 2 + 1
                     LocalDateTime(dt.year, dt.month, groupStartDay, 0, 0).toInstant(timeZone)
                 }
 
-                is Period.Year -> {
+                Period.Year -> {
                     LocalDateTime(dt.year, dt.month, 1, 0, 0).toInstant(timeZone)
                 }
             }

@@ -37,6 +37,7 @@ dependencies {
     implementation(projects.core.store.datastore)
 
     implementation(projects.source.remote.ble)
+    implementation(projects.source.local.file)
     implementation(projects.source.local.room)
     implementation(projects.source.local.healthconnect)
 
@@ -44,5 +45,6 @@ dependencies {
     implementation(projects.feature.settings)
     implementation(projects.feature.home.impl)
     implementation(projects.feature.user.impl)
+    implementation(projects.feature.report.impl)
     implementation(projects.feature.measurement.impl)
 }

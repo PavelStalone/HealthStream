@@ -211,7 +211,7 @@ private enum class Node {
 
 @Preview
 @Composable
-fun PreviewLineChart() {
+private fun PreviewLineChart() {
     val points = List(11) { index ->
         ChartPosition.Point(
             x = index.toFloat(),

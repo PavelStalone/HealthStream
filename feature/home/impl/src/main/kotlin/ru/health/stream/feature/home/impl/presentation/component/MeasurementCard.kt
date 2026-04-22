@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,12 +26,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
-import ru.health.stream.core.ui.component.EstimationLevel
 import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Favorite
-import ru.health.stream.core.ui.layout.RowByFirstBaseLine
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.content
@@ -77,6 +74,7 @@ internal fun MeasurementCard(
 
             is Period.Week -> period.getDisplay(locale = locale)
             Period.Year -> Period.Year.getDisplay(locale = locale)
+            else -> emptyMap()
         }
     }
 
@@ -125,8 +123,12 @@ internal fun MeasurementCard(
             }
 
             if (measurementValue != null) {
-                RowByFirstBaseLine(modifier = Modifier.padding(vertical = 12.dp)) {
+                Row(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
                     Text(
+                        modifier = Modifier.alignByBaseline(),
                         text = measurementValue,
                         style = MaterialTheme.typography.displaySmall.copy(
                             fontWeight = FontWeight.ExtraBold,
@@ -134,7 +136,9 @@ internal fun MeasurementCard(
                         ),
                     )
                     Text(
-                        modifier = Modifier.padding(start = 4.dp),
+                        modifier = Modifier
+                            .alignByBaseline()
+                            .padding(start = 4.dp),
                         text = measurementUnit,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Medium,
