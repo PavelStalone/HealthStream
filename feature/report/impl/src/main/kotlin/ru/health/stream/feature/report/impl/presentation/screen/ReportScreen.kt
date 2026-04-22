@@ -152,7 +152,10 @@ internal fun ReportScreen(
                         style = MaterialTheme.typography.headlineSmall,
                     )
 
-                    Text(text = "Период", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = "Период",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     DateRange(
                         onClick = { showDatePicker = true },
                         prefixIcon = UiIcon.Vector(Icons.Default.Calendar),
@@ -177,7 +180,7 @@ internal fun ReportScreen(
                             FilterChip(
                                 selected = reportFormat == format,
                                 onClick = { viewModel.onFormatChange(format) },
-                                label = { Text(format.name) },
+                                label = { Text(text = format.name) },
                                 shape = RoundedCornerShape(20.dp)
                             )
                         }
@@ -205,7 +208,11 @@ internal fun ReportScreen(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { viewModel.generateReport() },
                     ) {
-                        Text("Сгенерировать отчет", color = Color.White, fontSize = 18.sp)
+                        Text(
+                            text = "Сгенерировать отчет",
+                            fontSize = 18.sp,
+                            color = Color.White,
+                        )
                     }
 
                     Text(
@@ -253,14 +260,14 @@ internal fun ReportScreen(
                                     ) { isBanned ->
                                         if (isBanned) {
                                             Text(
-                                                fontWeight = FontWeight.Bold,
                                                 text = "Выбрать все".uppercase(),
+                                                fontWeight = FontWeight.Bold,
                                                 style = MaterialTheme.typography.labelSmall,
                                             )
                                         } else {
                                             Text(
-                                                fontWeight = FontWeight.Bold,
                                                 text = "Исключить все".uppercase(),
+                                                fontWeight = FontWeight.Bold,
                                                 style = MaterialTheme.typography.labelSmall,
                                             )
                                         }
