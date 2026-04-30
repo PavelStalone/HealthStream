@@ -59,7 +59,7 @@ class HeartRateAssessor @Inject constructor(
     ): Map<Estimation.Level, List<ClosedRange<Float>>> = runCatching {
         val user = requireNotNull(userRepository.getUser())
         val userAge = user.datePeriodAfterBirthday(
-            localDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            localDate = date.toLocalDateTime(TimeZone.currentSystemDefault()).date
         ).years
 
         val resting = calculateRestingHR(start = date)

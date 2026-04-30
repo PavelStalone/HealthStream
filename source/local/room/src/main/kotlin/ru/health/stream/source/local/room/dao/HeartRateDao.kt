@@ -7,8 +7,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import ru.health.stream.core.monitor.logD
-import ru.health.stream.core.monitor.logV
 import ru.health.stream.source.local.room.entity.HeartRateEntity
 import ru.health.stream.source.local.room.entity.HeartRateWithMetadata
 

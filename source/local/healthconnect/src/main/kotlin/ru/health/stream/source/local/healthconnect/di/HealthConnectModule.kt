@@ -9,6 +9,7 @@ import dagger.multibindings.IntoSet
 import jakarta.inject.Singleton
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.source.local.ExternalMeasurementSource
+import ru.health.stream.source.local.healthconnect.record.BloodPressureSource
 import ru.health.stream.source.local.healthconnect.record.HeartRateSource
 import ru.health.stream.source.local.healthconnect.record.MeasurementSource
 import ru.health.stream.source.local.healthconnect.source.HealthConnectMeasurementSource
@@ -22,8 +23,10 @@ internal object HealthConnectModule {
     @Suppress("UNCHECKED_CAST")
     fun provideMeasurementSources(
         heartRateSource: HeartRateSource,
+        bloodPressureSource: BloodPressureSource,
     ): List<MeasurementSource<Measurement>> = listOf(
         heartRateSource as MeasurementSource<Measurement>,
+        bloodPressureSource as MeasurementSource<Measurement>,
     )
 
     @Module

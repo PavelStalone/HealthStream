@@ -9,21 +9,28 @@ import no.nordicsemi.android.support.v18.scanner.ScanFilter
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.monitor.logV
+import ru.health.stream.source.remote.ble.domain.builder.BPCuffMeasurementBuilder
+import ru.health.stream.source.remote.ble.domain.builder.PulseOxMeasurementBuilder
 import ru.health.stream.source.remote.ble.lib.device.BleDevice
 import ru.health.stream.source.remote.ble.lib.device.ConfigurationScope
 import ru.health.stream.source.remote.ble.lib.device.buildScanFilter
 import ru.health.stream.source.remote.ble.lib.device.matchesAnyPrefix
+import ru.health.stream.source.remote.ble.source.BleMeasurementSource
 
 /**
  * BLE implementation for TMB2084 blood pressure monitor device
  */
-class TMB2084 : BleDevice() {
+internal class TMB2084(
+    private val measurementSource: BleMeasurementSource,
+) : BleDevice() {
 
     private val DEVICE_NAMES = listOf("tmb_2084_a", "tmb-2084-a")
 
     override val scanFilters: List<ScanFilter> = listOf(
         buildScanFilter { setServiceUuid(ParcelUuid(Services.BLOOD_PRESSURE.uuid)) }
     )
+
+    private var measurementBuilder: BPCuffMeasurementBuilder? = null
 
     override fun ConfigurationScope.init() {
         service(uuid = Services.CURRENT_TIME.uuid) {
@@ -47,6 +54,8 @@ class TMB2084 : BleDevice() {
                     packet = TMB2048Packet.Definition,
                     callback = { packet ->
                         logI("Read packet: $packet")
+
+                        measurementBuilder?.receive(packet)
                     },
                 )
             }
@@ -55,6 +64,10 @@ class TMB2084 : BleDevice() {
 
     override fun onInvalidated() {
         logI("onInvalidated called")
+
+        measurementBuilder?.build()
+            ?.let { measurement -> measurementSource.sendMeasurement(measurement) }
+        measurementBuilder = null
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -62,5 +75,8 @@ class TMB2084 : BleDevice() {
         logV("isDeviceSupported called: ${discoveredDevice.device.name}")
 
         return discoveredDevice.matchesAnyPrefix(prefixList = DEVICE_NAMES)
+            .also { result ->
+                if (result) measurementBuilder = BPCuffMeasurementBuilder(discoveredDevice.device)
+            }
     }
 }
