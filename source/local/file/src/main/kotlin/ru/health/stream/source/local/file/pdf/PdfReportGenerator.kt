@@ -537,7 +537,7 @@ internal class PdfReportGenerator(
                 .setFontColor(HEADER_BG)
         )
         doc.add(
-            Paragraph("Данные представлены в сгруппированном виде. Диапазоны показывают минимальные и максимальные значения, а линия — их среднее арифметическое")
+            Paragraph("Данные представлены в сгруппированном виде. Диапазоны показывают минимальные и максимальные значения, а линия их среднее арифметическое")
                 .setFont(font)
                 .setFontSize(10f)
                 .setMarginBottom(16f)
@@ -783,16 +783,31 @@ internal class PdfReportGenerator(
             lastRange = period.calculateRange(lastRange.endInclusive.plus(1.minutes), timeZone)
         } while (lastRange.start <= lastTime)
 
+        val middleLine = areas[ReportEstimation.LOW]?.first()?.endInclusive?.let { top ->
+            ReportEstimation.entries.asReversed().asSequence()
+                .mapNotNull { level -> areas[level]?.drop(1)?.lastOrNull()?.start }
+                .firstOrNull { bottom -> top >= bottom }
+                ?.let { bottom -> (top + bottom) / 2f }
+        }
+
         with(chart) {
             val yLabelRange = yLabels.first()..yLabels.last()
 
             areas.forEach { (estimation, areaList) ->
-                areaList.forEach { area ->
+                areaList.forEachIndexed { index, area ->
                     val colors = estimation.color.colorValue
 
                     if (area.start in yLabelRange || area.endInclusive in yLabelRange) {
-                        val yMaxBound = min(area.endInclusive.yChart, yLabels.last().yChart)
-                        val yMinBound = max(area.start.yChart, yLabels.first().yChart)
+                        var yMaxBound = min(area.endInclusive.yChart, yLabels.last().yChart)
+                        var yMinBound = max(area.start.yChart, yLabels.first().yChart)
+
+                        middleLine?.let { line ->
+                            if (index == 0) {
+                                yMinBound = max(yMinBound, line.yChart)
+                            } else {
+                                yMaxBound = min(yMaxBound, line.yChart)
+                            }
+                        }
 
                         drawRect(
                             size = size.copy(height = yMaxBound - yMinBound),
@@ -867,7 +882,7 @@ internal class PdfReportGenerator(
 
                     points.forEach { point ->
                         val color = areas.firstNotNullOfOrNull { (estimation, areas) ->
-                            if (areas.any { area -> point.y in area }) {
+                            if (areas.drop(if (i % 3 != 0) 0 else 1 ).any { area -> point.y in area }) {
                                 val colors = estimation.color.colorValue
 
                                 Color(
