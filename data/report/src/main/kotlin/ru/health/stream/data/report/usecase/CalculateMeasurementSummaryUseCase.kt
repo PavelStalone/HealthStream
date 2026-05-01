@@ -4,69 +4,92 @@ import androidx.collection.FloatFloatPair
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import ru.health.stream.data.report.model.MeasurementSummary
+import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.MeasurementGroup
+import ru.health.stream.data.vitals.model.asMeasurementGroup
+import ru.health.stream.data.vitals.model.measurement.BloodGlucose
+import ru.health.stream.data.vitals.model.measurement.BloodPressure
+import ru.health.stream.data.vitals.model.measurement.BodyWeight
+import ru.health.stream.data.vitals.model.measurement.HeartRate
+import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
+import ru.health.stream.data.vitals.model.measurement.RespirationRate
+import kotlin.reflect.KClass
 
 @Singleton
 class CalculateMeasurementSummaryUseCase @Inject constructor() {
 
     operator fun invoke(
-        measurementGroups: List<MeasurementGroup>,
-    ): MeasurementSummary? {
-        var measurementSummary: MeasurementSummary? = null
+        measurements: List<Measurement>,
+    ): Map<KClass<out Measurement>, MeasurementSummary> {
+        val measurementSummary: MutableMap<KClass<out Measurement>, MeasurementSummary> =
+            mutableMapOf()
 
-        measurementGroups.forEach { measurementGroup ->
-            val estimation = measurementGroup.estimation?.level
+        measurements.forEach { measurement ->
+            val summary = measurementSummary[measurement::class]
 
-            val newSummary = measurementSummary
-                ?.mergeWithMeasurementGroup(measurementGroup = measurementGroup)
-                ?: MeasurementSummary(
-                    counts = 1,
-                    group = measurementGroup,
-                    estimationsCount = estimation?.let { estimation -> mapOf(estimation to 1) }
-                        ?: emptyMap()
-                )
+            val newSummary = with(measurement) {
+                summary?.mergeWithMeasurement(measurement)
+                    ?: MeasurementSummary(
+                        counts = 1,
+                        group = asMeasurementGroup(measurementDateRange = createdAt..createdAt),
+                        estimationsCount = metadata[Estimation]?.level?.let { estimation ->
+                            mapOf(estimation to 1)
+                        } ?: emptyMap()
+                    )
+            }
 
-            measurementSummary = newSummary
+            measurementSummary[measurement::class] = newSummary
         }
 
         return measurementSummary
     }
 
-
-    private fun MeasurementSummary.mergeWithMeasurementGroup(
-        measurementGroup: MeasurementGroup,
+    private fun MeasurementSummary.mergeWithMeasurement(
+        measurement: Measurement,
     ): MeasurementSummary {
-        val estimation = measurementGroup.estimation?.level
+        val estimation = measurement[Estimation]?.level
+        val measurementDateRange = measurement.createdAt..measurement.createdAt
 
         return MeasurementSummary(
             counts = counts + 1,
             group = with(group) {
                 when (this) {
                     is MeasurementGroup.BloodGlucose -> copy(
-                        range = range.changeRange((measurementGroup as MeasurementGroup.BloodGlucose).range),
+                        dateRange = dateRange.changeRange(measurementDateRange),
+                        range = range.changeRange((measurement as BloodGlucose).level),
                     )
 
                     is MeasurementGroup.BloodPressure -> copy(
-                        systolicRange = systolicRange.changeRange((measurementGroup as MeasurementGroup.BloodPressure).systolicRange),
-                        diastolicRange = diastolicRange.changeRange(measurementGroup.diastolicRange),
-                        minBpByDifference = minBpByDifference.changeByMin(measurementGroup.minBpByDifference),
-                        maxBpByDifference = maxBpByDifference.changeByMax(measurementGroup.maxBpByDifference),
+                        dateRange = dateRange.changeRange(measurementDateRange),
+                        systolicRange = systolicRange.changeRange((measurement as BloodPressure).systolic),
+                        diastolicRange = diastolicRange.changeRange(measurement.diastolic),
+                        minBpByDifference = minBpByDifference.changeByMin(measurement.run {
+                            FloatFloatPair(systolic, diastolic)
+                        }),
+                        maxBpByDifference = maxBpByDifference.changeByMax(measurement.run {
+                            FloatFloatPair(systolic, diastolic)
+                        }),
                     )
 
                     is MeasurementGroup.BodyWeight -> copy(
-                        range = range.changeRange((measurementGroup as MeasurementGroup.BodyWeight).range),
+                        dateRange = dateRange.changeRange(measurementDateRange),
+                        range = range.changeRange((measurement as BodyWeight).weight.kg),
                     )
 
                     is MeasurementGroup.HeartRate -> copy(
-                        range = range.changeRange((measurementGroup as MeasurementGroup.HeartRate).range),
+                        dateRange = dateRange.changeRange(measurementDateRange),
+                        range = range.changeRange((measurement as HeartRate).pulse),
                     )
 
                     is MeasurementGroup.OxygenSaturation -> copy(
-                        range = range.changeRange((measurementGroup as MeasurementGroup.OxygenSaturation).range),
+                        dateRange = dateRange.changeRange(measurementDateRange),
+                        range = range.changeRange((measurement as OxygenSaturation).saturation),
                     )
 
                     is MeasurementGroup.RespirationRate -> copy(
-                        range = range.changeRange((measurementGroup as MeasurementGroup.RespirationRate).range),
+                        dateRange = dateRange.changeRange(measurementDateRange),
+                        range = range.changeRange((measurement as RespirationRate).rate),
                     )
                 }
             },

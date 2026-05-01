@@ -70,8 +70,6 @@ class BloodPressureAssessor @Inject constructor(
 
         val normalPressure = calculateNormalPressure(date = date, age = userAge)
 
-        println("Normal pressure: $normalPressure")
-
         val lowSystolic = normalPressure.first - 20f
         val highSystolic = normalPressure.first + 10f
         val extraHighSystolic = normalPressure.first + 25f
@@ -94,7 +92,7 @@ class BloodPressureAssessor @Inject constructor(
                 highSystolic..extraHighSystolic,
                 highDiastolic..extraHighDiastolic,
             ),
-            Estimation.Level.EXTRA_HIGH to listOf(
+            Estimation.Level.CRITICAL to listOf(
                 extraHighSystolic..Float.MAX_VALUE,
                 extraHighDiastolic..Float.MAX_VALUE,
             ),

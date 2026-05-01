@@ -10,6 +10,8 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.usecase.DateTransformerUseCase
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
 import ru.health.stream.feature.chart.model.ChartPosition
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
@@ -234,11 +236,15 @@ data class DrawableData(
                 }
             }
 
+            val step = 10f
+            val start = floor(yMin / step) * step
+            val end = ceil(yMax / step) * step
+
             return DrawableData(
                 scatterPositions = scatterPositions,
                 pointPositions = pointPositions,
                 xRange = 0f..1f,
-                yRange = yMin..yMax,
+                yRange = start..end,
             )
         }
     }

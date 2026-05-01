@@ -10,7 +10,9 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.source.local.room.MeasurementTable
 import ru.health.stream.source.local.room.VitalDatabase
 import ru.health.stream.source.local.room.table.BloodPressureTable
+import ru.health.stream.source.local.room.table.BodyWeightTable
 import ru.health.stream.source.local.room.table.HeartRateTable
+import ru.health.stream.source.local.room.table.OxygenSaturationTable
 import javax.inject.Singleton
 
 @Module
@@ -27,9 +29,13 @@ internal object DatabaseModule {
     @Suppress("UNCHECKED_CAST")
     fun provideTables(
         heartRateTable: HeartRateTable,
+        bodyWeightTable: BodyWeightTable,
         bloodPressureTable: BloodPressureTable,
+        oxygenSaturationTable: OxygenSaturationTable,
     ): List<MeasurementTable<Measurement>> = listOf(
         heartRateTable as MeasurementTable<Measurement>,
+        bodyWeightTable as MeasurementTable<Measurement>,
         bloodPressureTable as MeasurementTable<Measurement>,
+        oxygenSaturationTable as MeasurementTable<Measurement>,
     )
 }

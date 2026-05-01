@@ -10,16 +10,20 @@ import ru.health.stream.source.local.room.converter.InstantConverter
 import ru.health.stream.source.local.room.converter.LengthConverter
 import ru.health.stream.source.local.room.converter.LocalDateConverter
 import ru.health.stream.source.local.room.dao.BloodPressureDao
+import ru.health.stream.source.local.room.dao.BodyWeightDao
 import ru.health.stream.source.local.room.dao.DeviceDao
 import ru.health.stream.source.local.room.dao.HeartRateDao
 import ru.health.stream.source.local.room.dao.NoteDao
+import ru.health.stream.source.local.room.dao.OxygenSaturationDao
 import ru.health.stream.source.local.room.dao.ResourceDao
 import ru.health.stream.source.local.room.dao.UserDao
 import ru.health.stream.source.local.room.entity.BloodPressureEntity
-import ru.health.stream.source.local.room.entity.resource.DeviceEntity
+import ru.health.stream.source.local.room.entity.BodyWeightEntity
 import ru.health.stream.source.local.room.entity.HeartRateEntity
 import ru.health.stream.source.local.room.entity.NoteEntity
+import ru.health.stream.source.local.room.entity.OxygenSaturationEntity
 import ru.health.stream.source.local.room.entity.UserEntity
+import ru.health.stream.source.local.room.entity.resource.DeviceEntity
 import ru.health.stream.source.local.room.entity.resource.ResourceEntity
 
 @Database(
@@ -29,7 +33,9 @@ import ru.health.stream.source.local.room.entity.resource.ResourceEntity
         DeviceEntity::class,
         ResourceEntity::class,
         HeartRateEntity::class,
+        BodyWeightEntity::class,
         BloodPressureEntity::class,
+        OxygenSaturationEntity::class,
     ],
     version = 1
 )
@@ -48,7 +54,9 @@ internal abstract class VitalDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao
     abstract fun resourceDao(): ResourceDao
     abstract fun heartRateDao(): HeartRateDao
+    abstract fun bodyWeightDao(): BodyWeightDao
     abstract fun bloodPressureDao(): BloodPressureDao
+    abstract fun oxygenSaturationDao(): OxygenSaturationDao
 
     companion object {
 

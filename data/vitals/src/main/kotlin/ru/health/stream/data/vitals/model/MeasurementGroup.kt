@@ -100,7 +100,7 @@ sealed interface MeasurementGroup {
     }
 }
 
-internal fun Measurement.asMeasurementGroup(
+fun Measurement.asMeasurementGroup(
     measurementDateRange: ClosedRange<Instant>,
 ): MeasurementGroup {
     val mNote = metadata[Note]?.description

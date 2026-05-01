@@ -11,6 +11,7 @@ import ru.health.stream.core.monitor.logD
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
+import ru.health.stream.source.remote.ble.domain.builder.BodyWeightMeasurementBuilder
 import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled
 import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.BindResult
 import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.ReceiverAuth
@@ -26,14 +27,19 @@ import ru.health.stream.source.remote.ble.lib.device.ConfigurationScope
 import ru.health.stream.source.remote.ble.lib.device.GattCharacteristic
 import ru.health.stream.source.remote.ble.lib.device.buildScanFilter
 import ru.health.stream.source.remote.ble.lib.device.matchesAnyPrefix
+import ru.health.stream.source.remote.ble.source.BleMeasurementSource
 
-class GBS2012B : BleDevice() {
+internal class GBS2012B(
+    private val measurementSource: BleMeasurementSource,
+) : BleDevice() {
 
     private val DEVICE_NAMES = listOf("gbs-2012-b", "gbf-2008-bf")
 
     override val scanFilters: List<ScanFilter> = DEVICE_NAMES
         .flatMap { deviceName -> listOf(deviceName, deviceName.uppercase()) }
         .map { deviceName -> buildScanFilter { setDeviceName(deviceName) } }
+
+    private var measurementBuilder: BodyWeightMeasurementBuilder? = null
 
     override fun ConfigurationScope.init() {
         service(uuid = LX_SERVICE.uuid) {
@@ -42,6 +48,8 @@ class GBS2012B : BleDevice() {
                     packet = GBS2012BPacket.Definition,
                     callback = { packet ->
                         logI("notification packet in lxTransfer: $packet")
+
+                        measurementBuilder?.receive(packet)
                     }
                 )
             }
@@ -77,6 +85,10 @@ class GBS2012B : BleDevice() {
 
     override fun onInvalidated() {
         logI("onInvalidated called")
+
+        measurementBuilder?.build()
+            ?.let { measurement -> measurementSource.sendMeasurement(measurement) }
+        measurementBuilder = null
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -84,6 +96,10 @@ class GBS2012B : BleDevice() {
         logV("isDeviceSupported called: ${discoveredDevice.device.name}")
 
         return discoveredDevice.matchesAnyPrefix(prefixList = DEVICE_NAMES)
+            .also { result ->
+                if (result) measurementBuilder =
+                    BodyWeightMeasurementBuilder(discoveredDevice.device)
+            }
     }
 
     private fun Filled.handle(

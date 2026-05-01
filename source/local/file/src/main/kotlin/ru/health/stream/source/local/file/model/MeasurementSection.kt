@@ -47,6 +47,10 @@ internal class MeasurementSection(
             }
         }
     }
+
+    override fun toString(): String {
+        return "MeasurementSection(typeName='$typeName', measurementGroup=$measurementGroup, date='$date')"
+    }
 }
 
 private val dateFormatter = LocalDateTime.Format {

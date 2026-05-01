@@ -22,14 +22,13 @@ import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.Period
 import ru.health.stream.data.vitals.model.measurement.BloodPressure
+import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
-import ru.health.stream.feature.chart.core.Drawable
-import ru.health.stream.feature.chart.model.ChartPosition
 import ru.health.stream.feature.chart.model.DrawableData
-import ru.health.stream.feature.home.impl.domain.DatePositionTransformer
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
@@ -102,10 +101,68 @@ class HomeViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
     )
 
+    val bodyWeightFlow = measurementRepository.getMeasurementsFlowByRange(
+        from = range.start,
+        to = range.endInclusive,
+        type = BodyWeight::class,
+    ).map { bodyWeights ->
+        WeekCardState(
+            key = "BodyWeight",
+            measurementType = BodyWeight::class,
+            measurementUnit = UiText.NonTranslatable(value = "кг"),
+            measurementValue = bodyWeights.firstOrNull()?.let { measurement ->
+                UiText.NonTranslatable(value = measurement.asUi().value)
+            },
+            measurementTitle = UiMeasurement.Type.WEIGHT.text,
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            drawableData = DrawableData.create(
+                dateRange = range,
+                timeZone = timeZone,
+                period = Period.SixHour,
+                measurements = bodyWeights,
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+            ),
+            estimationLevel = bodyWeights.firstOrNull()?.metadata[Estimation]?.asUi(),
+        )
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+    )
+
+    val oxygenSaturationFlow = measurementRepository.getMeasurementsFlowByRange(
+        from = range.start,
+        to = range.endInclusive,
+        type = OxygenSaturation::class,
+    ).map { oxygenSaturations ->
+        WeekCardState(
+            key = "OxygenSaturation",
+            measurementType = OxygenSaturation::class,
+            measurementUnit = UiText.NonTranslatable(value = "%"),
+            measurementValue = oxygenSaturations.firstOrNull()?.let { measurement ->
+                UiText.NonTranslatable(value = measurement.asUi().value)
+            },
+            measurementTitle = UiMeasurement.Type.OXYGEN_SATURATION.text,
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            drawableData = DrawableData.create(
+                dateRange = range,
+                timeZone = timeZone,
+                period = Period.SixHour,
+                measurements = oxygenSaturations,
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+            ),
+            estimationLevel = oxygenSaturations.firstOrNull()?.metadata[Estimation]?.asUi(),
+        )
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+    )
+
     val weekCardStates = combine(
         // TODO: Bind by settings - shoplikpavel 2026-02-24
         heartRateFlow,
+        bodyWeightFlow,
         bloodPressureFlow,
+        oxygenSaturationFlow,
         transform = { states -> states.toList() },
     ).shareIn(
         replay = 1,
@@ -117,7 +174,7 @@ class HomeViewModel @Inject constructor(
         Estimation.Level.LOW -> UiLevel.LOW
         Estimation.Level.NORMAL -> UiLevel.NORMAL
         Estimation.Level.HIGH -> UiLevel.HIGH
-        Estimation.Level.EXTRA_HIGH -> UiLevel.EXTRA_HIGH
+        Estimation.Level.CRITICAL -> UiLevel.CRITICAL
     }
 }
 

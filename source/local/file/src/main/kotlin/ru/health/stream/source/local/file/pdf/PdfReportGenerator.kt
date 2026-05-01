@@ -717,6 +717,13 @@ internal class PdfReportGenerator(
             }
         }
 
+        val step = 10f
+        val start = floor(yMin / step) * step
+        val end = ceil(yMax / step) * step
+        val yLabels = generateSequence(seed = start) { y -> y + step }
+            .takeWhile { y -> y <= end }
+            .toList()
+
         val drawScope = PdfDrawScope(
             pdfCanvas = c,
             pageSize = Size(width = pW, height = pH),
@@ -726,15 +733,8 @@ internal class PdfReportGenerator(
         val chart = PdfChartDrawScopeImpl(
             drawScope = drawScope,
             widthRange = 0f..1f,
-            heightRange = yMin..yMax,
+            heightRange = start..end,
         )
-
-        val step = 10f
-        val start = floor(yMin / step) * step
-        val end = ceil(yMax / step) * step
-        val yLabels = generateSequence(seed = start) { y -> y + step }
-            .takeWhile { y -> y <= end }
-            .toList()
 
         val dateTimeFormatter = when (period) {
             Period.OneHour -> LocalDateTime.Format {
@@ -882,7 +882,9 @@ internal class PdfReportGenerator(
 
                     points.forEach { point ->
                         val color = areas.firstNotNullOfOrNull { (estimation, areas) ->
-                            if (areas.drop(if (i % 3 != 0) 0 else 1 ).any { area -> point.y in area }) {
+                            if (areas.drop(if (i % 3 != 0) 0 else 1)
+                                    .any { area -> point.y in area }
+                            ) {
                                 val colors = estimation.color.colorValue
 
                                 Color(
@@ -942,18 +944,16 @@ internal class PdfReportGenerator(
             timeZone = timeZone,
             measurements = measurements,
         )
+        val measurementsSummariesWithType =
+            calculateMeasurementSummaryUseCase(measurements = measurements)
 
-        val measurementsSummaries = measurementGroupsWithType.values
-            .mapNotNull { measurementGroups ->
-                calculateMeasurementSummaryUseCase(measurementGroups = measurementGroups)
-            }
         val measurementSections = measurementGroupsWithType.mapValues { (_, measurementGroups) ->
             measurementGroups.map { measurementGroup ->
                 measurementGroup.asMeasurementSection(timeZone = timeZone)
             }
         }
 
-        return measurementSections to measurementsSummaries
+        return measurementSections to measurementsSummariesWithType.values.toList()
     }
 
     private fun Cell.defaultCell(

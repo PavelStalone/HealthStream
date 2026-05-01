@@ -3,9 +3,11 @@ package ru.health.stream.source.local.healthconnect.record
 import android.content.Context
 import android.health.connect.datatypes.Metadata.RECORDING_METHOD_MANUAL_ENTRY
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Pressure
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -17,30 +19,32 @@ import ru.health.stream.core.monitor.logW
 import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.Resource
+import ru.health.stream.data.vitals.model.kg
 import ru.health.stream.data.vitals.model.measurement.BloodPressure
+import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.source.local.healthconnect.HealthConnectManager
 import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
 import androidx.health.connect.client.records.metadata.Device as DeviceData
 
 @OptIn(ExperimentalUuidApi::class)
-internal class BloodPressureSource @Inject constructor(
+internal class BodyWeightSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val localDeviceSource: LocalDeviceSource,
     private val healthConnectManager: HealthConnectManager,
-) : MeasurementSource<BloodPressure>() {
+) : MeasurementSource<BodyWeight>() {
 
-    override val type: KClass<BloodPressure> = BloodPressure::class
+    override val type: KClass<BodyWeight> = BodyWeight::class
 
     override suspend fun getMeasurementByRange(
         start: Instant,
         end: Instant,
-    ): List<BloodPressure> = runCatching {
+    ): List<BodyWeight> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end")
 
         val response = healthConnectManager.healthConnectClient.readRecords(
             ReadRecordsRequest(
-                BloodPressureRecord::class,
+                WeightRecord::class,
                 timeRangeFilter = TimeRangeFilter.between(
                     start.toJavaInstant(),
                     end.toJavaInstant()
@@ -66,10 +70,9 @@ internal class BloodPressureSource @Inject constructor(
                     Resource.App(packageName = packageName)
                 }
 
-                BloodPressure(
+                BodyWeight(
                     id = metadata.id,
-                    systolic = record.systolic.inMillimetersOfMercury.toFloat(),
-                    diastolic = record.diastolic.inMillimetersOfMercury.toFloat(),
+                    weight = record.weight.inKilograms.kg,
                     createdAt = record.time.toKotlinInstant(),
                     resource = resource,
                 )
@@ -79,8 +82,8 @@ internal class BloodPressureSource @Inject constructor(
     }.getOrElse { emptyList() }
 
     override suspend fun writeMeasurement(
-        measurement: BloodPressure,
-    ): Result<BloodPressure> = runCatching {
+        measurement: BodyWeight,
+    ): Result<BodyWeight> = runCatching {
         logV("writeMeasurement called: measurement=$measurement")
 
         writeMeasurements(listOf(measurement)).getOrThrow()
@@ -89,7 +92,7 @@ internal class BloodPressureSource @Inject constructor(
         logW("Error while writeMeasurement running", exception)
     }
 
-    override suspend fun writeMeasurements(measurements: List<BloodPressure>): Result<List<BloodPressure>> =
+    override suspend fun writeMeasurements(measurements: List<BodyWeight>): Result<List<BodyWeight>> =
         runCatching {
             logV("writeMeasurements called: measurements=$measurements")
 
@@ -112,12 +115,11 @@ internal class BloodPressureSource @Inject constructor(
                 }
                 val instant = measurement.createdAt.toJavaInstant()
 
-                BloodPressureRecord(
+                WeightRecord(
                     time = instant,
                     zoneOffset = null,
                     metadata = metadata,
-                    systolic = Pressure.millimetersOfMercury(measurement.systolic.toDouble()),
-                    diastolic = Pressure.millimetersOfMercury(measurement.diastolic.toDouble()),
+                    weight = Mass.kilograms(measurement.weight.kg.toDouble())
                 )
             }
 
