@@ -23,8 +23,8 @@ class MeasurementWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
     private val primaryMeasurementSource: PrimaryMeasurementSource,
-    private val setEstimationForMeasurementUseCase: SetEstimationForMeasurementUseCase,
     @Dispatcher(Dispatcher.IO) private val coroutineDispatcher: CoroutineDispatcher,
+    private val setEstimationForMeasurementUseCase: SetEstimationForMeasurementUseCase,
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result = coroutineScope {
