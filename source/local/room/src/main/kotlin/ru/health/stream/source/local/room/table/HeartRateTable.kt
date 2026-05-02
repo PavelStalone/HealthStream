@@ -20,6 +20,11 @@ internal class HeartRateTable @Inject constructor(
 
     override val type: KClass<HeartRate> = HeartRate::class
 
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = heartRateDao.getWithoutEstimation()
+        .map { heartRateWithMetadata -> heartRateWithMetadata.asHeartRate() as T }
+
     override suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
         end: Instant,

@@ -20,6 +20,11 @@ internal class BodyWeightTable @Inject constructor(
 
     override val type: KClass<BodyWeight> = BodyWeight::class
 
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = dao.getWithoutEstimation()
+        .map { metadata -> metadata.asBodyWeight() as T }
+
     override suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
         end: Instant,

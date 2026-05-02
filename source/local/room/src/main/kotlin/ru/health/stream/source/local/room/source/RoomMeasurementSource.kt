@@ -17,6 +17,22 @@ internal class RoomMeasurementSource @Inject constructor(
     private val tables: List<@JvmSuppressWildcards MeasurementTable<Measurement>>,
 ) : PrimaryMeasurementSource {
 
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = runCatching {
+        logV("getMeasurementsWithoutEstimation called: kClass=$type")
+
+        val response = tables.filter { table -> type.java.isAssignableFrom(table.type.java) }
+            .flatMap { table ->
+                table.getMeasurementsWithoutEstimation(type = type)
+            }
+
+        logV("Founded measurements: $response")
+        response
+    }.onFailure { exception ->
+        logW("Error while getMeasurementsWithoutEstimation running", exception)
+    }.getOrElse { emptyList() }
+
     override suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
         end: Instant,

@@ -20,6 +20,11 @@ internal class BloodPressureTable @Inject constructor(
 
     override val type: KClass<BloodPressure> = BloodPressure::class
 
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = dao.getWithoutEstimation()
+        .map { metadata -> metadata.asBloodPressure() as T }
+
     override suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
         end: Instant,

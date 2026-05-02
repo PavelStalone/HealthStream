@@ -20,6 +20,11 @@ internal class OxygenSaturationTable @Inject constructor(
 
     override val type: KClass<OxygenSaturation> = OxygenSaturation::class
 
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = dao.getWithoutEstimation()
+        .map { metadata -> metadata.asOxygenSaturation() as T }
+
     override suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
         end: Instant,

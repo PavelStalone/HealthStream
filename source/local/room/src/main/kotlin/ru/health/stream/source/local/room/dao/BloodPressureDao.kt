@@ -19,6 +19,9 @@ internal interface BloodPressureDao : ResourceDao, NoteDao {
     @Query("SELECT * FROM bloodPressure WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<BloodPressureWithMetadata>>
 
+    @Query("SELECT * FROM bloodPressure WHERE estimation_level IS NULL ORDER BY created_at DESC")
+    suspend fun getWithoutEstimation(): List<BloodPressureWithMetadata>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: BloodPressureEntity)
 
