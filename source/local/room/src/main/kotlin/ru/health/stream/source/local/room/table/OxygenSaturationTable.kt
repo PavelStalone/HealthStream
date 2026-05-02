@@ -11,7 +11,6 @@ import ru.health.stream.source.local.room.MeasurementTable
 import ru.health.stream.source.local.room.dao.OxygenSaturationDao
 import ru.health.stream.source.local.room.entity.asOxygenSaturationWithMetadata
 import javax.inject.Inject
-import kotlin.collections.map
 import kotlin.reflect.KClass
 
 @Suppress("UNCHECKED_CAST")

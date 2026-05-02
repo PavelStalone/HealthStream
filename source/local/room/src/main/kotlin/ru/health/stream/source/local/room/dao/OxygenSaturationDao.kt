@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import ru.health.stream.source.local.room.entity.BodyWeightWithMetadata
 import ru.health.stream.source.local.room.entity.OxygenSaturationEntity
 import ru.health.stream.source.local.room.entity.OxygenSaturationWithMetadata
 

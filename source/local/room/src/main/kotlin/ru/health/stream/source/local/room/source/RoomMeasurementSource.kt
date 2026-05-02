@@ -30,7 +30,7 @@ internal class RoomMeasurementSource @Inject constructor(
         logV("Founded measurements: $response")
         response
     }.onFailure { exception ->
-        logW("Error while getMeasurementByRange running", exception)
+        logW("Error while getMeasurementsWithoutEstimation running", exception)
     }.getOrElse { emptyList() }
 
     override suspend fun <T : Measurement> getMeasurementsByRange(
