@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import ru.health.stream.source.local.room.entity.BloodPressureEntity
 import ru.health.stream.source.local.room.entity.BloodPressureWithMetadata
+import ru.health.stream.source.local.room.entity.HeartRateWithMetadata
 
 @Dao
 internal interface BloodPressureDao : ResourceDao, NoteDao {
@@ -18,6 +19,9 @@ internal interface BloodPressureDao : ResourceDao, NoteDao {
 
     @Query("SELECT * FROM bloodPressure WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<BloodPressureWithMetadata>>
+
+    @Query("SELECT * FROM bloodPressure WHERE estimation_level IS NULL ORDER BY created_at DESC")
+    suspend fun getWithoutEstimation(): List<BloodPressureWithMetadata>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: BloodPressureEntity)

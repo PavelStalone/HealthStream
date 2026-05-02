@@ -21,6 +21,9 @@ internal interface BodyWeightDao : ResourceDao, NoteDao {
     @Query("SELECT * FROM bodyWeight WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<BodyWeightWithMetadata>>
 
+    @Query("SELECT * FROM bodyWeight WHERE estimation_level IS NULL ORDER BY created_at DESC")
+    suspend fun getWithoutEstimation(): List<BodyWeightWithMetadata>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: BodyWeightEntity)
 

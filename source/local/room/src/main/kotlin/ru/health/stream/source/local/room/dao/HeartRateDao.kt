@@ -19,6 +19,9 @@ internal interface HeartRateDao : ResourceDao, NoteDao {
     @Query("SELECT * FROM heartRate WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<HeartRateWithMetadata>>
 
+    @Query("SELECT * FROM heartRate WHERE estimation_level IS NULL ORDER BY created_at DESC")
+    suspend fun getWithoutEstimation(): List<HeartRateWithMetadata>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: HeartRateEntity)
 

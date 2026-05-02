@@ -12,6 +12,10 @@ internal class MeasurementRepositoryImpl @Inject constructor(
     private val localMeasurementSource: LocalMeasurementSource,
 ) : MeasurementRepository {
 
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = localMeasurementSource.getMeasurementsWithoutEstimation(type = type)
+
     override suspend fun <T : Measurement> getMeasurementsByRange(
         from: Instant,
         to: Instant,

@@ -29,6 +29,12 @@ internal class SyncableMeasurementLocalSource @Inject constructor(
 
     private val mutex = Mutex()
 
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = withContext(ioDispatcher) {
+        primarySource.getMeasurementsWithoutEstimation(type = type)
+    }
+
     override suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
         end: Instant,

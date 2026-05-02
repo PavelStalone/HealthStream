@@ -7,6 +7,10 @@ import kotlin.reflect.KClass
 
 interface LocalMeasurementSource {
 
+    suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>,
+    ): List<T>
+
     suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
         end: Instant,

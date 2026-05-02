@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
+import ru.health.stream.source.local.room.entity.BodyWeightWithMetadata
 import ru.health.stream.source.local.room.entity.OxygenSaturationEntity
 import ru.health.stream.source.local.room.entity.OxygenSaturationWithMetadata
 
@@ -18,6 +19,9 @@ internal interface OxygenSaturationDao : ResourceDao, NoteDao {
 
     @Query("SELECT * FROM oxygenSaturation WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<OxygenSaturationWithMetadata>>
+
+    @Query("SELECT * FROM oxygenSaturation WHERE estimation_level IS NULL ORDER BY created_at DESC")
+    suspend fun getWithoutEstimation(): List<OxygenSaturationWithMetadata>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: OxygenSaturationEntity)

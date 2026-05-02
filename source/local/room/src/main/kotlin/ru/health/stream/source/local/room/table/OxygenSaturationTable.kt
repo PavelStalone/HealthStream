@@ -11,6 +11,7 @@ import ru.health.stream.source.local.room.MeasurementTable
 import ru.health.stream.source.local.room.dao.OxygenSaturationDao
 import ru.health.stream.source.local.room.entity.asOxygenSaturationWithMetadata
 import javax.inject.Inject
+import kotlin.collections.map
 import kotlin.reflect.KClass
 
 @Suppress("UNCHECKED_CAST")
@@ -19,6 +20,11 @@ internal class OxygenSaturationTable @Inject constructor(
 ) : MeasurementTable<OxygenSaturation>() {
 
     override val type: KClass<OxygenSaturation> = OxygenSaturation::class
+
+    override suspend fun <T : Measurement> getMeasurementsWithoutEstimation(
+        type: KClass<T>
+    ): List<T> = dao.getWithoutEstimation()
+        .map { metadata -> metadata.asOxygenSaturation() as T }
 
     override suspend fun <T : Measurement> getMeasurementsByRange(
         start: Instant,
