@@ -46,7 +46,6 @@ class BloodPressureAssessor @Inject constructor(
         return FloatFloatPair(normalSystolic, normalDiastolic)
     }
 
-
     override suspend fun analyze(measurement: BloodPressure): Estimation? = runCatching {
         val levels = requireNotNull(levels(measurement.createdAt))
         val systolicLevel = levels.firstNotNullOf { (level, ranges) ->

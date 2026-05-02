@@ -11,7 +11,6 @@ import ru.health.stream.source.local.room.entity.resource.ResourceWithType
 @Dao
 internal interface ResourceDao : DeviceDao {
 
-    @Transaction
     @Query("SELECT * FROM resource WHERE id == :id")
     suspend fun getResourceById(id: String): ResourceWithType
 

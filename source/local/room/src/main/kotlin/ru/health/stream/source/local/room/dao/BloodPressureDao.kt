@@ -13,11 +13,9 @@ import ru.health.stream.source.local.room.entity.BloodPressureWithMetadata
 @Dao
 internal interface BloodPressureDao : ResourceDao, NoteDao {
 
-    @Transaction
     @Query("SELECT * FROM bloodPressure WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
     suspend fun getByRange(start: Instant, end: Instant): List<BloodPressureWithMetadata>
 
-    @Transaction
     @Query("SELECT * FROM bloodPressure WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<BloodPressureWithMetadata>>
 
