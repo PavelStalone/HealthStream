@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ import ru.health.stream.core.ui.model.asText
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.chart.core.drawable.CubicArea
 import ru.health.stream.feature.chart.core.drawable.CubicLine
+import ru.health.stream.feature.chart.core.drawable.Scatter
 import ru.health.stream.feature.home.impl.presentation.component.MeasurementCard
 import ru.health.stream.feature.home.impl.presentation.viewmodel.HomeViewModel
 import ru.health.stream.feature.home.impl.presentation.viewmodel.WeekCardState
@@ -62,31 +64,33 @@ internal fun HomeScreen(
                             measurementTitle = measurementTitle.asText(),
                             measurementValue = measurementValue?.asText(),
                             onClick = { onMeasurementCardClick(measurementType) },
-                            yRange = if (points.isNotEmpty()) {
-                                points.minOf { point -> point.y }..points.maxOf { point -> point.y }
-                            } else {
-                                0f..1f
-                            },
-                            chartDrawables = if (points.isNotEmpty()) {
-                                listOf(
-                                    CubicArea(
-                                        points = points,
-                                        brush = Brush.verticalGradient(
-                                            colors = listOf(
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.0f),
-                                            )
+                            yRange = drawableData.yRange,
+                            chartDrawables = buildList {
+                                drawableData.scatterPositions.forEach { positions ->
+                                    add(
+                                        Scatter(
+                                            positions = positions,
+                                            pointColor = MaterialTheme.colorScheme.primary,
+                                            rangeColor = MaterialTheme.colorScheme.primary.copy(
+                                                alpha = 0.3f
+                                            ),
+                                            radiusPoint = 4.dp
                                         )
-                                    ),
-                                    CubicLine(
-                                        points = points,
-                                        style = Stroke(width = 6.dp.value),
-                                        color = MaterialTheme.colorScheme.primary,
                                     )
-                                )
-                            } else {
-                                emptyList()
-                            }
+                                }
+                                drawableData.pointPositions.forEach { positions ->
+                                    add(
+                                        CubicLine(
+                                            points = positions,
+                                            color = MaterialTheme.colorScheme.tertiary,
+                                            style = Stroke(
+                                                width = 6f,
+                                                cap = StrokeCap.Round
+                                            ),
+                                        )
+                                    )
+                                }
+                            },
                         )
                     }
                 }

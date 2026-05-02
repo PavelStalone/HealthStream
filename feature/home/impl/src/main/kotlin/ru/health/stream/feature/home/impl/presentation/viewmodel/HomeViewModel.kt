@@ -16,14 +16,19 @@ import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
+import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
+import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.Period
+import ru.health.stream.data.vitals.model.measurement.BloodPressure
+import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.repository.MeasurementRepository
-import ru.health.stream.feature.chart.model.ChartPosition
-import ru.health.stream.feature.home.impl.domain.DatePositionTransformer
+import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
+import ru.health.stream.feature.chart.model.DrawableData
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
@@ -31,17 +36,14 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
+    groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
 ) : ViewModel() {
 
-    private val positionTransformer = DatePositionTransformer(
-        timeZone = TimeZone.currentSystemDefault(),
-        dateNow = Clock.System.now(),
-        period = Period.Week(firstDayOfWeek = DayOfWeek.MONDAY)
-    )
+    private val timeZone = TimeZone.currentSystemDefault()
 
     private val period = Period.Week(firstDayOfWeek = DayOfWeek.MONDAY)
     private val range =
-        period.calculateRange(date = Clock.System.now(), timeZone = TimeZone.currentSystemDefault())
+        period.calculateRange(date = Clock.System.now(), timeZone = timeZone)
 
     val heartRateFlow = measurementRepository.getMeasurementsFlowByRange(
         from = range.start,
@@ -55,15 +57,100 @@ class HomeViewModel @Inject constructor(
             measurementValue = heartRates.firstOrNull()?.pulse?.run {
                 UiText.NonTranslatable(toString())
             },
-            measurementTitle = UiText.NonTranslatable(value = "Пульс"),
+            measurementTitle = UiMeasurement.Type.HEART_RATE.text,
             measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
-            points = heartRates.map { heartRate ->
-                ChartPosition.Point(
-                    x = positionTransformer.transform(date = heartRate.createdAt),
-                    y = heartRate.pulse.toFloat(),
-                )
+            drawableData = DrawableData.create(
+                dateRange = range,
+                timeZone = timeZone,
+                period = Period.SixHour,
+                measurements = heartRates,
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+            ),
+            estimationLevel = heartRates.firstOrNull()?.metadata[Estimation]?.asUi(),
+        )
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+    )
+
+    val bloodPressureFlow = measurementRepository.getMeasurementsFlowByRange(
+        from = range.start,
+        to = range.endInclusive,
+        type = BloodPressure::class,
+    ).map { bloodPressures ->
+        WeekCardState(
+            key = "BloodPressure",
+            measurementType = BloodPressure::class,
+            measurementUnit = UiText.NonTranslatable(value = "мм рт. ст."),
+            measurementValue = bloodPressures.firstOrNull()?.let { bloodPressure ->
+                UiText.NonTranslatable(value = bloodPressure.asUi().value)
             },
-            estimationLevel = heartRates.firstOrNull()?.metadata[Estimation]?.asUi()
+            measurementTitle = UiMeasurement.Type.BLOOD_PRESSURE.text,
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            drawableData = DrawableData.create(
+                dateRange = range,
+                timeZone = timeZone,
+                period = Period.SixHour,
+                measurements = bloodPressures,
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+            ),
+            estimationLevel = bloodPressures.firstOrNull()?.metadata[Estimation]?.asUi(),
+        )
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+    )
+
+    val bodyWeightFlow = measurementRepository.getMeasurementsFlowByRange(
+        from = range.start,
+        to = range.endInclusive,
+        type = BodyWeight::class,
+    ).map { bodyWeights ->
+        WeekCardState(
+            key = "BodyWeight",
+            measurementType = BodyWeight::class,
+            measurementUnit = UiText.NonTranslatable(value = "кг"),
+            measurementValue = bodyWeights.firstOrNull()?.let { measurement ->
+                UiText.NonTranslatable(value = measurement.asUi().value)
+            },
+            measurementTitle = UiMeasurement.Type.WEIGHT.text,
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            drawableData = DrawableData.create(
+                dateRange = range,
+                timeZone = timeZone,
+                period = Period.SixHour,
+                measurements = bodyWeights,
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+            ),
+            estimationLevel = bodyWeights.firstOrNull()?.metadata[Estimation]?.asUi(),
+        )
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+    )
+
+    val oxygenSaturationFlow = measurementRepository.getMeasurementsFlowByRange(
+        from = range.start,
+        to = range.endInclusive,
+        type = OxygenSaturation::class,
+    ).map { oxygenSaturations ->
+        WeekCardState(
+            key = "OxygenSaturation",
+            measurementType = OxygenSaturation::class,
+            measurementUnit = UiText.NonTranslatable(value = "%"),
+            measurementValue = oxygenSaturations.firstOrNull()?.let { measurement ->
+                UiText.NonTranslatable(value = measurement.asUi().value)
+            },
+            measurementTitle = UiMeasurement.Type.OXYGEN_SATURATION.text,
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            drawableData = DrawableData.create(
+                dateRange = range,
+                timeZone = timeZone,
+                period = Period.SixHour,
+                measurements = oxygenSaturations,
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+            ),
+            estimationLevel = oxygenSaturations.firstOrNull()?.metadata[Estimation]?.asUi(),
         )
     }.shareIn(
         scope = viewModelScope,
@@ -73,6 +160,9 @@ class HomeViewModel @Inject constructor(
     val weekCardStates = combine(
         // TODO: Bind by settings - shoplikpavel 2026-02-24
         heartRateFlow,
+        bodyWeightFlow,
+        bloodPressureFlow,
+        oxygenSaturationFlow,
         transform = { states -> states.toList() },
     ).shareIn(
         replay = 1,
@@ -84,7 +174,7 @@ class HomeViewModel @Inject constructor(
         Estimation.Level.LOW -> UiLevel.LOW
         Estimation.Level.NORMAL -> UiLevel.NORMAL
         Estimation.Level.HIGH -> UiLevel.HIGH
-        Estimation.Level.EXTRA_HIGH -> UiLevel.EXTRA_HIGH
+        Estimation.Level.CRITICAL -> UiLevel.CRITICAL
     }
 }
 
@@ -97,5 +187,5 @@ data class WeekCardState(
     val measurementTitle: UiText,
     val measurementIcon: UiIcon,
     val estimationLevel: UiLevel?,
-    val points: List<ChartPosition.Point>,
+    val drawableData: DrawableData,
 )

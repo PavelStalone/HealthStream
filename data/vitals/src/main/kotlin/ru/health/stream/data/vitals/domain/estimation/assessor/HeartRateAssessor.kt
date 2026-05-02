@@ -1,7 +1,6 @@
 package ru.health.stream.data.vitals.domain.estimation.assessor
 
 import jakarta.inject.Inject
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -18,17 +17,24 @@ class HeartRateAssessor @Inject constructor(
     private val measurementRepository: MeasurementRepository,
 ) : MeasurementAssessor<HeartRate> {
 
+    private val actualDuration = 20.days
+    private val restingHrDuration = 10.days
+
     override val type: KClass<HeartRate> = HeartRate::class
 
     private var restingHR: Float? = null
+    private var writeDate: Instant? = null
 
     suspend fun calculateRestingHR(start: Instant): Float {
         val buffer = restingHR
+        val isActual = writeDate?.minus(start)
+            ?.let { duration -> duration <= actualDuration }
+            ?: false
 
-        if (buffer != null) return buffer
+        if (buffer != null && isActual) return buffer
 
         val currentRestingHR = measurementRepository.getMeasurementsByRange(
-            from = start.minus(10.days),
+            from = start.minus(restingHrDuration),
             to = start,
             type = HeartRate::class,
         ).map { heartRate -> heartRate.pulse }
@@ -38,6 +44,7 @@ class HeartRateAssessor @Inject constructor(
 
         if (!currentRestingHR.isNaN()) {
             restingHR = currentRestingHR
+            writeDate = start
             return currentRestingHR
         }
 
@@ -59,7 +66,7 @@ class HeartRateAssessor @Inject constructor(
     ): Map<Estimation.Level, List<ClosedRange<Float>>> = runCatching {
         val user = requireNotNull(userRepository.getUser())
         val userAge = user.datePeriodAfterBirthday(
-            localDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            localDate = date.toLocalDateTime(TimeZone.currentSystemDefault()).date
         ).years
 
         val resting = calculateRestingHR(start = date)
@@ -78,7 +85,7 @@ class HeartRateAssessor @Inject constructor(
             Estimation.Level.LOW to listOf(0f..lowHR),
             Estimation.Level.NORMAL to listOf(lowHR..pulseByIntensity(0.5f)),
             Estimation.Level.HIGH to listOf(pulseByIntensity(0.5f)..pulseByIntensity(0.8f)),
-            Estimation.Level.EXTRA_HIGH to listOf(pulseByIntensity(0.8f)..Float.MAX_VALUE),
+            Estimation.Level.CRITICAL to listOf(pulseByIntensity(0.8f)..Float.MAX_VALUE),
         )
     }.getOrElse { emptyMap() }
 }

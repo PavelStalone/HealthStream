@@ -110,9 +110,9 @@ data class UiMeasurement(
 fun Measurement.asUi(): UiMeasurement {
     val (value, unit) = when (this) {
         is HeartRate -> "$pulse" to UiText.NonTranslatable(value = "уд/мин")
-        is BodyWeight -> "$weight" to UiText.NonTranslatable(value = "кг")
+        is BodyWeight -> "${weight.kg}" to UiText.NonTranslatable(value = "кг")
         is OxygenSaturation -> "$saturation" to UiText.NonTranslatable(value = "%")
-        is BloodPressure -> "$systolic/$diastolic" to UiText.NonTranslatable(value = "мм рт. ст.")
+        is BloodPressure -> "${systolic.toInt()}/${diastolic.toInt()}" to UiText.NonTranslatable(value = "мм рт. ст.")
         is RespirationRate -> "$rate" to UiText.NonTranslatable(value = "дых/мин")
         is BloodGlucose -> "${level.toInt()}" to UiText.NonTranslatable(value = "ммоль/л")
 
@@ -159,5 +159,5 @@ fun Estimation.asUi(): UiLevel = when (level) {
     Estimation.Level.LOW -> UiLevel.LOW
     Estimation.Level.NORMAL -> UiLevel.NORMAL
     Estimation.Level.HIGH -> UiLevel.HIGH
-    Estimation.Level.EXTRA_HIGH -> UiLevel.EXTRA_HIGH
+    Estimation.Level.CRITICAL -> UiLevel.CRITICAL
 }

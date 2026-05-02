@@ -37,18 +37,15 @@ import kotlinx.datetime.todayIn
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.data.personal.model.User
+import ru.health.stream.data.report.model.MeasurementSummary
+import ru.health.stream.data.report.usecase.CalculateMeasurementSummaryUseCase
 import ru.health.stream.data.vitals.domain.estimation.MeasurementAnalyzer
 import ru.health.stream.data.vitals.model.Estimation
-import ru.health.stream.data.vitals.model.Note
+import ru.health.stream.data.vitals.model.MeasurementGroup
 import ru.health.stream.data.vitals.model.Period
-import ru.health.stream.data.vitals.model.measurement.BloodGlucose
-import ru.health.stream.data.vitals.model.measurement.BloodPressure
-import ru.health.stream.data.vitals.model.measurement.BodyWeight
-import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.usecase.DateTransformerUseCase
+import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.drawable.Scatter
 import ru.health.stream.feature.chart.model.ChartPosition
@@ -57,7 +54,6 @@ import ru.health.stream.source.local.file.ReportGenerator
 import ru.health.stream.source.local.file.model.ACCENT
 import ru.health.stream.source.local.file.model.HEADER_BG
 import ru.health.stream.source.local.file.model.MeasurementSection
-import ru.health.stream.source.local.file.model.MeasurementSummary
 import ru.health.stream.source.local.file.model.ReportEstimation
 import ru.health.stream.source.local.file.model.STRIPE_BG
 import ru.health.stream.source.local.file.model.TEXT_MUTED
@@ -75,6 +71,8 @@ import kotlin.time.Duration.Companion.minutes
 internal class PdfReportGenerator(
     @ApplicationContext private val context: Context,
     private val measurementAnalyzer: MeasurementAnalyzer,
+    private val groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
+    private val calculateMeasurementSummaryUseCase: CalculateMeasurementSummaryUseCase,
 ) : ReportGenerator {
 
     override suspend fun generate(
@@ -125,7 +123,8 @@ internal class PdfReportGenerator(
                         doc = doc,
                         font = font,
                         fontBold = fontBold,
-                        summaries = measurementsSummary.values.toList(),
+                        timeZone = timeZone,
+                        summaries = measurementsSummary,
                     )
 
                     measurementSections.forEach { (type, sections) ->
@@ -283,6 +282,7 @@ internal class PdfReportGenerator(
         doc: Document,
         font: PdfFont,
         fontBold: PdfFont,
+        timeZone: TimeZone,
         summaries: List<MeasurementSummary>,
     ) {
         doc.add(
@@ -319,9 +319,12 @@ internal class PdfReportGenerator(
         summaries.forEachIndexed { i, summary ->
             val backgroundColor = if (i % 2 == 0) STRIPE_BG else null
 
+            val section = summary.group.asMeasurementSection(timeZone)
+            val group = section.measurementGroup
+
             val cs = listOf(
                 Cell().add(
-                    Paragraph(summary.section.typeName)
+                    Paragraph(section.typeName)
                         .setFont(fontBold)
                         .setFontSize(9f)
                 ).defaultCell(backgroundColor = backgroundColor),
@@ -329,20 +332,20 @@ internal class PdfReportGenerator(
                 Cell().add(countParagraph(count = summary.counts, font = font))
                     .defaultCell(backgroundColor = backgroundColor),
 
-                *ReportEstimation.entries.map { estimation ->
-                    val count = summary.estimationsCount[estimation] ?: 0
+                *Estimation.Level.entries.map { estimationLevel ->
+                    val count = summary.estimationsCount[estimationLevel] ?: 0
 
                     Cell().add(
                         countParagraph(
                             count = count,
                             font = if (count > 0) fontBold else font,
-                            fontColor = if (count > 0) estimation.color else null,
+                            fontColor = if (count > 0) estimationLevel.asReportEstimation().color else null,
                         )
                     ).defaultCell(backgroundColor = backgroundColor)
                 }.toTypedArray(),
 
                 Cell().add(
-                    Paragraph(summary.section.valueText)
+                    Paragraph(group.aggregateValue + " " + section.unit)
                         .setFont(font)
                         .setFontSize(9f)
                 ).defaultCell(backgroundColor = backgroundColor),
@@ -367,14 +370,15 @@ internal class PdfReportGenerator(
                 )
             ).defaultCell(backgroundColor = backgroundColor),
 
-            *ReportEstimation.entries.map { estimation ->
-                val count = summaries.mapNotNull { cell -> cell.estimationsCount[estimation] }.sum()
+            *Estimation.Level.entries.map { estimationLevel ->
+                val count =
+                    summaries.mapNotNull { cell -> cell.estimationsCount[estimationLevel] }.sum()
 
                 Cell().add(
                     countParagraph(
                         count = count,
                         font = fontBold,
-                        fontColor = if (count > 0) estimation.color else null,
+                        fontColor = if (count > 0) estimationLevel.asReportEstimation().color else null,
                     )
                 ).defaultCell(backgroundColor = backgroundColor)
             }.toTypedArray(),
@@ -411,7 +415,7 @@ internal class PdfReportGenerator(
                 .setFontColor(TEXT_MUTED)
         )
 
-        val cw = floatArrayOf(30f, 90f, 80f, 65f, 120f)
+        val cw = floatArrayOf(20f, 80f, 80f, 60f, 120f)
 
         var i = 1
 
@@ -435,6 +439,7 @@ internal class PdfReportGenerator(
             }
 
             chunk.forEach { section ->
+                val group = section.measurementGroup
                 val defaultBackgroundColor = if (i % 2 == 0) STRIPE_BG else null
                 val backgroundColor =
                     section.reportEstimation?.backgroundColor ?: defaultBackgroundColor
@@ -456,10 +461,11 @@ internal class PdfReportGenerator(
                             .setFontSize(9f)
                     )
                         .setPadding(5f)
-                        .setBackgroundColor(backgroundColor),
+                        .setBackgroundColor(backgroundColor)
+                        .setTextAlignment(TextAlignment.CENTER),
 
                     Cell().add(
-                        Paragraph(section.valueText)
+                        Paragraph(group.aggregateValue + " " + section.unit)
                             .setFont(font)
                             .setFontSize(9f)
                     )
@@ -478,7 +484,7 @@ internal class PdfReportGenerator(
                         .setTextAlignment(TextAlignment.CENTER),
 
                     Cell().add(
-                        Paragraph(section.note ?: "")
+                        Paragraph(group.note ?: "")
                             .setFont(font)
                             .setFontSize(8f)
                             .setFontColor(TEXT_MUTED)
@@ -531,7 +537,7 @@ internal class PdfReportGenerator(
                 .setFontColor(HEADER_BG)
         )
         doc.add(
-            Paragraph("Данные представлены в сгруппированном виде. Диапазоны показывают минимальные и максимальные значения, а линия — их среднее арифметическое")
+            Paragraph("Данные представлены в сгруппированном виде. Диапазоны показывают минимальные и максимальные значения, а линия их среднее арифметическое")
                 .setFont(font)
                 .setFontSize(10f)
                 .setMarginBottom(16f)
@@ -539,132 +545,134 @@ internal class PdfReportGenerator(
         )
 
         sections.forEach { section ->
+            val group = section.measurementGroup
+
             val x = dateTransformerUseCase(
-                section.dateRange.start.plus((section.dateRange.endInclusive - section.dateRange.start) / 2)
+                group.dateRange.start.plus((group.dateRange.endInclusive - group.dateRange.start) / 2)
             )
 
-            when (section) {
-                is MeasurementSection.BloodGlucose -> {
+            when (group) {
+                is MeasurementGroup.BloodGlucose -> {
                     val scatterPositions = positionMap.getOrPut(0) { mutableListOf() }
                     val meanPositions = positionMap.getOrPut(1) { mutableListOf() }
 
                     meanPositions.add(
                         ChartPosition.Point(
                             x = x,
-                            y = section.levelMean.mean.toFloat(),
+                            y = group.mean.value.toFloat(),
                         )
                     )
                     scatterPositions.add(
                         ChartPosition.Range.Vertical(
                             x = x,
                             y = FloatFloatPair(
-                                first = section.levelRange.start.toFloat(),
-                                second = section.levelRange.endInclusive.toFloat(),
+                                first = group.range.start.toFloat(),
+                                second = group.range.endInclusive.toFloat(),
                             )
                         )
                     )
 
-                    yMin = min(section.levelRange.start.toFloat(), yMin)
-                    yMax = max(section.levelRange.endInclusive.toFloat(), yMax)
+                    yMin = min(group.range.start.toFloat(), yMin)
+                    yMax = max(group.range.endInclusive.toFloat(), yMax)
                 }
 
-                is MeasurementSection.BodyWeight -> {
+                is MeasurementGroup.BodyWeight -> {
                     val scatterPositions = positionMap.getOrPut(0) { mutableListOf() }
                     val meanPositions = positionMap.getOrPut(1) { mutableListOf() }
 
                     meanPositions.add(
                         ChartPosition.Point(
                             x = x,
-                            y = section.weightMean.mean.toFloat(),
+                            y = group.mean.value.toFloat(),
                         )
                     )
                     scatterPositions.add(
                         ChartPosition.Range.Vertical(
                             x = x,
                             y = FloatFloatPair(
-                                first = section.weightRange.start,
-                                second = section.weightRange.endInclusive,
+                                first = group.range.start,
+                                second = group.range.endInclusive,
                             )
                         )
                     )
 
-                    yMin = min(section.weightRange.start, yMin)
-                    yMax = max(section.weightRange.endInclusive, yMax)
+                    yMin = min(group.range.start, yMin)
+                    yMax = max(group.range.endInclusive, yMax)
                 }
 
-                is MeasurementSection.HeartRate -> {
+                is MeasurementGroup.HeartRate -> {
                     val scatterPositions = positionMap.getOrPut(0) { mutableListOf() }
                     val meanPositions = positionMap.getOrPut(1) { mutableListOf() }
 
                     meanPositions.add(
                         ChartPosition.Point(
                             x = x,
-                            y = section.pulseMean.mean.toFloat(),
+                            y = group.mean.value.toFloat(),
                         )
                     )
                     scatterPositions.add(
                         ChartPosition.Range.Vertical(
                             x = x,
                             y = FloatFloatPair(
-                                first = section.pulseRange.start.toFloat(),
-                                second = section.pulseRange.endInclusive.toFloat(),
+                                first = group.range.start.toFloat(),
+                                second = group.range.endInclusive.toFloat(),
                             )
                         )
                     )
 
-                    yMin = min(section.pulseRange.start.toFloat(), yMin)
-                    yMax = max(section.pulseRange.endInclusive.toFloat(), yMax)
+                    yMin = min(group.range.start.toFloat(), yMin)
+                    yMax = max(group.range.endInclusive.toFloat(), yMax)
                 }
 
-                is MeasurementSection.OxygenSaturation -> {
+                is MeasurementGroup.OxygenSaturation -> {
                     val scatterPositions = positionMap.getOrPut(0) { mutableListOf() }
                     val meanPositions = positionMap.getOrPut(1) { mutableListOf() }
 
                     meanPositions.add(
                         ChartPosition.Point(
                             x = x,
-                            y = section.saturationMean.mean.toFloat(),
+                            y = group.mean.value.toFloat(),
                         )
                     )
                     scatterPositions.add(
                         ChartPosition.Range.Vertical(
                             x = x,
                             y = FloatFloatPair(
-                                first = section.saturationRange.start,
-                                second = section.saturationRange.endInclusive,
+                                first = group.range.start,
+                                second = group.range.endInclusive,
                             )
                         )
                     )
 
-                    yMin = min(section.saturationRange.start, yMin)
-                    yMax = max(section.saturationRange.endInclusive, yMax)
+                    yMin = min(group.range.start, yMin)
+                    yMax = max(group.range.endInclusive, yMax)
                 }
 
-                is MeasurementSection.RespirationRate -> {
+                is MeasurementGroup.RespirationRate -> {
                     val scatterPositions = positionMap.getOrPut(0) { mutableListOf() }
                     val meanPositions = positionMap.getOrPut(1) { mutableListOf() }
 
                     meanPositions.add(
                         ChartPosition.Point(
                             x = x,
-                            y = section.rateMean.mean.toFloat(),
+                            y = group.mean.value.toFloat(),
                         )
                     )
                     scatterPositions.add(
                         ChartPosition.Range.Vertical(
                             x = x,
                             y = FloatFloatPair(
-                                first = section.rateRange.start.toFloat(),
-                                second = section.rateRange.endInclusive.toFloat(),
+                                first = group.range.start.toFloat(),
+                                second = group.range.endInclusive.toFloat(),
                             )
                         )
                     )
 
-                    yMin = min(section.rateRange.start.toFloat(), yMin)
-                    yMax = max(section.rateRange.endInclusive.toFloat(), yMax)
+                    yMin = min(group.range.start.toFloat(), yMin)
+                    yMax = max(group.range.endInclusive.toFloat(), yMax)
                 }
 
-                is MeasurementSection.BloodPressure -> {
+                is MeasurementGroup.BloodPressure -> {
                     val systolicScatterPositions = positionMap.getOrPut(0) { mutableListOf() }
                     val systolicMeanPositions = positionMap.getOrPut(1) { mutableListOf() }
                     val diastolicScatterPositions = positionMap.getOrPut(2) { mutableListOf() }
@@ -673,21 +681,21 @@ internal class PdfReportGenerator(
                     systolicMeanPositions.add(
                         ChartPosition.Point(
                             x = x,
-                            y = section.systolicMean.mean.toFloat(),
+                            y = group.systolicMean.value.toFloat(),
                         )
                     )
                     diastolicMeanPositions.add(
                         ChartPosition.Point(
                             x = x,
-                            y = section.diastolicMean.mean.toFloat(),
+                            y = group.diastolicMean.value.toFloat(),
                         )
                     )
                     systolicScatterPositions.add(
                         ChartPosition.Range.Vertical(
                             x = x,
                             y = FloatFloatPair(
-                                first = section.systolicRange.start,
-                                second = section.systolicRange.endInclusive,
+                                first = group.systolicRange.start,
+                                second = group.systolicRange.endInclusive,
                             )
                         )
                     )
@@ -695,19 +703,26 @@ internal class PdfReportGenerator(
                         ChartPosition.Range.Vertical(
                             x = x,
                             y = FloatFloatPair(
-                                first = section.diastolicRange.start,
-                                second = section.diastolicRange.endInclusive,
+                                first = group.diastolicRange.start,
+                                second = group.diastolicRange.endInclusive,
                             )
                         )
                     )
 
-                    yMin = min(section.systolicRange.start, yMin)
-                    yMin = min(section.diastolicRange.start, yMin)
-                    yMax = max(section.systolicRange.endInclusive, yMax)
-                    yMax = max(section.diastolicRange.endInclusive, yMax)
+                    yMin = min(group.systolicRange.start, yMin)
+                    yMin = min(group.diastolicRange.start, yMin)
+                    yMax = max(group.systolicRange.endInclusive, yMax)
+                    yMax = max(group.diastolicRange.endInclusive, yMax)
                 }
             }
         }
+
+        val step = 10f
+        val start = floor(yMin / step) * step
+        val end = ceil(yMax / step) * step
+        val yLabels = generateSequence(seed = start) { y -> y + step }
+            .takeWhile { y -> y <= end }
+            .toList()
 
         val drawScope = PdfDrawScope(
             pdfCanvas = c,
@@ -718,15 +733,8 @@ internal class PdfReportGenerator(
         val chart = PdfChartDrawScopeImpl(
             drawScope = drawScope,
             widthRange = 0f..1f,
-            heightRange = yMin..yMax,
+            heightRange = start..end,
         )
-
-        val step = 10f
-        val start = floor(yMin / step) * step
-        val end = ceil(yMax / step) * step
-        val yLabels = generateSequence(seed = start) { y -> y + step }
-            .takeWhile { y -> y <= end }
-            .toList()
 
         val dateTimeFormatter = when (period) {
             Period.OneHour -> LocalDateTime.Format {
@@ -775,16 +783,31 @@ internal class PdfReportGenerator(
             lastRange = period.calculateRange(lastRange.endInclusive.plus(1.minutes), timeZone)
         } while (lastRange.start <= lastTime)
 
+        val middleLine = areas[ReportEstimation.LOW]?.first()?.endInclusive?.let { top ->
+            ReportEstimation.entries.asReversed().asSequence()
+                .mapNotNull { level -> areas[level]?.drop(1)?.lastOrNull()?.start }
+                .firstOrNull { bottom -> top >= bottom }
+                ?.let { bottom -> (top + bottom) / 2f }
+        }
+
         with(chart) {
             val yLabelRange = yLabels.first()..yLabels.last()
 
             areas.forEach { (estimation, areaList) ->
-                areaList.forEach { area ->
+                areaList.forEachIndexed { index, area ->
                     val colors = estimation.color.colorValue
 
                     if (area.start in yLabelRange || area.endInclusive in yLabelRange) {
-                        val yMaxBound = min(area.endInclusive.yChart, yLabels.last().yChart)
-                        val yMinBound = max(area.start.yChart, yLabels.first().yChart)
+                        var yMaxBound = min(area.endInclusive.yChart, yLabels.last().yChart)
+                        var yMinBound = max(area.start.yChart, yLabels.first().yChart)
+
+                        middleLine?.let { line ->
+                            if (index == 0) {
+                                yMinBound = max(yMinBound, line.yChart)
+                            } else {
+                                yMaxBound = min(yMaxBound, line.yChart)
+                            }
+                        }
 
                         drawRect(
                             size = size.copy(height = yMaxBound - yMinBound),
@@ -859,7 +882,9 @@ internal class PdfReportGenerator(
 
                     points.forEach { point ->
                         val color = areas.firstNotNullOfOrNull { (estimation, areas) ->
-                            if (areas.any { area -> point.y in area }) {
+                            if (areas.drop(if (i % 3 != 0) 0 else 1)
+                                    .any { area -> point.y in area }
+                            ) {
                                 val colors = estimation.color.colorValue
 
                                 Color(
@@ -895,41 +920,6 @@ internal class PdfReportGenerator(
         )
     }
 
-    private fun <T : Comparable<T>> ClosedRange<T>.changeRange(value: T): ClosedRange<T> {
-        val newStart = if (value < start) value else start
-        val newEnd = if (value > endInclusive) value else endInclusive
-
-        return newStart..newEnd
-    }
-
-    private fun <T : Comparable<T>> ClosedRange<T>.changeRange(
-        value: ClosedRange<T>
-    ): ClosedRange<T> = changeRange(value.start).changeRange(value.endInclusive)
-
-    private fun String?.merge(other: String?): String? = when {
-        this == null -> other
-        other == null -> this
-        else -> "$this | $other"
-    }
-
-    private fun ReportEstimation?.changeByPriority(other: ReportEstimation?): ReportEstimation? =
-        when {
-            this == null -> other
-            other == null -> this
-            (ordinal < other.ordinal && other != ReportEstimation.NORMAL) -> other
-            else -> this
-        }
-
-    private fun FloatFloatPair.changeByMin(other: FloatFloatPair): FloatFloatPair = when {
-        first - second < other.first - other.second -> this
-        else -> other
-    }
-
-    private fun FloatFloatPair.changeByMax(other: FloatFloatPair): FloatFloatPair = when {
-        first - second > other.first - other.second -> this
-        else -> other
-    }
-
     private fun getPeriodByRange(
         dateRange: ClosedRange<Instant>
     ): Period {
@@ -943,156 +933,27 @@ internal class PdfReportGenerator(
         }
     }
 
-    private fun MeasurementSection.mergeWithMeasurement(measurement: Measurement): MeasurementSection {
-        val mNote = measurement[Note]?.description
-        val mEstimation = measurement[Estimation]?.level?.asReportEstimation()
-
-        return when (this) {
-            is MeasurementSection.BloodGlucose -> copy(
-                note = note.merge(mNote),
-                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                levelMean = levelMean.add((measurement as BloodGlucose).level),
-                levelRange = levelRange.changeRange(measurement.level),
-            )
-
-            is MeasurementSection.BloodPressure -> copy(
-                note = note.merge(mNote),
-                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                systolicMean = systolicMean.add((measurement as BloodPressure).systolic.toDouble()),
-                diastolicMean = systolicMean.add(measurement.diastolic.toDouble()),
-                systolicRange = systolicRange.changeRange(measurement.systolic),
-                diastolicRange = diastolicRange.changeRange(measurement.diastolic),
-                minBpByDifference = minBpByDifference.changeByMin(measurement.run {
-                    FloatFloatPair(systolic, diastolic)
-                }),
-                maxBpByDifference = maxBpByDifference.changeByMax(measurement.run {
-                    FloatFloatPair(systolic, diastolic)
-                }),
-            )
-
-            is MeasurementSection.BodyWeight -> copy(
-                note = note.merge(mNote),
-                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                weightMean = weightMean.add((measurement as BodyWeight).weight.kg.toDouble()),
-                weightRange = weightRange.changeRange(measurement.weight.kg),
-            )
-
-            is MeasurementSection.HeartRate -> copy(
-                note = note.merge(mNote),
-                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                pulseMean = pulseMean.add((measurement as HeartRate).pulse.toDouble()),
-                pulseRange = pulseRange.changeRange(measurement.pulse),
-            )
-
-            is MeasurementSection.OxygenSaturation -> copy(
-                note = note.merge(mNote),
-                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                saturationMean = saturationMean.add((measurement as OxygenSaturation).saturation.toDouble()),
-                saturationRange = saturationRange.changeRange(measurement.saturation),
-            )
-
-            is MeasurementSection.RespirationRate -> copy(
-                note = note.merge(mNote),
-                reportEstimation = reportEstimation.changeByPriority(mEstimation),
-                rateMean = rateMean.add((measurement as RespirationRate).rate),
-                rateRange = rateRange.changeRange(measurement.rate),
-            )
-        }
-    }
-
-    private fun MeasurementSummary.mergeWithMeasurementSection(
-        measurement: Measurement,
-        measurementSection: MeasurementSection,
-    ): MeasurementSummary {
-        val mEstimation = measurement[Estimation]?.level?.asReportEstimation()
-
-        return MeasurementSummary(
-            counts = counts + 1,
-            section = with(section) {
-                when (this) {
-                    is MeasurementSection.BloodGlucose -> copy(
-                        levelRange = levelRange.changeRange((measurementSection as MeasurementSection.BloodGlucose).levelRange),
-                    )
-
-                    is MeasurementSection.BloodPressure -> copy(
-                        systolicRange = systolicRange.changeRange((measurementSection as MeasurementSection.BloodPressure).systolicRange),
-                        diastolicRange = diastolicRange.changeRange(measurementSection.diastolicRange),
-                        minBpByDifference = minBpByDifference.changeByMin(measurementSection.minBpByDifference),
-                        maxBpByDifference = maxBpByDifference.changeByMax(measurementSection.maxBpByDifference),
-                    )
-
-                    is MeasurementSection.BodyWeight -> copy(
-                        weightRange = weightRange.changeRange((measurementSection as MeasurementSection.BodyWeight).weightRange),
-                    )
-
-                    is MeasurementSection.HeartRate -> copy(
-                        pulseRange = pulseRange.changeRange((measurementSection as MeasurementSection.HeartRate).pulseRange),
-                    )
-
-                    is MeasurementSection.OxygenSaturation -> copy(
-                        saturationRange = saturationRange.changeRange((measurementSection as MeasurementSection.OxygenSaturation).saturationRange),
-                    )
-
-                    is MeasurementSection.RespirationRate -> copy(
-                        rateRange = rateRange.changeRange((measurementSection as MeasurementSection.RespirationRate).rateRange),
-                    )
-                }
-            },
-            estimationsCount = mEstimation?.let { estimation ->
-                estimationsCount + (estimation to (estimationsCount[estimation] ?: 0) + 1)
-            } ?: estimationsCount
-        )
-    }
 
     private fun calculateMeasurementsData(
         period: Period,
         timeZone: TimeZone,
         measurements: List<Measurement>,
-    ): Pair<Map<KClass<out Measurement>, List<MeasurementSection>>, Map<KClass<out MeasurementSection>, MeasurementSummary>> {
-        val measurementsSummary: MutableMap<KClass<out MeasurementSection>, MeasurementSummary> =
-            mutableMapOf()
-        val measurementSections: MutableMap<KClass<out Measurement>, MutableList<MeasurementSection>> =
-            mutableMapOf()
+    ): Pair<Map<KClass<out Measurement>, List<MeasurementSection>>, List<MeasurementSummary>> {
+        val measurementGroupsWithType = groupMeasurementByPeriodUseCase(
+            period = period,
+            timeZone = timeZone,
+            measurements = measurements,
+        )
+        val measurementsSummariesWithType =
+            calculateMeasurementSummaryUseCase(measurements = measurements)
 
-        measurements.forEach { measurement ->
-            val periodRange = period.calculateRange(
-                date = measurement.createdAt,
-                timeZone = timeZone,
-            )
-
-            val sections =
-                measurementSections.getOrPut(key = measurement::class) { mutableListOf() }
-            val lastSection = sections.lastOrNull()
-
-            val newSection = if (lastSection != null && lastSection.dateRange == periodRange) {
-                sections.removeAt(sections.lastIndex)
-                lastSection.mergeWithMeasurement(measurement)
-            } else {
-                measurement.asMeasurementSection(
-                    timeZone = timeZone,
-                    measurementDateRange = periodRange,
-                )
+        val measurementSections = measurementGroupsWithType.mapValues { (_, measurementGroups) ->
+            measurementGroups.map { measurementGroup ->
+                measurementGroup.asMeasurementSection(timeZone = timeZone)
             }
-
-            sections.add(newSection)
-
-            val mEstimation = measurement[Estimation]?.level?.asReportEstimation()
-            val newSummary = measurementsSummary[newSection::class]
-                ?.mergeWithMeasurementSection(
-                    measurement = measurement,
-                    measurementSection = newSection,
-                )
-                ?: MeasurementSummary(
-                    counts = 1,
-                    section = newSection,
-                    estimationsCount = mEstimation?.let { estimation -> mapOf(estimation to 1) }
-                        ?: emptyMap()
-                )
-
-            measurementsSummary[newSection::class] = newSummary
         }
 
-        return measurementSections to measurementsSummary
+        return measurementSections to measurementsSummariesWithType.values.toList()
     }
 
     private fun Cell.defaultCell(

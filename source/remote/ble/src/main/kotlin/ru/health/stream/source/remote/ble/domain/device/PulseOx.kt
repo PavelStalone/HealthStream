@@ -62,7 +62,10 @@ internal class PulseOx(
         logI("onInvalidated called")
 
         measurementBuilder?.build()
-            ?.let { measurement -> measurementSource.sendMeasurement(measurement) }
+            ?.let { (heartRate, oxygenSaturation) ->
+                measurementSource.sendMeasurement(heartRate)
+                measurementSource.sendMeasurement(oxygenSaturation)
+            }
         measurementBuilder = null
     }
 

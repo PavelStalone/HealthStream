@@ -12,7 +12,7 @@ internal data class EstimationEntity(
         LOW,
         NORMAL,
         HIGH,
-        EXTRA_HIGH,
+        CRITICAL,
         ;
     }
 }

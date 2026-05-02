@@ -3,10 +3,9 @@ package ru.health.stream.feature.measurement.impl.presentation.viewmodel
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
@@ -15,36 +14,35 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
-import ru.health.stream.core.ui.model.UiIcon
-import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiMeasurement
-import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asUi
+import ru.health.stream.data.vitals.model.Period
+import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.repository.MeasurementRepository
-import ru.health.stream.feature.measurement.impl.domain.DrawableData
-import ru.health.stream.feature.measurement.impl.domain.GroupMeasurementUseCase
+import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
+import ru.health.stream.feature.chart.model.DrawableData
 import ru.health.stream.feature.measurement.impl.presentation.model.UiPeriod
 import ru.health.stream.feature.measurement.impl.presentation.model.asPeriod
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
 
-@HiltViewModel(assistedFactory = MeasurementViewModel.Factory::class)
-internal class MeasurementViewModel @AssistedInject constructor(
+@HiltViewModel
+internal class MeasurementViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
-    @Assisted private val period: UiPeriod,
-    @Assisted private val measurementType: KClass<out Measurement>,
+    groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
 ) : ViewModel() {
 
-    private val periodFlow = MutableStateFlow(period)
-    private val measurementTypeFlow = MutableStateFlow(measurementType)
+    private val periodFlow: MutableStateFlow<UiPeriod> = MutableStateFlow(UiPeriod.Week)
+    private val measurementTypeFlow: MutableStateFlow<KClass<out Measurement>> =
+        MutableStateFlow(HeartRate::class)
 
     private val _expandedMeasurementsFlow = MutableStateFlow<Set<String>>(emptySet())
     val expandedMeasurementsFlow = _expandedMeasurementsFlow.asStateFlow()
@@ -54,18 +52,22 @@ internal class MeasurementViewModel @AssistedInject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
-        initialValue = period.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY)
+        initialValue = periodFlow.value.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY)
     )
 
-    private val measurementFlow = combine(
-        convertedPeriodFlow,
-        measurementTypeFlow,
-    ) { period, measurementType ->
-        val range = period.calculateRange(
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val rangeFlow = convertedPeriodFlow.mapLatest { period ->
+        period.calculateRange(
             date = Clock.System.now(),
-            timeZone = TimeZone.currentSystemDefault()
+            timeZone = TimeZone.currentSystemDefault(),
         )
+    }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val measurementFlow = combine(
+        rangeFlow,
+        measurementTypeFlow,
+    ) { range, measurementType ->
         range to measurementType
     }
         .distinctUntilChanged()
@@ -83,17 +85,24 @@ internal class MeasurementViewModel @AssistedInject constructor(
         )
 
     val measurementChartStates = combine(
+        rangeFlow,
         measurementFlow,
         convertedPeriodFlow,
-    ) { measurements, period ->
+    ) { range, measurements, period ->
+        val groupPeriod = when (period) {
+            is Period.Week -> Period.SixHour
+            Period.Month -> Period.Day
+            Period.Year -> Period.Month
+            else -> Period.OneHour
+        }
+
         MeasurementsChartState.Main(
             drawableData = DrawableData.create(
-                period = period,
+                period = groupPeriod,
+                dateRange = range,
                 measurements = measurements,
-                dateNow = Clock.System.now(),
-                coroutineScope = viewModelScope,
                 timeZone = TimeZone.currentSystemDefault(),
-                groupMeasurementUseCase = GroupMeasurementUseCase(),
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
             )
         )
     }.stateIn(
@@ -109,8 +118,8 @@ internal class MeasurementViewModel @AssistedInject constructor(
             }
             .map { (date, measurements) ->
                 MeasurementGroup(
+                    date = date,
                     id = date.toString(),
-                    date = date.atStartOfDayIn(TimeZone.currentSystemDefault()),
                     measurements = measurements,
                 )
             }
@@ -133,13 +142,8 @@ internal class MeasurementViewModel @AssistedInject constructor(
         periodFlow.value = period
     }
 
-    @AssistedFactory
-    interface Factory {
-
-        fun create(
-            period: UiPeriod,
-            measurementType: KClass<out Measurement>,
-        ): MeasurementViewModel
+    fun changeMeasurementType(measurementType: KClass<out Measurement>) {
+        measurementTypeFlow.value = measurementType
     }
 }
 
@@ -156,7 +160,7 @@ internal sealed interface MeasurementsState {
 @Immutable
 internal data class MeasurementGroup(
     val id: String,
-    val date: Instant,
+    val date: LocalDate,
     val measurements: List<UiMeasurement>
 )
 

@@ -49,6 +49,7 @@ androidx-work = "2.11.2"
 
 com-github-movisens-smart-gatt = "3.6.0"
 io-github-automapper = "0.11.0"
+collectionJvm = "1.6.0"
 
 [libraries]
 io-github-automapper-processor = { group = "io.github.jacksever.automapper", name = "processor", version.ref = "io-github-automapper" }
@@ -123,6 +124,7 @@ google-dagger-hilt-android = { module = "com.google.dagger:hilt-android", versio
 androidx-hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidx-hilt-ext" }
 androidx-hilt-ext-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "androidx-hilt-ext" }
 androidx-hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidx-hilt-ext" }
+androidx-collection-jvm = { group = "androidx.collection", name = "collection-jvm", version.ref = "collectionJvm" }
 google-dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "com-google-dagger" } # instrumentation testing
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt-navigation-compose" }
 

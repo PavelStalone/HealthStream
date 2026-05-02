@@ -19,8 +19,10 @@ import ru.health.stream.core.monitor.logV
 import ru.health.stream.data.personal.model.User
 import ru.health.stream.data.report.api.ReportFileGenerator
 import ru.health.stream.data.report.model.ReportFormat
+import ru.health.stream.data.report.usecase.CalculateMeasurementSummaryUseCase
 import ru.health.stream.data.vitals.domain.estimation.MeasurementAnalyzer
 import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
 import ru.health.stream.source.local.file.pdf.PdfReportGenerator
 import java.net.URI
 import javax.inject.Inject
@@ -29,11 +31,15 @@ internal class ReportFileGeneratorImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val measurementAnalyzer: MeasurementAnalyzer,
     @Dispatcher(Dispatcher.IO) val ioDispatcher: CoroutineDispatcher,
+    private val groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
+    private val calculateMeasurementSummaryUseCase: CalculateMeasurementSummaryUseCase,
 ) : ReportFileGenerator {
 
     private val pdfGenerator: ReportGenerator = PdfReportGenerator(
         context = context,
         measurementAnalyzer = measurementAnalyzer,
+        groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+        calculateMeasurementSummaryUseCase = calculateMeasurementSummaryUseCase,
     )
     private val localDateTimeFormatter = LocalDateTime.Format {
         dayOfMonth()

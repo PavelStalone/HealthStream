@@ -23,7 +23,7 @@ internal object DeviceModule {
         measurementSource: BleMeasurementSource
     ): Set<BleDevice> = setOf(
         PulseOx(measurementSource = measurementSource),
-        TMB2084(),
-        GBS2012B(),
+        TMB2084(measurementSource = measurementSource),
+        GBS2012B(measurementSource = measurementSource),
     )
 }

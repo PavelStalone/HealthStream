@@ -23,7 +23,7 @@ internal enum class ReportEstimation(
         text = "Повышено",
         backgroundColor = HIGH_LEVEL_CONTAINER,
     ),
-    EXTRA_HIGH(
+    CRITICAL(
         color = RED,
         text = "Критично",
         backgroundColor = EXTRA_HIGH_LEVEL_CONTAINER,
@@ -35,5 +35,5 @@ internal fun Estimation.Level.asReportEstimation(): ReportEstimation = when (thi
     Estimation.Level.LOW -> ReportEstimation.LOW
     Estimation.Level.NORMAL -> ReportEstimation.NORMAL
     Estimation.Level.HIGH -> ReportEstimation.HIGH
-    Estimation.Level.EXTRA_HIGH -> ReportEstimation.EXTRA_HIGH
+    Estimation.Level.CRITICAL -> ReportEstimation.CRITICAL
 }

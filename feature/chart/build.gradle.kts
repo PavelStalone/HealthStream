@@ -6,3 +6,9 @@ plugins {
 android {
     namespace = "ru.health.stream.feature.chart"
 }
+
+dependencies {
+    implementation(projects.data.vitals)
+
+    implementation(projects.core.common)
+}
