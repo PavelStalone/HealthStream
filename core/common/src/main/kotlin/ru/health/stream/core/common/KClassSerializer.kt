@@ -9,6 +9,7 @@ import kotlinx.serialization.encoding.Encoder
 import kotlin.reflect.KClass
 
 object KClassSerializer : KSerializer<KClass<*>> {
+
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("KClass", PrimitiveKind.STRING)
 

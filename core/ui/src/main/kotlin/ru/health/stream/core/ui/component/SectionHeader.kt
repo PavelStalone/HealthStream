@@ -15,10 +15,9 @@ fun SectionHeader(
     Text(
         modifier = modifier,
         text = text.uppercase(),
-        style = MaterialTheme.typography.labelMedium.copy(
-            letterSpacing = 1.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-        ),
+        letterSpacing = 1.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.labelMedium,
     )
 }
