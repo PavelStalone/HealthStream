@@ -6,18 +6,23 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -40,94 +45,95 @@ internal class MeasurementViewModel @Inject constructor(
     groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
 ) : ViewModel() {
 
-    private val periodFlow: MutableStateFlow<UiPeriod> = MutableStateFlow(UiPeriod.Week)
-    private val measurementTypeFlow: MutableStateFlow<KClass<out Measurement>> =
-        MutableStateFlow(HeartRate::class)
+    private val periodFlow = MutableStateFlow<UiPeriod>(UiPeriod.Week)
+    private val measurementTypeFlow = MutableStateFlow<KClass<out Measurement>>(HeartRate::class)
 
     private val _expandedMeasurementsFlow = MutableStateFlow<Set<String>>(emptySet())
     val expandedMeasurementsFlow = _expandedMeasurementsFlow.asStateFlow()
 
-    val convertedPeriodFlow = periodFlow.map { period ->
-        period.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = periodFlow.value.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY)
-    )
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val rangeFlow = convertedPeriodFlow.mapLatest { period ->
-        period.calculateRange(
+    private val queryFlow = combine(
+        periodFlow,
+        measurementTypeFlow,
+    ) { uiPeriod, type ->
+        val period = uiPeriod.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY)
+        val range = period.calculateRange(
             date = Clock.System.now(),
             timeZone = TimeZone.currentSystemDefault(),
         )
-    }
+
+        Query(
+            period = period,
+            uiPeriod = uiPeriod,
+            range = range,
+            type = type
+        )
+    }.distinctUntilChanged()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val measurementFlow = combine(
-        rangeFlow,
-        measurementTypeFlow,
-    ) { range, measurementType ->
-        range to measurementType
-    }
-        .distinctUntilChanged()
-        .flatMapLatest { (range, measurementType) ->
+    private val measurementFlow = queryFlow
+        .flatMapLatest { query ->
             measurementRepository.getMeasurementsFlowByRange(
-                from = range.start,
-                to = range.endInclusive,
-                type = measurementType,
+                from = query.range.start,
+                to = query.range.endInclusive,
+                type = query.type,
             )
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = emptyList()
-        )
 
-    val measurementChartStates = combine(
-        rangeFlow,
-        measurementFlow,
-        convertedPeriodFlow,
-    ) { range, measurements, period ->
-        val groupPeriod = when (period) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val mainMeasurementsStateFlow = measurementFlow.mapLatest { measurements ->
+        val query = queryFlow.first()
+        val timeZone = TimeZone.currentSystemDefault()
+        val groupPeriod = when (query.period) {
             is Period.Week -> Period.SixHour
             Period.Month -> Period.Day
             Period.Year -> Period.Month
             else -> Period.OneHour
         }
 
-        MeasurementsChartState.Main(
-            drawableData = DrawableData.create(
-                period = groupPeriod,
-                dateRange = range,
-                measurements = measurements,
-                timeZone = TimeZone.currentSystemDefault(),
-                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
-            )
+        val drawableData = DrawableData.create(
+            timeZone = timeZone,
+            period = groupPeriod,
+            dateRange = query.range,
+            measurements = measurements,
+            groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 3.seconds),
-        initialValue = MeasurementsChartState.Loading
-    )
+        val measurementGroups = measurements.groupBy { measurement ->
+            measurement.createdAt.toLocalDateTime(timeZone).date
+        }.map { (date, measurements) ->
+            MeasurementGroup(
+                date = date,
+                id = date.toString(),
+                measurements = measurements.map { measurement -> measurement.asUi() },
+            )
+        }
 
-    val measurementsState = measurementFlow.map { measurements ->
-        measurements.groupBy { it.createdAt.toLocalDateTime(TimeZone.currentSystemDefault()).date }
-            .mapValues { (_, measurements) ->
-                measurements.map { measurement -> measurement.asUi() }
+        if (measurementGroups.isEmpty()) {
+            MeasurementsState.Empty
+        } else {
+            MeasurementsState.Main(
+                drawableData = drawableData,
+                measurements = measurementGroups,
+            )
+        }
+    }
+
+    val measurementStateFlow = callbackFlow {
+        launch {
+            queryFlow.collect {
+                send(MeasurementsState.Loading)
             }
-            .map { (date, measurements) ->
-                MeasurementGroup(
-                    date = date,
-                    id = date.toString(),
-                    measurements = measurements,
-                )
+        }
+        launch {
+            mainMeasurementsStateFlow.collectLatest { state ->
+                send(state)
             }
-            .let { MeasurementsState.Main(it) }
+        }
+
+        awaitClose()
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 3.seconds),
-        initialValue = MeasurementsState.Loading
+        initialValue = MeasurementsState.Loading,
+        started = SharingStarted.WhileSubscribed(3.seconds),
     )
 
     fun expandMeasurement(id: String) {
@@ -145,14 +151,24 @@ internal class MeasurementViewModel @Inject constructor(
     fun changeMeasurementType(measurementType: KClass<out Measurement>) {
         measurementTypeFlow.value = measurementType
     }
+
+    private data class Query(
+        val period: Period,
+        val uiPeriod: UiPeriod,
+        val range: ClosedRange<Instant>,
+        val type: KClass<out Measurement>,
+    )
 }
 
 @Immutable
 internal sealed interface MeasurementsState {
 
+    data object Empty : MeasurementsState
+
     data object Loading : MeasurementsState
 
     data class Main(
+        val drawableData: DrawableData,
         val measurements: List<MeasurementGroup>,
     ) : MeasurementsState
 }
@@ -163,11 +179,3 @@ internal data class MeasurementGroup(
     val date: LocalDate,
     val measurements: List<UiMeasurement>
 )
-
-@Immutable
-internal sealed interface MeasurementsChartState {
-
-    data object Loading : MeasurementsChartState
-
-    data class Main(val drawableData: DrawableData) : MeasurementsChartState
-}

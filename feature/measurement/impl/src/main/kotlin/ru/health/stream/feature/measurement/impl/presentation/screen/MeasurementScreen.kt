@@ -1,5 +1,6 @@
 package ru.health.stream.feature.measurement.impl.presentation.screen
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,12 +29,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
@@ -53,13 +60,15 @@ import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.asUi
+import ru.health.stream.core.ui.modifier.shimmer
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.drawable.Scatter
+import ru.health.stream.feature.measurement.impl.R
 import ru.health.stream.feature.measurement.impl.presentation.component.MeasurementTrendCard
 import ru.health.stream.feature.measurement.impl.presentation.model.UiPeriod
+import ru.health.stream.feature.measurement.impl.presentation.model.asPeriod
 import ru.health.stream.feature.measurement.impl.presentation.viewmodel.MeasurementViewModel
-import ru.health.stream.feature.measurement.impl.presentation.viewmodel.MeasurementsChartState
 import ru.health.stream.feature.measurement.impl.presentation.viewmodel.MeasurementsState
 import kotlin.reflect.KClass
 
@@ -75,10 +84,8 @@ internal fun MeasurementScreen(
     val timeZone = LocalTimeZone.current
     val viewModel: MeasurementViewModel = hiltViewModel()
 
-    val chartState by viewModel.measurementChartStates.collectAsStateWithLifecycle()
-    val measurementsState by viewModel.measurementsState.collectAsStateWithLifecycle()
+    val measurementState by viewModel.measurementStateFlow.collectAsStateWithLifecycle()
     val expandedMeasurements by viewModel.expandedMeasurementsFlow.collectAsStateWithLifecycle()
-    val periodState by viewModel.convertedPeriodFlow.collectAsStateWithLifecycle()
 
     var selectedPeriod by remember { mutableStateOf(value = startPeriod) }
     val options = listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year)
@@ -165,25 +172,44 @@ internal fun MeasurementScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Box(modifier = Modifier.padding(all = 16.dp)) {
-                            when (val state = chartState) {
-                                MeasurementsChartState.Loading -> {
-                                    Box(
+                            AnimatedContent(targetState = measurementState) { state ->
+                                when (state) {
+                                    MeasurementsState.Empty -> Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(220.dp),
                                         contentAlignment = Alignment.Center,
                                     ) {
-                                        CircularProgressIndicator(strokeWidth = 3.dp)
+                                        Text(
+                                            text = "Нет данных за этот период",
+                                            textAlign = TextAlign.Center,
+                                            color = MaterialTheme.colorScheme.outline,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                        )
                                     }
-                                }
 
-                                is MeasurementsChartState.Main -> {
-                                    with(state) {
+                                    MeasurementsState.Loading -> Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(220.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        val composition by rememberLottieComposition(
+                                            LottieCompositionSpec.RawRes(R.raw.aggregate)
+                                        )
+                                        LottieAnimation(
+                                            modifier = Modifier.fillMaxSize(),
+                                            composition = composition,
+                                            iterations = LottieConstants.IterateForever,
+                                        )
+                                    }
+
+                                    is MeasurementsState.Main -> with(state) {
                                         MeasurementTrendCard(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(220.dp),
-                                            period = periodState,
+                                            period = selectedPeriod.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY),
                                             yRange = drawableData.yRange,
                                             chartDrawables = buildList {
                                                 drawableData.scatterPositions.forEach { positions ->
@@ -224,46 +250,64 @@ internal fun MeasurementScreen(
 
             item { SectionHeader(text = "История измерений") }
 
-            if (measurementsState is MeasurementsState.Main) {
-                val state = measurementsState as MeasurementsState.Main
+            when (val state = measurementState) {
+                MeasurementsState.Empty -> {
+                    /* Do nothing */
+                }
 
-                state.measurements.forEach { group ->
-                    val isExpanded = expandedMeasurements.contains(group.id)
-
-                    item(key = group.id) {
-                        ExpandableHeader(
+                MeasurementsState.Loading -> {
+                    items(3) {
+                        Box(
                             modifier = Modifier
-                                .height(32.dp)
+                                .padding(top = 8.dp)
                                 .fillMaxWidth()
-                                .animateItem()
-                                .padding(top = 8.dp),
-                            isExpanded = isExpanded,
-                            title = group.date.format(dateFormatter),
-                            onClick = { viewModel.expandMeasurement(group.id) },
+                                .height(32.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .shimmer()
                         )
                     }
+                }
 
-                    if (isExpanded) {
-                        group.measurements.forEach { measurement ->
-                            with(measurement) {
-                                item(key = id) {
-                                    MeasurementCard(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .animateItem()
-                                            .padding(top = 8.dp),
-                                        value = value,
-                                        unit = unit.asText(),
-                                        note = note?.asText(),
-                                        estimation = estimation,
-                                        type = type.text.asText(),
-                                        sourceIcon = resource.icon,
-                                        measurementIcon = type.icon,
-                                        sourceName = resource.text.asText(),
-                                        time = time.toLocalDateTime(timeZone).format(timeFormatter),
-                                        onEditClick = {}, // TODO: Add on click method in edit callback - pavelshoplik 21-04-2026
-                                        onDeleteClick = {}, // TODO: Add on click method in delete callback - pavelshoplik 21-04-2026
-                                    )
+                is MeasurementsState.Main -> {
+                    state.measurements.forEach { group ->
+                        val isExpanded = expandedMeasurements.contains(group.id)
+
+                        item(key = group.id) {
+                            ExpandableHeader(
+                                modifier = Modifier
+                                    .height(32.dp)
+                                    .fillMaxWidth()
+                                    .animateItem()
+                                    .padding(top = 8.dp),
+                                isExpanded = isExpanded,
+                                title = group.date.format(dateFormatter),
+                                onClick = { viewModel.expandMeasurement(group.id) },
+                            )
+                        }
+
+                        if (isExpanded) {
+                            group.measurements.forEach { measurement ->
+                                with(measurement) {
+                                    item(key = id) {
+                                        MeasurementCard(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .animateItem()
+                                                .padding(top = 8.dp),
+                                            value = value,
+                                            unit = unit.asText(),
+                                            note = note?.asText(),
+                                            estimation = estimation,
+                                            type = type.text.asText(),
+                                            sourceIcon = resource.icon,
+                                            measurementIcon = type.icon,
+                                            sourceName = resource.text.asText(),
+                                            time = time.toLocalDateTime(timeZone)
+                                                .format(timeFormatter),
+                                            onEditClick = {}, // TODO: Add on click method in edit callback - pavelshoplik 21-04-2026
+                                            onDeleteClick = {}, // TODO: Add on click method in delete callback - pavelshoplik 21-04-2026
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -16,4 +16,6 @@ dependencies {
     implementation(projects.core.ui)
 
     implementation(projects.feature.chart)
+
+    implementation(libs.lottie.compose)
 }

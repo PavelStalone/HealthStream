@@ -8,15 +8,18 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -46,6 +49,7 @@ import ru.health.stream.data.vitals.repository.MeasurementRepository
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,10 +77,10 @@ internal class ReportViewModel @Inject constructor(
     private val _bannedMeasurements = MutableStateFlow<Set<String>>(emptySet())
     val bannedMeasurements = _bannedMeasurements.asStateFlow()
 
-    private val _events = MutableSharedFlow<ReportUiEvent>()
-    val events: SharedFlow<ReportUiEvent> = _events.asSharedFlow()
+    private val _reportStateFlow = MutableStateFlow<ReportUiState>(ReportUiState.Init)
+    val reportStateFlow: StateFlow<ReportUiState> = _reportStateFlow.asStateFlow()
 
-    private val measurements = combine(
+    private val measurementQueryFlow = combine(
         selectedDateRange,
         selectedDataTypes,
     ) { dateRange, dataTypes ->
@@ -85,32 +89,27 @@ internal class ReportViewModel @Inject constructor(
             to = dateRange.endInclusive,
             types = dataTypes.map { type -> type.toMeasurementClass() }
         )
-    }
-        .distinctUntilChanged()
-        .mapLatest { (to, from, types) ->
-            types.asFlow()
-                .flatMapMerge(concurrency = 3) { type ->
-                    flow {
-                        emit(
-                            measurementRepository.getMeasurementsByRange(
-                                to = to,
-                                from = from,
-                                type = type,
-                            )
-                        )
-                    }.flowOn(ioDispatcher)
-                }
-                .toList()
-                .flatten()
-                .sortedByDescending { measurement -> measurement.createdAt }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            initialValue = emptyList(),
-            started = SharingStarted.WhileSubscribed(3000),
-        )
+    }.distinctUntilChanged()
 
-    val measurementsGroup = measurements.mapLatest { measurements ->
+    private val measurementsFlow = measurementQueryFlow.mapLatest { (to, from, types) ->
+        types.asFlow()
+            .flatMapMerge(concurrency = 3) { type ->
+                flow {
+                    emit(
+                        measurementRepository.getMeasurementsByRange(
+                            to = to,
+                            from = from,
+                            type = type,
+                        )
+                    )
+                }.flowOn(ioDispatcher)
+            }
+            .toList()
+            .flatten()
+            .sortedByDescending { measurement -> measurement.createdAt }
+    }
+
+    private val measurementsGroupFlow = measurementsFlow.mapLatest { measurements ->
         val timeZone = TimeZone.currentSystemDefault()
         val groupedByDate = measurements.groupBy { measurement ->
             measurement.createdAt.toLocalDateTime(timeZone).date
@@ -123,10 +122,25 @@ internal class ReportViewModel @Inject constructor(
                 measurements = measurements.map { measurement -> measurement.asUi() },
             )
         }
+    }
+
+    val measurementStateFlow = callbackFlow {
+        launch {
+            measurementQueryFlow.collect {
+                send(MeasurementUiState.Loading)
+            }
+        }
+        launch {
+            measurementsGroupFlow.collectLatest { groups ->
+                send(MeasurementUiState.Loaded(measurementGroups = groups))
+            }
+        }
+
+        awaitClose()
     }.stateIn(
         scope = viewModelScope,
-        initialValue = emptyList(),
-        started = SharingStarted.WhileSubscribed(3000),
+        initialValue = MeasurementUiState.Loading,
+        started = SharingStarted.WhileSubscribed(3.seconds),
     )
 
     fun expandMeasurementGroup(id: String) {
@@ -171,7 +185,9 @@ internal class ReportViewModel @Inject constructor(
 
     fun generateReport() {
         viewModelScope.launch(ioDispatcher) {
-            val measurements = measurements.value
+            _reportStateFlow.value = ReportUiState.Generating
+
+            val measurements = measurementsFlow.first()
             val bannedMeasurements = bannedMeasurements.value
 
             val result = reportRepository.generateReport(
@@ -182,7 +198,12 @@ internal class ReportViewModel @Inject constructor(
                 dateRange = _selectedDateRange.value,
             )
 
-            _events.emit(ReportUiEvent.ShareFile(result.toString().toUri(), _reportFormat.value))
+            _reportStateFlow.emit(
+                ReportUiState.Generated(
+                    uri = result.toString().toUri(),
+                    format = _reportFormat.value,
+                )
+            )
         }
     }
 
@@ -203,9 +224,26 @@ internal class ReportViewModel @Inject constructor(
 }
 
 @Immutable
-internal sealed interface ReportUiEvent {
+internal sealed interface MeasurementUiState {
 
-    data class ShareFile(val uri: Uri, val format: ReportFormat) : ReportUiEvent
+    data object Loading : MeasurementUiState
+
+    data class Loaded(
+        val measurementGroups: List<MeasurementGroup>
+    ) : MeasurementUiState
+}
+
+@Immutable
+internal sealed interface ReportUiState {
+
+    data object Init : ReportUiState
+
+    data object Generating : ReportUiState
+
+    data class Generated(
+        val uri: Uri,
+        val format: ReportFormat,
+    ) : ReportUiState
 }
 
 @Immutable

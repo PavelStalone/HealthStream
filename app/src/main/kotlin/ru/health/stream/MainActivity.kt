@@ -59,7 +59,7 @@ class MainActivity : StarterActivity() {
                     elements = arrayOf(
                         HomeNavKey,
                         UserNavKey,
-                    )
+                    ),
                 )
 
                 Scaffold(
