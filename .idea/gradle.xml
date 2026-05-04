@@ -48,6 +48,9 @@
             <option value="$PROJECT_DIR$/feature/measurement" />
             <option value="$PROJECT_DIR$/feature/measurement/api" />
             <option value="$PROJECT_DIR$/feature/measurement/impl" />
+            <option value="$PROJECT_DIR$/feature/onboarding" />
+            <option value="$PROJECT_DIR$/feature/onboarding/api" />
+            <option value="$PROJECT_DIR$/feature/onboarding/impl" />
             <option value="$PROJECT_DIR$/feature/report" />
             <option value="$PROJECT_DIR$/feature/report/api" />
             <option value="$PROJECT_DIR$/feature/report/impl" />
