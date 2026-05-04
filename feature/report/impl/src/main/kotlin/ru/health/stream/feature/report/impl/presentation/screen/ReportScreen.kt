@@ -237,15 +237,17 @@ internal fun ReportScreen(
                             },
                         ) { reportState ->
                             when (reportState) {
-                                ReportUiState.Generating -> CircularProgressIndicator(
-                                    color = LocalContentColor.current,
-                                )
+                                ReportUiState.Generating -> {
+                                    CircularProgressIndicator(color = LocalContentColor.current)
+                                }
 
-                                else -> Text(
-                                    text = "Сгенерировать отчет",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
+                                else -> {
+                                    Text(
+                                        text = "Сгенерировать отчет",
+                                        fontWeight = FontWeight.ExtraBold,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
                             }
                         }
                     }

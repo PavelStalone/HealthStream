@@ -128,7 +128,6 @@ private fun AppBottomBar(
                 label = {
                     Text(text = tab.title)
                 },
-                alwaysShowLabel = true
             )
         }
     }

@@ -172,7 +172,11 @@ internal fun AddMeasurementContent(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                 ) {
-                    Text(text = "Сохранить", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                    Text(
+                        text = "Сохранить",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
                 }
             }
         }

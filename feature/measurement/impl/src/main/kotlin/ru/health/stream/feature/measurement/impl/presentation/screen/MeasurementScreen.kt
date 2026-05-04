@@ -174,34 +174,38 @@ internal fun MeasurementScreen(
                         Box(modifier = Modifier.padding(all = 16.dp)) {
                             AnimatedContent(targetState = measurementState) { state ->
                                 when (state) {
-                                    MeasurementsState.Empty -> Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(220.dp),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Text(
-                                            text = "Нет данных за этот период",
-                                            textAlign = TextAlign.Center,
-                                            color = MaterialTheme.colorScheme.outline,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                        )
+                                    MeasurementsState.Empty -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(220.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Text(
+                                                text = "Нет данных за этот период",
+                                                textAlign = TextAlign.Center,
+                                                color = MaterialTheme.colorScheme.outline,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                            )
+                                        }
                                     }
 
-                                    MeasurementsState.Loading -> Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(220.dp),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        val composition by rememberLottieComposition(
-                                            LottieCompositionSpec.RawRes(R.raw.aggregate)
-                                        )
-                                        LottieAnimation(
-                                            modifier = Modifier.fillMaxSize(),
-                                            composition = composition,
-                                            iterations = LottieConstants.IterateForever,
-                                        )
+                                    MeasurementsState.Loading -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(220.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            val composition by rememberLottieComposition(
+                                                LottieCompositionSpec.RawRes(R.raw.aggregate)
+                                            )
+                                            LottieAnimation(
+                                                modifier = Modifier.fillMaxSize(),
+                                                composition = composition,
+                                                iterations = LottieConstants.IterateForever,
+                                            )
+                                        }
                                     }
 
                                     is MeasurementsState.Main -> with(state) {
