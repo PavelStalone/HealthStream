@@ -13,7 +13,10 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.Blood
 import ru.health.stream.core.ui.icon.default.Favorite
+import ru.health.stream.core.ui.icon.default.Spo2
+import ru.health.stream.core.ui.icon.default.Weight
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiMeasurement
@@ -86,7 +89,7 @@ class HomeViewModel @Inject constructor(
                 UiText.NonTranslatable(value = bloodPressure.asUi().value)
             },
             measurementTitle = UiMeasurement.Type.BLOOD_PRESSURE.text,
-            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Blood),
             drawableData = DrawableData.create(
                 dateRange = range,
                 timeZone = timeZone,
@@ -114,7 +117,7 @@ class HomeViewModel @Inject constructor(
                 UiText.NonTranslatable(value = measurement.asUi().value)
             },
             measurementTitle = UiMeasurement.Type.WEIGHT.text,
-            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Weight),
             drawableData = DrawableData.create(
                 dateRange = range,
                 timeZone = timeZone,
@@ -142,7 +145,7 @@ class HomeViewModel @Inject constructor(
                 UiText.NonTranslatable(value = measurement.asUi().value)
             },
             measurementTitle = UiMeasurement.Type.OXYGEN_SATURATION.text,
-            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Spo2),
             drawableData = DrawableData.create(
                 dateRange = range,
                 timeZone = timeZone,

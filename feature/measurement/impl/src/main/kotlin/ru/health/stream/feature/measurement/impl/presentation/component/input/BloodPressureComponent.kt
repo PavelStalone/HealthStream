@@ -1,7 +1,9 @@
 package ru.health.stream.feature.measurement.impl.presentation.component.input
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +17,7 @@ import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
@@ -70,7 +73,7 @@ class BloodPressureComponent : InputTypeComponent {
         val state by retain(bloodPressureState) { bloodPressureState }
 
         Row(
-            modifier = modifier,
+            modifier = modifier.height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedTextField(
@@ -78,7 +81,13 @@ class BloodPressureComponent : InputTypeComponent {
                 value = state.systolic,
                 shape = MaterialTheme.shapes.large,
                 onValueChange = { value -> changeSystolic(value) },
-                label = { Text(text = "Систолическое") },
+                label = {
+                    Text(
+                        text = "Систолическое",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
                 isError = state.error != null,
                 suffix = {
                     Text(
@@ -97,7 +106,13 @@ class BloodPressureComponent : InputTypeComponent {
                 value = state.diastolic,
                 shape = MaterialTheme.shapes.large,
                 onValueChange = { value -> changeDiastolic(value) },
-                label = { Text(text = "Диастолическое") },
+                label = {
+                    Text(
+                        text = "Диастолическое",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
                 isError = state.error != null,
                 suffix = {
                     Text(

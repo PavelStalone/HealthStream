@@ -19,7 +19,7 @@ val Icons.Default.Calendar: ImageVector
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {
-            path(fill = SolidColor(Color(0xFFE8EAED))) {
+            path(fill = SolidColor(Color.White)) {
                 moveTo(200f, 880f)
                 quadToRelative(-33f, 0f, -56.5f, -23.5f)
                 reflectiveQuadTo(120f, 800f)

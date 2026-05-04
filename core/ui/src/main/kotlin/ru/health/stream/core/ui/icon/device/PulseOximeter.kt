@@ -21,7 +21,7 @@ val Icons.Device.PulseOximeter: ImageVector
             viewportHeight = 24f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFF36E881)),
+                fill = SolidColor(Color.Green),
                 pathFillType = PathFillType.EvenOdd
             ) {
                 moveTo(15f, 6f)

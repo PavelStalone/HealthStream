@@ -4,12 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -26,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +59,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
@@ -68,6 +71,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
+import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
@@ -80,9 +84,11 @@ import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.drawIcon
+import ru.health.stream.core.ui.modifier.shimmer
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.report.model.ReportFormat
-import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportUiEvent
+import ru.health.stream.feature.report.impl.presentation.viewmodel.MeasurementUiState
+import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportUiState
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewModel
 
 @Composable
@@ -98,9 +104,11 @@ internal fun ReportScreen(
     val reportFormat by viewModel.reportFormat.collectAsStateWithLifecycle()
     val dateRange by viewModel.selectedDateRange.collectAsStateWithLifecycle()
     val dataTypes by viewModel.selectedDataTypes.collectAsStateWithLifecycle()
-    val groupMeasurements by viewModel.measurementsGroup.collectAsStateWithLifecycle()
     val bannedMeasurements by viewModel.bannedMeasurements.collectAsStateWithLifecycle()
     val expandedMeasurementGroup by viewModel.expandedMeasurementGroup.collectAsStateWithLifecycle()
+
+    val reportUiState by viewModel.reportStateFlow.collectAsStateWithLifecycle()
+    val measurementUiState by viewModel.measurementStateFlow.collectAsStateWithLifecycle()
 
     val dateState = rememberDateRangePickerState(
         initialSelectedStartDateMillis = dateRange.start.toEpochMilliseconds(),
@@ -109,13 +117,21 @@ internal fun ReportScreen(
 
     var showDatePicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is ReportUiEvent.ShareFile -> {
-                    shareFile(context, event.uri, event.format)
-                }
-            }
+    val reportButtonEnabled by remember {
+        derivedStateOf {
+            (measurementUiState as? MeasurementUiState.Loaded)?.measurementGroups
+                ?.isNotEmpty()
+                ?: false
+        }
+    }
+
+    LaunchedEffect(reportUiState) {
+        (reportUiState as? ReportUiState.Generated)?.let { state ->
+            shareFile(
+                uri = state.uri,
+                context = context,
+                format = state.format,
+            )
         }
     }
 
@@ -123,7 +139,7 @@ internal fun ReportScreen(
         TopBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(bottom = 8.dp),
             title = UiText.NonTranslatable("Отчет"),
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
@@ -144,19 +160,18 @@ internal fun ReportScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(
-                        text = "Конфигурация отчета",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall,
+                    SectionHeader(
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        text = "Конфигурация",
                     )
-
                     Text(
                         text = "Период",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     DateRange(
+                        modifier = Modifier.height(TextFieldDefaults.MinHeight),
                         onClick = { showDatePicker = true },
                         prefixIcon = UiIcon.Vector(Icons.Default.Calendar),
                         actionIcon = UiIcon.Vector(Icons.Default.KeyboardArrowDown),
@@ -169,6 +184,7 @@ internal fun ReportScreen(
                     )
 
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = "Формат",
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -187,12 +203,13 @@ internal fun ReportScreen(
                     }
 
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = "Типы данных",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         UiMeasurement.Type.entries.forEach { type ->
                             FilterChip(
@@ -205,114 +222,159 @@ internal fun ReportScreen(
                     }
 
                     Button(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .height(TextFieldDefaults.MinHeight)
+                            .fillMaxWidth(),
                         onClick = { viewModel.generateReport() },
+                        enabled = reportButtonEnabled,
                     ) {
-                        Text(
-                            text = "Сгенерировать отчет",
-                            fontSize = 18.sp,
-                            color = Color.White,
-                        )
+                        AnimatedContent(
+                            targetState = reportUiState,
+                            transitionSpec = {
+                                fadeIn(animationSpec = tween(220, delayMillis = 90))
+                                    .togetherWith(fadeOut(animationSpec = tween(90)))
+                            },
+                        ) { reportState ->
+                            when (reportState) {
+                                ReportUiState.Generating -> {
+                                    CircularProgressIndicator(color = LocalContentColor.current)
+                                }
+
+                                else -> {
+                                    Text(
+                                        text = "Сгенерировать отчет",
+                                        fontWeight = FontWeight.ExtraBold,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
+                            }
+                        }
                     }
 
-                    Text(
+                    SectionHeader(
                         modifier = Modifier.padding(top = 8.dp),
                         text = "Данные",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall,
                     )
                 }
             }
 
-            groupMeasurements.forEach { measurementGroup ->
-                with(measurementGroup) {
-                    val isExpand = expandedMeasurementGroup.contains(id)
-                    val measurementsId = measurements.map(UiMeasurement::id)
-
-                    item(key = id) {
-                        val isSectorBanned by remember {
-                            derivedStateOf { bannedMeasurements.containsAll(measurementsId) }
-                        }
-
-                        ExpandableHeader(
+            when (val state = measurementUiState) {
+                MeasurementUiState.Loading -> {
+                    items(3) {
+                        Box(
                             modifier = Modifier
-                                .height(40.dp)
                                 .fillMaxWidth()
-                                .animateItem(),
-                            isExpanded = isExpand,
-                            title = date.format(dateFormatter),
-                            onClick = { viewModel.expandMeasurementGroup(id) },
-                            actions = {
-                                TextButton(
-                                    onClick = {
-                                        if (isSectorBanned) {
-                                            viewModel.unbanMeasurements(measurementsId)
-                                        } else {
-                                            viewModel.banMeasurements(measurementsId)
-                                        }
-                                    }
-                                ) {
-                                    AnimatedContent(
-                                        targetState = isSectorBanned,
-                                        transitionSpec = {
-                                            (slideInVertically { it } + fadeIn()) togetherWith (slideOutVertically { -it } + fadeOut())
-                                        }
-                                    ) { isBanned ->
-                                        if (isBanned) {
-                                            Text(
-                                                text = "Выбрать все".uppercase(),
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.labelSmall,
-                                            )
-                                        } else {
-                                            Text(
-                                                text = "Исключить все".uppercase(),
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.labelSmall,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                                .height(32.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .shimmer()
                         )
                     }
+                }
 
-                    if (isExpand) {
-                        measurements.forEach { measurement ->
-                            with(measurement) {
-                                item(key = id) {
-                                    val isMeasurementBanned = bannedMeasurements.contains(id)
-                                    MeasurementCard(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .animateItem(),
-                                        enabled = !isMeasurementBanned,
-                                        type = type.text.asText(),
-                                        unit = unit.asText(),
-                                        time = time.toLocalDateTime(timeZone).format(timeFormatter),
-                                        value = value,
-                                        sourceIcon = resource.icon,
-                                        sourceName = resource.text.asText(),
-                                        measurementIcon = type.icon,
-                                        note = note?.asText(),
-                                        estimation = estimation,
-                                        onEditClick = {}, // TODO: Add on click method in edit callback - pavelshoplik 21-04-2026
-                                        onDeleteClick = {}, // TODO: Add on click method in delete callback - pavelshoplik 21-04-2026
-                                        onCardClick = {
-                                            if (isMeasurementBanned) {
-                                                viewModel.unbanMeasurement(id)
-                                            } else {
-                                                viewModel.banMeasurement(id)
+                is MeasurementUiState.Loaded -> {
+                    if (state.measurementGroups.isEmpty()) {
+                        item {
+                            Text(
+                                text = "Нет данных за этот период",
+                                color = MaterialTheme.colorScheme.outline,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                    }
+                    state.measurementGroups.forEach { measurementGroup ->
+                        with(measurementGroup) {
+                            val isExpand = expandedMeasurementGroup.contains(id)
+                            val measurementsId = measurements.map(UiMeasurement::id)
+
+                            item(key = id) {
+                                val isSectorBanned by remember {
+                                    derivedStateOf { bannedMeasurements.containsAll(measurementsId) }
+                                }
+
+                                ExpandableHeader(
+                                    modifier = Modifier
+                                        .height(32.dp)
+                                        .fillMaxWidth()
+                                        .animateItem(),
+                                    isExpanded = isExpand,
+                                    title = date.format(dateFormatter),
+                                    onClick = { viewModel.expandMeasurementGroup(id) },
+                                    actions = {
+                                        TextButton(
+                                            onClick = {
+                                                if (isSectorBanned) {
+                                                    viewModel.unbanMeasurements(measurementsId)
+                                                } else {
+                                                    viewModel.banMeasurements(measurementsId)
+                                                }
                                             }
-                                        },
-                                        actionIcon = {
-                                            Checkbox(
-                                                modifier = Modifier.fillMaxHeight(),
-                                                checked = !isMeasurementBanned,
-                                                onCheckedChange = null
+                                        ) {
+                                            AnimatedContent(
+                                                targetState = isSectorBanned,
+                                                transitionSpec = {
+                                                    (slideInVertically { it } + fadeIn()) togetherWith (slideOutVertically { -it } + fadeOut())
+                                                }
+                                            ) { isBanned ->
+                                                if (isBanned) {
+                                                    Text(
+                                                        text = "Выбрать все".uppercase(),
+                                                        fontWeight = FontWeight.Bold,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                    )
+                                                } else {
+                                                    Text(
+                                                        text = "Исключить все".uppercase(),
+                                                        fontWeight = FontWeight.Bold,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+                            if (isExpand) {
+                                measurements.forEach { measurement ->
+                                    with(measurement) {
+                                        item(key = id) {
+                                            val isMeasurementBanned =
+                                                bannedMeasurements.contains(id)
+                                            MeasurementCard(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .animateItem(),
+                                                enabled = !isMeasurementBanned,
+                                                type = type.text.asText(),
+                                                unit = unit.asText(),
+                                                time = time.toLocalDateTime(timeZone)
+                                                    .format(timeFormatter),
+                                                value = value,
+                                                sourceIcon = resource.icon,
+                                                sourceName = resource.text.asText(),
+                                                measurementIcon = type.icon,
+                                                note = note?.asText(),
+                                                estimation = estimation,
+                                                onEditClick = {}, // TODO: Add on click method in edit callback - pavelshoplik 21-04-2026
+                                                onDeleteClick = {}, // TODO: Add on click method in delete callback - pavelshoplik 21-04-2026
+                                                onCardClick = {
+                                                    if (isMeasurementBanned) {
+                                                        viewModel.unbanMeasurement(id)
+                                                    } else {
+                                                        viewModel.banMeasurement(id)
+                                                    }
+                                                },
+                                                actionIcon = {
+                                                    Checkbox(
+                                                        modifier = Modifier.fillMaxHeight(),
+                                                        checked = !isMeasurementBanned,
+                                                        onCheckedChange = null
+                                                    )
+                                                },
                                             )
-                                        },
-                                    )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -397,7 +459,9 @@ fun DateRange(
         colors = CardDefaults.outlinedCardColors(),
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             prefixIcon?.drawIcon(
@@ -442,7 +506,9 @@ private fun DateRangePreview() {
         dynamicColor = false
     ) {
         DateRange(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             onClick = { },
             endDate = "End date",
             startDate = "Start date",

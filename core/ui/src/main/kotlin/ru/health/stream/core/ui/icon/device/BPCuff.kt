@@ -20,7 +20,7 @@ val Icons.Device.BPCuff: ImageVector
             viewportWidth = 24f,
             viewportHeight = 24f
         ).apply {
-            path(fill = SolidColor(Color(0xFF36E881))) {
+            path(fill = SolidColor(Color.Green)) {
                 moveTo(12.5f, 10.75f)
                 lineTo(11.75f, 13.25f)
                 lineTo(12.5f, 14.25f)
@@ -29,7 +29,7 @@ val Icons.Device.BPCuff: ImageVector
                 close()
             }
             path(
-                fill = SolidColor(Color(0xFF36E881)),
+                fill = SolidColor(Color.Green),
                 pathFillType = PathFillType.EvenOdd
             ) {
                 moveTo(17f, 8.816f)

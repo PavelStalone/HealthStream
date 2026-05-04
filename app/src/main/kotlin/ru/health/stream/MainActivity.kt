@@ -3,10 +3,10 @@ package ru.health.stream
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -28,12 +28,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.AccountCircle
+import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.icon.fill.Favorite
-import ru.health.stream.core.ui.icon.fill.Settings
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
 import ru.health.stream.feature.report.api.navigation.ReportNavKey
-import ru.health.stream.feature.settings.navigation.SettingsNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
 import javax.inject.Inject
 
@@ -49,27 +49,6 @@ class MainActivity : StarterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val availabilityStatus = HealthConnectClient.getSdkStatus(this)
-//
-//        logI("availabilityStatus: $availabilityStatus")
-//        if (availabilityStatus == HealthConnectClient.SDK_UNAVAILABLE) {
-//            return // early return as there is no viable integration
-//        }
-//        if (availabilityStatus == HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
-//            // Optionally redirect to package installer to find a provider, for example:
-//            val uriString =
-//                "market://details?id=com.google.android.apps.healthdata&url=healthconnect%3A%2F%2Fonboarding"
-//            startActivity(
-//                Intent(Intent.ACTION_VIEW).apply {
-//                    setPackage("com.android.vending")
-//                    data = uriString.toUri()
-//                    putExtra("overlay", true)
-//                    putExtra("callerId", packageName)
-//                }
-//            )
-//            return
-//        }
-
         enableEdgeToEdge()
         setContent {
             HealthStreamTheme(
@@ -79,9 +58,8 @@ class MainActivity : StarterActivity() {
                 val backStack = rememberNavBackStack(
                     elements = arrayOf(
                         HomeNavKey,
-                        ReportNavKey,
                         UserNavKey,
-                    )
+                    ),
                 )
 
                 Scaffold(
@@ -90,7 +68,8 @@ class MainActivity : StarterActivity() {
                         AppBottomBar(
                             backStack = backStack,
                             onTabClick = { screen ->
-                                navigationRouter.replaceStack(screen)
+                                navigationRouter.popTo(HomeNavKey)
+                                navigationRouter.push(screen)
                             }
                         )
                     }
@@ -118,12 +97,14 @@ class MainActivity : StarterActivity() {
 @Composable
 private fun AppBottomBar(
     backStack: List<NavKey>,
-    onTabClick: (NavKey) -> Unit
+    modifier: Modifier = Modifier,
+    onTabClick: (NavKey) -> Unit,
 ) {
     val tabs = remember {
         listOf(
             BottomTab.Vitals,
-            BottomTab.Settings,
+            BottomTab.Report,
+            BottomTab.Profile,
         )
     }
     val tabKeys = remember { tabs.map { tab -> tab.screen }.toSet() }
@@ -133,27 +114,21 @@ private fun AppBottomBar(
         }
     }
 
-    val visible by remember(backStack) {
-        derivedStateOf {
-            backStack.last() !is UserNavKey
-        }
-    }
-
-    AnimatedVisibility(visible = visible) {
-        NavigationBar {
-            tabs.forEach { tab ->
-                NavigationBarItem(
-                    selected = tab.screen == activeTabKey,
-                    onClick = { onTabClick(tab.screen) },
-                    icon = {
-                        Icon(imageVector = tab.icon, contentDescription = tab.title)
-                    },
-                    label = {
-                        Text(text = tab.title)
-                    },
-                    alwaysShowLabel = false
-                )
-            }
+    NavigationBar(modifier = modifier) {
+        tabs.forEach { tab ->
+            NavigationBarItem(
+                selected = tab.screen == activeTabKey,
+                onClick = { onTabClick(tab.screen) },
+                icon = {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = tab.title,
+                    )
+                },
+                label = {
+                    Text(text = tab.title)
+                },
+            )
         }
     }
 }
@@ -170,9 +145,15 @@ private sealed class BottomTab(
         icon = Icons.Fill.Favorite,
     )
 
-    data object Settings : BottomTab(
-        title = "Настройки",
-        screen = SettingsNavKey,
-        icon = Icons.Fill.Settings,
+    data object Report : BottomTab(
+        title = "Отчет",
+        screen = ReportNavKey,
+        icon = Icons.Default.Report,
+    )
+
+    data object Profile : BottomTab(
+        title = "Профиль",
+        screen = UserNavKey,
+        icon = Icons.Default.AccountCircle,
     )
 }

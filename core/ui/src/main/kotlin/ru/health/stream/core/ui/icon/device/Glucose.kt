@@ -19,7 +19,7 @@ val Icons.Device.Glucose: ImageVector
             viewportWidth = 22f,
             viewportHeight = 21f
         ).apply {
-            path(fill = SolidColor(Color(0xFF36E881))) {
+            path(fill = SolidColor(Color.Green)) {
                 moveTo(12.475f, 20.775f)
                 curveTo(12.008f, 20.775f, 11.571f, 20.675f, 11.163f, 20.475f)
                 curveTo(10.755f, 20.275f, 10.409f, 19.992f, 10.125f, 19.625f)

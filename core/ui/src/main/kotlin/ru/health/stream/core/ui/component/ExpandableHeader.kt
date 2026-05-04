@@ -117,17 +117,13 @@ private fun ExpandableHeaderPreview() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             ExpandableHeader(
-                modifier = Modifier
-                    .height(40.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 title = now,
                 isExpanded = isExpand,
                 onClick = { isExpand = !isExpand },
             )
             ExpandableHeader(
-                modifier = Modifier
-                    .height(40.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 title = now,
                 isExpanded = isExpand,
                 onClick = { isExpand = !isExpand },

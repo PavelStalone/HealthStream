@@ -27,25 +27,26 @@ nordic-android-common-uiscanner = "1.0.11"
 com-polidea-rxandroidble = "1.19.1"
 #endregion
 
-itext7Core = "9.6.0"
 room = "2.8.4"
 navRouter = "1.0.3"
 datastore = "1.2.1"
+itext7Core = "9.6.0"
 healthConnect = "1.1.0"
+lottieCompose = "6.7.1"
+com-google-ksp = "2.3.6"
+androidx-work = "2.11.2"
+composeBom = "2026.03.01"
+activityCompose = "1.13.0"
+kotlinx-datetime = "0.6.2" # Many ext functions for kotlinx.datetime break on version 0.7.1
+androidx-hilt-ext = "1.3.0"
+com-google-dagger = "2.59.2"
+jakewharton-timber = "5.0.1"
 lifecycleRuntimeKtx = "2.10.0"
 kotlinxSerializationJson = "1.10.0"
-activityCompose = "1.13.0"
-composeBom = "2026.03.01"
-com-google-ksp = "2.3.6"
-com-google-dagger = "2.59.2"
-androidx-hilt-ext = "1.3.0"
-androidx-hilt-navigation-compose = "1.3.0"
-androidx-lifecycle-viewmodel-compose = "2.10.0"
 org-gradle-android-cache-fix = "3.0.3"
-jakewharton-timber = "5.0.1"
-kotlinx-datetime = "0.6.2" # Many ext functions for kotlinx.datetime break on version 0.7.1
+androidx-hilt-navigation-compose = "1.3.0"
 androidx-constraintlayout-compose = "1.1.1"
-androidx-work = "2.11.2"
+androidx-lifecycle-viewmodel-compose = "2.10.0"
 
 com-github-movisens-smart-gatt = "3.6.0"
 io-github-automapper = "0.11.0"
@@ -119,6 +120,8 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 com-github-movisens-smart-gatt = { module = "com.github.movisens:SmartGattLib", version.ref = "com-github-movisens-smart-gatt" }
+
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 
 google-dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "com-google-dagger" }
 androidx-hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidx-hilt-ext" }

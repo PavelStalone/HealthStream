@@ -19,7 +19,7 @@ val Icons.Default.KeyboardArrowDown: ImageVector
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {
-            path(fill = SolidColor(Color(0xFFE3E3E3))) {
+            path(fill = SolidColor(Color.White)) {
                 moveTo(480f, 616f)
                 lineTo(240f, 376f)
                 lineToRelative(56f, -56f)

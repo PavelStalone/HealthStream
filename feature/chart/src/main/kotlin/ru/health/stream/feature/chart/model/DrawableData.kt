@@ -237,8 +237,13 @@ data class DrawableData(
             }
 
             val step = 10f
-            val start = floor(yMin / step) * step
-            val end = ceil(yMax / step) * step
+            var end = ceil(yMax / step) * step
+            var start = floor(yMin / step) * step
+
+            if (start == end) {
+                end += step
+                start -= step
+            }
 
             return DrawableData(
                 scatterPositions = scatterPositions,

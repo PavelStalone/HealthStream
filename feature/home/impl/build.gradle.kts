@@ -16,5 +16,6 @@ dependencies {
     implementation(projects.core.ui)
 
     implementation(projects.feature.chart)
+    implementation(projects.feature.report.api)
     implementation(projects.feature.measurement.api)
 }
