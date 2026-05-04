@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +55,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
@@ -68,6 +67,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
+import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
@@ -123,7 +123,7 @@ internal fun ReportScreen(
         TopBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(bottom = 8.dp),
             title = UiText.NonTranslatable("Отчет"),
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
@@ -144,19 +144,18 @@ internal fun ReportScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(
-                        text = "Конфигурация отчета",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall,
+                    SectionHeader(
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        text = "Конфигурация",
                     )
-
                     Text(
                         text = "Период",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     DateRange(
+                        modifier = Modifier.height(TextFieldDefaults.MinHeight),
                         onClick = { showDatePicker = true },
                         prefixIcon = UiIcon.Vector(Icons.Default.Calendar),
                         actionIcon = UiIcon.Vector(Icons.Default.KeyboardArrowDown),
@@ -169,6 +168,7 @@ internal fun ReportScreen(
                     )
 
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = "Формат",
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -187,12 +187,13 @@ internal fun ReportScreen(
                     }
 
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = "Типы данных",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         UiMeasurement.Type.entries.forEach { type ->
                             FilterChip(
@@ -205,21 +206,22 @@ internal fun ReportScreen(
                     }
 
                     Button(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .height(TextFieldDefaults.MinHeight)
+                            .fillMaxWidth(),
                         onClick = { viewModel.generateReport() },
                     ) {
                         Text(
                             text = "Сгенерировать отчет",
-                            fontSize = 18.sp,
-                            color = Color.White,
+                            fontWeight = FontWeight.ExtraBold,
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     }
 
-                    Text(
+                    SectionHeader(
                         modifier = Modifier.padding(top = 8.dp),
                         text = "Данные",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall,
                     )
                 }
             }
@@ -236,7 +238,7 @@ internal fun ReportScreen(
 
                         ExpandableHeader(
                             modifier = Modifier
-                                .height(40.dp)
+                                .height(32.dp)
                                 .fillMaxWidth()
                                 .animateItem(),
                             isExpanded = isExpand,
@@ -397,7 +399,9 @@ fun DateRange(
         colors = CardDefaults.outlinedCardColors(),
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             prefixIcon?.drawIcon(
@@ -442,7 +446,9 @@ private fun DateRangePreview() {
         dynamicColor = false
     ) {
         DateRange(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             onClick = { },
             endDate = "End date",
             startDate = "Start date",

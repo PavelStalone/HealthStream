@@ -3,24 +3,19 @@ package ru.health.stream.feature.measurement.impl.presentation.viewmodel
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.health.stream.core.ui.model.UiMeasurement
+import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.vitals.model.EmptyMetadata
 import ru.health.stream.data.vitals.model.Metadata
 import ru.health.stream.data.vitals.model.Note
-import ru.health.stream.data.vitals.model.measurement.BloodGlucose
-import ru.health.stream.data.vitals.model.measurement.BloodPressure
-import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.copy
 import ru.health.stream.data.vitals.usecase.CreateMeasurementUseCase
 import ru.health.stream.feature.measurement.impl.presentation.component.input.BloodGlucoseComponent
@@ -33,21 +28,20 @@ import ru.health.stream.feature.measurement.impl.presentation.component.input.Re
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 
-@HiltViewModel(assistedFactory = AddMeasurementViewModel.Factory::class)
-internal class AddMeasurementViewModel @AssistedInject constructor(
-    @Assisted private val measurementType: KClass<out Measurement>,
+@HiltViewModel
+internal class AddMeasurementViewModel @Inject constructor(
     private val createMeasurementUseCase: CreateMeasurementUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         AddMeasurementUiState(
-            inputTypeComponent = getInputComponent(measurementType),
-            selectedType = getMeasurementTypeUi(measurementType),
+            inputTypeComponent = getInputComponent(HeartRate::class),
+            selectedType = HeartRate::class.asUi(),
         )
     )
     val uiState = _uiState.asStateFlow()
 
-    fun onTypeSelected(type: MeasurementType) {
+    fun onTypeSelected(type: UiMeasurement.Type) {
         val state = _uiState.value
 
         if (state.selectedType != type) {
@@ -59,6 +53,8 @@ internal class AddMeasurementViewModel @AssistedInject constructor(
             }
         }
     }
+
+    fun onTypeSelected(type: KClass<out Measurement>) = onTypeSelected(type.asUi())
 
     fun onNoteChange(note: String) {
         _uiState.update { it.copy(note = note) }
@@ -79,39 +75,19 @@ internal class AddMeasurementViewModel @AssistedInject constructor(
     }
 
     private fun getInputComponent(
-        measurementType: KClass<out Measurement>
+        measurementType: UiMeasurement.Type
     ): InputTypeComponent = when (measurementType) {
-        HeartRate::class -> HeartRateComponent()
-        BloodPressure::class -> BloodPressureComponent()
-        BloodGlucose::class -> BloodGlucoseComponent()
-        BodyWeight::class -> BodyWeightComponent()
-        OxygenSaturation::class -> OxygenSaturationComponent()
-        RespirationRate::class -> RespirationRateComponent()
-        else -> HeartRateComponent()
+        UiMeasurement.Type.WEIGHT -> BodyWeightComponent()
+        UiMeasurement.Type.HEART_RATE -> HeartRateComponent()
+        UiMeasurement.Type.BLOOD_GLUCOSE -> BloodGlucoseComponent()
+        UiMeasurement.Type.BLOOD_PRESSURE -> BloodPressureComponent()
+        UiMeasurement.Type.RESPIRATION_RATE -> RespirationRateComponent()
+        UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturationComponent()
     }
 
     private fun getInputComponent(
-        measurementType: MeasurementType
-    ): InputTypeComponent = when (measurementType) {
-        MeasurementType.HEART_RATE -> HeartRateComponent()
-        MeasurementType.BLOOD_PRESSURE -> BloodPressureComponent()
-        MeasurementType.OXYGEN_SATURATION -> OxygenSaturationComponent()
-        MeasurementType.BODY_WEIGHT -> BodyWeightComponent()
-        MeasurementType.BLOOD_GLUCOSE -> BloodGlucoseComponent()
-        MeasurementType.RESPIRATION_RATE -> RespirationRateComponent()
-    }
-
-    private fun getMeasurementTypeUi(
         measurementType: KClass<out Measurement>
-    ): MeasurementType = when (measurementType) {
-        HeartRate::class -> MeasurementType.HEART_RATE
-        BloodPressure::class -> MeasurementType.BLOOD_PRESSURE
-        BloodGlucose::class -> MeasurementType.BLOOD_GLUCOSE
-        BodyWeight::class -> MeasurementType.BODY_WEIGHT
-        OxygenSaturation::class -> MeasurementType.OXYGEN_SATURATION
-        RespirationRate::class -> MeasurementType.RESPIRATION_RATE
-        else -> MeasurementType.HEART_RATE
-    }
+    ): InputTypeComponent = getInputComponent(measurementType.asUi())
 
     private fun createMeasurementFromState(
         state: AddMeasurementUiState,
@@ -130,26 +106,11 @@ internal class AddMeasurementViewModel @AssistedInject constructor(
 
         healthMeasurement.copy(metadata = metadata)
     }
-
-    @AssistedFactory
-    interface Factory {
-
-        fun create(measurementType: KClass<out Measurement>): AddMeasurementViewModel
-    }
 }
 
 @Immutable
 internal data class AddMeasurementUiState(
-    val selectedType: MeasurementType = MeasurementType.HEART_RATE,
+    val selectedType: UiMeasurement.Type = UiMeasurement.Type.HEART_RATE,
     val inputTypeComponent: InputTypeComponent = HeartRateComponent(),
     val note: String = "",
 )
-
-internal enum class MeasurementType(val title: String) {
-    HEART_RATE(title = "Пульс"),
-    BLOOD_PRESSURE(title = "Давление"),
-    OXYGEN_SATURATION(title = "Сатурация кислорода"),
-    BODY_WEIGHT(title = "Вес тела"),
-    BLOOD_GLUCOSE(title = "Глюкоза в крови"),
-    RESPIRATION_RATE(title = "Частота дыхания")
-}

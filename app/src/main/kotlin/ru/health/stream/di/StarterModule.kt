@@ -11,6 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import jakarta.inject.Provider
 import ru.health.stream.core.starter.ActivityStarter
 import ru.health.stream.core.starter.AppStarter
 import ru.health.stream.worker.MeasurementWorker
@@ -23,14 +24,14 @@ internal object StarterModule {
     @IntoSet
     @Provides
     fun provideWorkerStarter(
-        workManager: WorkManager
+        workManager: Provider<WorkManager>,
     ) = object : AppStarter {
 
         override fun onCreate() {
             val workRequest = PeriodicWorkRequestBuilder<MeasurementWorker>(15, TimeUnit.MINUTES)
                 .build()
 
-            workManager.enqueueUniquePeriodicWork(
+            workManager.get().enqueueUniquePeriodicWork(
                 request = workRequest,
                 uniqueWorkName = "MeasurementWorker",
                 existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.KEEP,

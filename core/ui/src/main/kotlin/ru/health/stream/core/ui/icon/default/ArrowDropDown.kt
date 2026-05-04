@@ -19,7 +19,7 @@ val Icons.Default.ArrowDropDown: ImageVector
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {
-            path(fill = SolidColor(Color(0xFFE3E3E3))) {
+            path(fill = SolidColor(Color.White)) {
                 moveTo(480f, 600f)
                 lineTo(280f, 400f)
                 horizontalLineToRelative(400f)

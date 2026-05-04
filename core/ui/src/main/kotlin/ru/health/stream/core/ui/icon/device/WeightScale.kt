@@ -22,7 +22,7 @@ val Icons.Device.WeightScale: ImageVector
             viewportHeight = 22f
         ).apply {
             path(
-                stroke = SolidColor(Color(0xFF36E881)),
+                stroke = SolidColor(Color.Green),
                 strokeLineWidth = 1.5f,
                 strokeLineJoin = StrokeJoin.Round
             ) {
@@ -40,7 +40,7 @@ val Icons.Device.WeightScale: ImageVector
                 curveTo(17.275f, 4.003f, 16.431f, 3.81f, 15.067f, 3.749f)
             }
             path(
-                stroke = SolidColor(Color(0xFF36E881)),
+                stroke = SolidColor(Color.Green),
                 strokeLineWidth = 1.5f,
                 strokeLineJoin = StrokeJoin.Round
             ) {
@@ -62,7 +62,7 @@ val Icons.Device.WeightScale: ImageVector
                 close()
             }
             path(
-                stroke = SolidColor(Color(0xFF36E881)),
+                stroke = SolidColor(Color.Green),
                 strokeLineWidth = 1.5f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round

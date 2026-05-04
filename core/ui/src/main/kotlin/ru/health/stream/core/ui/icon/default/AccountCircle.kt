@@ -19,7 +19,7 @@ val Icons.Default.AccountCircle: ImageVector
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {
-            path(fill = SolidColor(Color(0xFFE3E3E3))) {
+            path(fill = SolidColor(Color.White)) {
                 moveTo(234f, 684f)
                 quadToRelative(51f, -39f, 114f, -61.5f)
                 reflectiveQuadTo(480f, 600f)

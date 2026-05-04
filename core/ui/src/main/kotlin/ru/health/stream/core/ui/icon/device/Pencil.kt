@@ -19,7 +19,7 @@ val Icons.Device.Pencil: ImageVector
             viewportWidth = 24f,
             viewportHeight = 24f
         ).apply {
-            path(fill = SolidColor(Color(0xFF36E881))) {
+            path(fill = SolidColor(Color.Green)) {
                 moveTo(14.06f, 9f)
                 lineTo(15f, 9.94f)
                 lineTo(5.92f, 19f)

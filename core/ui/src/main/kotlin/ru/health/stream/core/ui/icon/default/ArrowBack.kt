@@ -19,7 +19,7 @@ val Icons.Default.ArrowBack: ImageVector
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {
-            path(fill = SolidColor(Color(0xFFE3E3E3))) {
+            path(fill = SolidColor(Color.White)) {
                 moveToRelative(313f, 520f)
                 lineToRelative(224f, 224f)
                 lineToRelative(-57f, 56f)

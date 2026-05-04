@@ -13,6 +13,7 @@ internal fun EntryProviderScope<NavKey>.userEntry(router: Router<NavKey>) {
         UserInputScreen(
             modifier = Modifier.fillMaxSize(),
             onSuccess = { router.pop() },
+            onBackClick = { router.pop() },
         )
     }
 }

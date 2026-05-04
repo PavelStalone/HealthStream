@@ -12,6 +12,7 @@ import ru.health.stream.core.ui.theme.LowLevelContainerColor
 import ru.health.stream.core.ui.theme.LowLevelContentColor
 import ru.health.stream.core.ui.theme.NormalLevelContainerColor
 import ru.health.stream.core.ui.theme.NormalLevelContentColor
+import ru.health.stream.data.vitals.model.Estimation
 
 enum class UiLevel(
     val text: UiText,
@@ -20,26 +21,33 @@ enum class UiLevel(
 ) {
 
     LOW(
-        text = UiText.NonTranslatable("Низкий"),
+        text = UiText.NonTranslatable("Низко"),
         contentColor = LowLevelContentColor,
         containerColor = LowLevelContainerColor,
     ),
     NORMAL(
-        text = UiText.NonTranslatable("Нормальный"),
+        text = UiText.NonTranslatable("Норма"),
         contentColor = NormalLevelContentColor,
         containerColor = NormalLevelContainerColor,
     ),
     HIGH(
-        text = UiText.NonTranslatable("Высокий"),
+        text = UiText.NonTranslatable("Высоко"),
         contentColor = HighLevelContentColor,
         containerColor = HighLevelContainerColor,
     ),
     CRITICAL(
-        text = UiText.NonTranslatable("Критический"),
+        text = UiText.NonTranslatable("Критично"),
         contentColor = ExtraHighLevelContentColor,
         containerColor = ExtraHighLevelContainerColor,
     ),
     ;
+}
+
+fun Estimation.asUi(): UiLevel = when (level) {
+    Estimation.Level.LOW -> UiLevel.LOW
+    Estimation.Level.NORMAL -> UiLevel.NORMAL
+    Estimation.Level.HIGH -> UiLevel.HIGH
+    Estimation.Level.CRITICAL -> UiLevel.CRITICAL
 }
 
 @Composable

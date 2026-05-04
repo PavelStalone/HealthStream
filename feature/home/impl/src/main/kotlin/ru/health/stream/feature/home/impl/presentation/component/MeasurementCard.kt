@@ -95,22 +95,14 @@ internal fun MeasurementCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Box(
+                    measurementIcon.drawIcon(
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                shape = MaterialTheme.shapes.medium,
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        measurementIcon.drawIcon(
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                            .padding(vertical = 4.dp)
+                            .size(32.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                     Text(
                         text = measurementTitle,
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -124,7 +116,6 @@ internal fun MeasurementCard(
 
             if (measurementValue != null) {
                 Row(
-                    modifier = Modifier.padding(vertical = 12.dp),
                     verticalAlignment = Alignment.Bottom,
                 ) {
                     Text(

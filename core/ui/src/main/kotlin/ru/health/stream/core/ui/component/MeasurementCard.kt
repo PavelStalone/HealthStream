@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Delete
 import ru.health.stream.core.ui.icon.default.Edit
+import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.icon.device.PulseOximeter
 import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.layout.SwipeableRow
@@ -67,13 +68,13 @@ fun MeasurementCard(
     onCardClick: (() -> Unit)? = null,
     shape: Shape = MaterialTheme.shapes.large,
     colors: CardColors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        containerColor = MaterialTheme.colorScheme.surface
     ),
     deleteColor: Color = MaterialTheme.colorScheme.error,
     editColor: Color = MaterialTheme.colorScheme.primary,
     deleteBackgroundColor: Color = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
     editBackgroundColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-    elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     actionIcon: @Composable () -> Unit = {},
 ) {
     val secondaryContentColor = colors.contentColor.copy(alpha = 0.7f)
@@ -93,7 +94,7 @@ fun MeasurementCard(
             containerColor = if (enabled) {
                 colors.containerColor
             } else {
-                colors.disabledContentColor
+                colors.disabledContainerColor
             }
         ),
     ) {
@@ -123,7 +124,9 @@ fun MeasurementCard(
                                     .fillMaxHeight()
                                     .background(
                                         shape = MaterialTheme.shapes.large,
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(
+                                            alpha = 0.3f
+                                        ),
                                     )
                                     .padding(12.dp),
                                 tint = MaterialTheme.colorScheme.primary,
@@ -311,7 +314,7 @@ private fun PreviewMeasurementCard() {
             MeasurementCard(
                 modifier = Modifier.fillMaxWidth(),
                 sourceIcon = UiIcon.Vector(Icons.Device.PulseOximeter),
-                measurementIcon = UiIcon.Vector(Icons.Fill.Favorite),
+                measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
                 unit = "уд/мин",
                 time = "12:30",
                 value = "72",
@@ -324,7 +327,7 @@ private fun PreviewMeasurementCard() {
             MeasurementCard(
                 modifier = Modifier.fillMaxWidth(),
                 sourceIcon = UiIcon.Vector(Icons.Device.PulseOximeter),
-                measurementIcon = UiIcon.Vector(Icons.Fill.Favorite),
+                measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
                 unit = "уд/мин",
                 time = "12:30",
                 value = "72",
@@ -336,7 +339,7 @@ private fun PreviewMeasurementCard() {
             MeasurementCard(
                 modifier = Modifier.fillMaxWidth(),
                 sourceIcon = UiIcon.Vector(Icons.Device.PulseOximeter),
-                measurementIcon = UiIcon.Vector(Icons.Fill.Favorite),
+                measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
                 unit = "уд/мин",
                 time = "12:30",
                 value = "72",
@@ -347,7 +350,7 @@ private fun PreviewMeasurementCard() {
             MeasurementCard(
                 modifier = Modifier.fillMaxWidth(),
                 sourceIcon = UiIcon.Vector(Icons.Device.PulseOximeter),
-                measurementIcon = UiIcon.Vector(Icons.Fill.Favorite),
+                measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
                 unit = "уд/мин",
                 time = "12:30",
                 value = "72",

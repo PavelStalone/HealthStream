@@ -2,6 +2,7 @@ package ru.health.stream.feature.measurement.api.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
+import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import kotlin.reflect.KClass
 
@@ -12,5 +13,5 @@ data class MeasurementNavKey(
 
 @Serializable
 data class AddMeasurementNavKey(
-    val measurementType: KClass<out Measurement>,
+    val measurementType: KClass<out Measurement> = HeartRate::class,
 ) : NavKey

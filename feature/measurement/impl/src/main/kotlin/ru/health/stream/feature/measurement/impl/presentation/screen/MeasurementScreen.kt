@@ -1,6 +1,6 @@
 package ru.health.stream.feature.measurement.impl.presentation.screen
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,14 +44,15 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
+import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
-import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
+import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.drawable.Scatter
@@ -92,11 +92,8 @@ internal fun MeasurementScreen(
         TopBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = 8.dp),
-            title = UiText.NonTranslatable(
-                value = measurementType.simpleName
-                    ?: "Детали измерения" // TODO: Change title name - shoplikpavel 2026-03-31
-            ),
+                .padding(bottom = 8.dp),
+            title = measurementType.asUi().text,
             navigationIcon = {
                 IconButton(
                     onClick = onBackClick
@@ -109,17 +106,11 @@ internal fun MeasurementScreen(
             },
             actions = {
                 IconButton(
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                            shape = CircleShape
-                        ),
                     onClick = { addMeasurementClick(measurementType) }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        imageVector = Icons.Default.Add,
                     )
                 }
             }
@@ -164,21 +155,16 @@ internal fun MeasurementScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
             item {
-                Column {
-                    Text(
-                        modifier = Modifier.padding(bottom = 12.dp, start = 4.dp),
-                        text = "Динамика показателей",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        ),
-                    )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SectionHeader(text = "Динамика показателей")
                     Card(
-                        shape = MaterialTheme.shapes.extraLarge,
+                        shape = MaterialTheme.shapes.large,
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Box(modifier = Modifier.padding(all = 20.dp)) {
+                        Box(modifier = Modifier.padding(all = 16.dp)) {
                             when (val state = chartState) {
                                 MeasurementsChartState.Loading -> {
                                     Box(
@@ -236,16 +222,7 @@ internal fun MeasurementScreen(
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            item {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp),
-                    text = "История измерений",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-                )
-            }
+            item { SectionHeader(text = "История измерений") }
 
             if (measurementsState is MeasurementsState.Main) {
                 val state = measurementsState as MeasurementsState.Main
@@ -256,10 +233,10 @@ internal fun MeasurementScreen(
                     item(key = group.id) {
                         ExpandableHeader(
                             modifier = Modifier
-                                .height(40.dp)
+                                .height(32.dp)
                                 .fillMaxWidth()
                                 .animateItem()
-                                .padding(top = 16.dp),
+                                .padding(top = 8.dp),
                             isExpanded = isExpanded,
                             title = group.date.format(dateFormatter),
                             onClick = { viewModel.expandMeasurement(group.id) },

@@ -3,6 +3,10 @@ package ru.health.stream.core.ui.model
 import androidx.compose.runtime.Immutable
 import kotlinx.datetime.Instant
 import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.Blood
+import ru.health.stream.core.ui.icon.default.Favorite
+import ru.health.stream.core.ui.icon.default.Spo2
+import ru.health.stream.core.ui.icon.default.Weight
 import ru.health.stream.core.ui.icon.device.BPCuff
 import ru.health.stream.core.ui.icon.device.Glucose
 import ru.health.stream.core.ui.icon.device.Pencil
@@ -22,6 +26,7 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.SystolicPressure
+import kotlin.reflect.KClass
 
 @Immutable
 data class UiMeasurement(
@@ -81,15 +86,15 @@ data class UiMeasurement(
 
         WEIGHT(
             text = UiText.NonTranslatable("Вес"),
-            icon = UiIcon.Vector(imageVector = Icons.Fill.Favorite),
+            icon = UiIcon.Vector(imageVector = Icons.Default.Weight),
         ),
         BLOOD_GLUCOSE(
             text = UiText.NonTranslatable("Глюкоза"),
-            icon = UiIcon.Vector(imageVector = Icons.Fill.Favorite),
+            icon = UiIcon.Vector(imageVector = Icons.Device.Glucose),
         ),
         HEART_RATE(
             text = UiText.NonTranslatable("Пульс"),
-            icon = UiIcon.Vector(imageVector = Icons.Fill.Favorite),
+            icon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
         ),
         RESPIRATION_RATE(
             text = UiText.NonTranslatable("Дыхание"),
@@ -97,11 +102,11 @@ data class UiMeasurement(
         ),
         OXYGEN_SATURATION(
             text = UiText.NonTranslatable("Сатурация"),
-            icon = UiIcon.Vector(imageVector = Icons.Fill.Favorite),
+            icon = UiIcon.Vector(imageVector = Icons.Default.Spo2),
         ),
         BLOOD_PRESSURE(
             text = UiText.NonTranslatable("Давление"),
-            icon = UiIcon.Vector(imageVector = Icons.Fill.Favorite),
+            icon = UiIcon.Vector(imageVector = Icons.Default.Blood),
         ),
         ;
     }
@@ -112,7 +117,10 @@ fun Measurement.asUi(): UiMeasurement {
         is HeartRate -> "$pulse" to UiText.NonTranslatable(value = "уд/мин")
         is BodyWeight -> "${weight.kg}" to UiText.NonTranslatable(value = "кг")
         is OxygenSaturation -> "$saturation" to UiText.NonTranslatable(value = "%")
-        is BloodPressure -> "${systolic.toInt()}/${diastolic.toInt()}" to UiText.NonTranslatable(value = "мм рт. ст.")
+        is BloodPressure -> "${systolic.toInt()}/${diastolic.toInt()}" to UiText.NonTranslatable(
+            value = "мм рт. ст."
+        )
+
         is RespirationRate -> "$rate" to UiText.NonTranslatable(value = "дых/мин")
         is BloodGlucose -> "${level.toInt()}" to UiText.NonTranslatable(value = "ммоль/л")
 
@@ -155,9 +163,12 @@ fun Measurement.asUi(): UiMeasurement {
     )
 }
 
-fun Estimation.asUi(): UiLevel = when (level) {
-    Estimation.Level.LOW -> UiLevel.LOW
-    Estimation.Level.NORMAL -> UiLevel.NORMAL
-    Estimation.Level.HIGH -> UiLevel.HIGH
-    Estimation.Level.CRITICAL -> UiLevel.CRITICAL
+fun KClass<out Measurement>.asUi(): UiMeasurement.Type = when (this) {
+    BodyWeight::class -> UiMeasurement.Type.WEIGHT
+    HeartRate::class -> UiMeasurement.Type.HEART_RATE
+    BloodGlucose::class -> UiMeasurement.Type.BLOOD_GLUCOSE
+    BloodPressure::class -> UiMeasurement.Type.BLOOD_PRESSURE
+    RespirationRate::class -> UiMeasurement.Type.RESPIRATION_RATE
+    OxygenSaturation::class -> UiMeasurement.Type.OXYGEN_SATURATION
+    else -> UiMeasurement.Type.HEART_RATE
 }

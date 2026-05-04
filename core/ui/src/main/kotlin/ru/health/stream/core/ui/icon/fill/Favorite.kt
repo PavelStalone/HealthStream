@@ -19,7 +19,7 @@ val Icons.Fill.Favorite: ImageVector
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {
-            path(fill = SolidColor(Color(0xFFE3E3E3))) {
+            path(fill = SolidColor(Color.White)) {
                 moveToRelative(480f, 840f)
                 lineToRelative(-58f, -52f)
                 quadToRelative(-101f, -91f, -167f, -157f)

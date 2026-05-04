@@ -21,9 +21,9 @@ fun EstimationLevel(
         modifier = modifier
             .background(
                 color = containerColor,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
             )
-            .padding(horizontal = 6.dp, vertical = 2.dp),
+            .padding(horizontal = 8.dp, vertical = 2.dp),
         text = text,
         style = MaterialTheme.typography.labelMedium.copy(
             color = contentColor,

@@ -19,7 +19,7 @@ val Icons.Default.Info: ImageVector
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {
-            path(fill = SolidColor(Color(0xFFE3E3E3))) {
+            path(fill = SolidColor(Color.White)) {
                 moveTo(440f, 680f)
                 horizontalLineToRelative(80f)
                 verticalLineToRelative(-240f)
