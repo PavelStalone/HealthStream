@@ -6,15 +6,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.EntryProviderScope
@@ -32,13 +34,18 @@ import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.theme.HealthStreamTheme
+import ru.health.stream.data.personal.repository.UserRepository
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
+import ru.health.stream.feature.onboarding.impl.presentation.screen.OnboardingScreen
 import ru.health.stream.feature.report.api.navigation.ReportNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : StarterActivity() {
+
+    @Inject
+    lateinit var userRepository: UserRepository
 
     @Inject
     lateinit var navigationRouter: Router<NavKey>
@@ -62,31 +69,43 @@ class MainActivity : StarterActivity() {
                     ),
                 )
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        AppBottomBar(
+                var onBoarding by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    onBoarding = userRepository.getUser() == null // TODO: Use DataStore for this flag - shoplikpavel 2026-05-05
+                }
+
+                if (onBoarding) {
+                    OnboardingScreen(
+                        onFinish = { onBoarding = false }
+                    )
+                } else {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        bottomBar = {
+                            AppBottomBar(
+                                backStack = backStack,
+                                onTabClick = { screen ->
+                                    navigationRouter.popTo(HomeNavKey)
+                                    navigationRouter.push(screen)
+                                }
+                            )
+                        }
+                    ) { innerPadding ->
+                        NavHost(
                             backStack = backStack,
-                            onTabClick = { screen ->
-                                navigationRouter.popTo(HomeNavKey)
-                                navigationRouter.push(screen)
-                            }
-                        )
-                    }
-                ) { innerPadding ->
-                    NavHost(
-                        backStack = backStack,
-                        router = navigationRouter,
-                    ) { backStack, onBack, router ->
-                        NavDisplay(
-                            modifier = Modifier.padding(paddingValues = innerPadding),
-                            onBack = onBack,
-                            backStack = backStack,
-                            sceneStrategy = DialogSceneStrategy(),
-                            entryProvider = entryProvider {
-                                entryProviders.forEach { provider -> this.provider(router) }
-                            },
-                        )
+                            router = navigationRouter,
+                        ) { backStack, onBack, router ->
+                            NavDisplay(
+                                modifier = Modifier.padding(paddingValues = innerPadding),
+                                onBack = onBack,
+                                backStack = backStack,
+                                sceneStrategy = DialogSceneStrategy(),
+                                entryProvider = entryProvider {
+                                    entryProviders.forEach { provider -> provider(router) }
+                                },
+                            )
+                        }
                     }
                 }
             }

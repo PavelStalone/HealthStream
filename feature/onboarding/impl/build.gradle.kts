@@ -9,7 +9,7 @@ android {
 }
 
 dependencies {
-    api(projects.feature.onboarding.api)
+    implementation(projects.core.starter)
 
     implementation(projects.data.vitals)
     implementation(projects.data.report)
@@ -17,6 +17,7 @@ dependencies {
     implementation(projects.core.ui)
 
     implementation(projects.feature.chart)
+    implementation(projects.feature.user.api)
 
     implementation(libs.lottie.compose)
 }
