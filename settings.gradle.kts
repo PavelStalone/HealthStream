@@ -57,6 +57,7 @@ include(":feature:home:api")
 include(":feature:home:impl")
 include(":feature:report:api")
 include(":feature:report:impl")
+include(":feature:onboarding:impl")
 include(":feature:measurement:api")
 include(":feature:measurement:impl")
 //endregion

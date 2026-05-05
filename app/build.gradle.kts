@@ -50,5 +50,6 @@ dependencies {
     implementation(projects.feature.home.impl)
     implementation(projects.feature.user.impl)
     implementation(projects.feature.report.impl)
+    implementation(projects.feature.onboarding.impl)
     implementation(projects.feature.measurement.impl)
 }
