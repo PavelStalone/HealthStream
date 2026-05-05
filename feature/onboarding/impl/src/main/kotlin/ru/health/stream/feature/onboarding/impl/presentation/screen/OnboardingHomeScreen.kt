@@ -12,10 +12,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -28,6 +30,7 @@ import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiText
+import ru.health.stream.feature.chart.core.Drawable
 import ru.health.stream.feature.chart.core.drawable.CubicLine
 import ru.health.stream.feature.chart.core.drawable.Scatter
 import ru.health.stream.feature.chart.model.ChartPosition
@@ -46,25 +49,23 @@ internal fun OnboardingHomeScreen(
 
     val currentStep by viewModel.currentStepFlow.collectAsState()
 
-    val drawableData by remember {
-        derivedStateOf {
-            if (currentStep.id == "home_filled") {
-                listOf(
-                    Scatter(
-                        positions = ranges,
-                        pointColor = primaryColor,
-                        rangeColor = primaryColor.copy(alpha = 0.3f),
-                        radiusPoint = 4.dp
-                    ),
-                    CubicLine(
-                        points = points,
-                        color = tertiaryColor,
-                        style = Stroke(width = 6f, cap = StrokeCap.Round),
-                    )
+    var drawableData by remember { mutableStateOf(emptyList<Drawable>()) }
+
+    LaunchedEffect(currentStep.id) {
+        if (currentStep.id == "home_filled") {
+            drawableData = listOf(
+                Scatter(
+                    positions = ranges,
+                    pointColor = primaryColor,
+                    rangeColor = primaryColor.copy(alpha = 0.3f),
+                    radiusPoint = 4.dp
+                ),
+                CubicLine(
+                    points = points,
+                    color = tertiaryColor,
+                    style = Stroke(width = 6f, cap = StrokeCap.Round),
                 )
-            } else {
-                emptyList()
-            }
+            )
         }
     }
 

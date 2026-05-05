@@ -65,93 +65,90 @@ internal fun OnboardingOverlay(
                 overlayOffset = coordinates.positionInWindow()
             }
     ) {
+        val density = LocalDensity.current
+
         val screenWidth = maxWidth
         val screenHeight = maxHeight
+        val targetRect = targetKey?.let { key -> targetCoordinates[key] }?.translate(-overlayOffset)
+        val isBottomHalf = targetRect?.let { rect ->
+            with(density) { rect.center.y.toDp() > screenHeight / 2 }
+        } ?: false
 
-        CompositionLocalProvider(LocalOnboardingScope provides scope) {
-            content()
-        }
-
-        val targetRect = targetKey?.let { targetCoordinates[it] }?.translate(-overlayOffset)
         val animatedRect by animateRectAsState(
             targetValue = targetRect ?: Rect(
                 left = screenWidth.value / 2f,
                 top = screenHeight.value / 2f,
                 right = screenWidth.value / 2f,
-                bottom = screenHeight.value / 2f
+                bottom = screenHeight.value / 2f,
             ),
             animationSpec = tween(durationMillis = 500),
-            label = "SpotlightAnimation"
+            label = "SpotlightAnimation",
         )
+        val targetYOffset by animateDpAsState(
+            targetValue = targetRect?.let { rect ->
+                with(density) {
+                    if (isBottomHalf) {
+                        rect.top.toDp() - 160.dp
+                    } else {
+                        rect.bottom.toDp() + 16.dp
+                    }
+                }
+            } ?: (screenHeight / 3),
+            animationSpec = tween(durationMillis = 300),
+            label = "TooltipPositionAnimation",
+        )
+
+        CompositionLocalProvider(LocalOnboardingScope provides scope) {
+            content()
+        }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer(alpha = 0.99f)
                 .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onNext,
                     indication = null,
-                    onClick = onNext
+                    interactionSource = remember { MutableInteractionSource() },
                 )
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(color = Color.Black.copy(alpha = 0.7f))
+
                 if (targetKey != null) {
                     drawRoundRect(
-                        color = Color.Transparent,
-                        topLeft = animatedRect.topLeft,
                         size = animatedRect.size,
+                        color = Color.Transparent,
+                        blendMode = BlendMode.Clear,
+                        topLeft = animatedRect.topLeft,
                         cornerRadius = CornerRadius(16.dp.toPx(), 16.dp.toPx()),
-                        blendMode = BlendMode.Clear
                     )
                 }
             }
 
-            val density = LocalDensity.current
-            val tooltipPadding = 16.dp
-
-            val isBottomHalf = if (targetRect != null) {
-                val rectCenterY = targetRect.center.y
-                with(density) { rectCenterY.toDp() > screenHeight / 2 }
-            } else false
-
-            val targetYOffset by animateDpAsState(
-                targetValue = if (targetRect != null) {
-                    if (isBottomHalf) {
-                        with(density) { targetRect.top.toDp() } - 160.dp
-                    } else {
-                        with(density) { targetRect.bottom.toDp() } + 16.dp
-                    }
-                } else {
-                    screenHeight / 3
-                },
-                animationSpec = tween(durationMillis = 300),
-                label = "TooltipPositionAnimation"
-            )
-
             Card(
                 modifier = Modifier
-                    .padding(horizontal = tooltipPadding)
+                    .padding(horizontal = 16.dp)
                     .offset(y = targetYOffset)
                     .widthIn(max = screenWidth - 32.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             ) {
                 AnimatedContent(
                     targetState = text,
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(durationMillis = 800, delayMillis = 200))
-                            .togetherWith(fadeOut(animationSpec = tween(durationMillis = 200))))
+                        fadeIn(animationSpec = tween(durationMillis = 800, delayMillis = 200))
+                            .togetherWith(fadeOut(animationSpec = tween(durationMillis = 200)))
                     },
-                    label = "TextAnimation"
+                    label = "TextAnimation",
                 ) { targetText ->
                     Text(
                         modifier = Modifier.padding(all = 16.dp),
                         text = targetText,
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                 }
             }
@@ -160,6 +157,7 @@ internal fun OnboardingOverlay(
 }
 
 internal fun interface OnboardingScope {
+
     fun onPositioned(key: String, rect: Rect)
 }
 

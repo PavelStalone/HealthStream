@@ -1,5 +1,3 @@
-@file:JvmName("OnboardingMeasurementCardKt")
-
 package ru.health.stream.feature.onboarding.impl.presentation.component
 
 import androidx.compose.animation.core.animateFloatAsState

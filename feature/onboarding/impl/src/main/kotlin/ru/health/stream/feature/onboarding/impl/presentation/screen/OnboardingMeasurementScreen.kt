@@ -57,6 +57,7 @@ internal fun OnboardingMeasurementScreen(
     val onboardingScope = LocalOnboardingScope.current
 
     val currentStep by viewModel.currentStepFlow.collectAsState()
+
     val isExpanded by remember {
         derivedStateOf {
             listOf("measurement_expand", "measurement_expand_edit").contains(currentStep.id)

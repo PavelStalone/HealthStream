@@ -62,22 +62,20 @@ class MainActivity : StarterActivity() {
                 darkTheme = false, // TODO: Remove after release - shoplikpavel 2026-03-30
                 dynamicColor = false,
             ) {
-                val backStack = rememberNavBackStack(
-                    elements = arrayOf(
-                        HomeNavKey,
-                        UserNavKey,
-                    ),
-                )
+                val backStack = rememberNavBackStack(HomeNavKey)
 
-                var onBoarding by remember { mutableStateOf(false) }
+                var onboarding by remember { mutableStateOf(false) }
 
                 LaunchedEffect(Unit) {
-                    onBoarding = userRepository.getUser() == null // TODO: Use DataStore for this flag - shoplikpavel 2026-05-05
+                    onboarding = (userRepository.getUser() == null) // TODO: Use DataStore for this flag - shoplikpavel 2026-05-05
                 }
 
-                if (onBoarding) {
+                if (onboarding) {
                     OnboardingScreen(
-                        onFinish = { onBoarding = false }
+                        onFinish = {
+                            backStack.add(UserNavKey)
+                            onboarding = false
+                        }
                     )
                 } else {
                     Scaffold(
