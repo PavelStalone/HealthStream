@@ -76,6 +76,7 @@ import kotlin.reflect.KClass
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun MeasurementScreen(
     onBackClick: () -> Unit,
+    onEditClick: (Measurement) -> Unit,
     measurementType: KClass<out Measurement>,
     addMeasurementClick: (KClass<out Measurement>) -> Unit,
     modifier: Modifier = Modifier,
@@ -308,8 +309,15 @@ internal fun MeasurementScreen(
                                             sourceName = resource.text.asText(),
                                             time = time.toLocalDateTime(timeZone)
                                                 .format(timeFormatter),
-                                            onEditClick = {}, // TODO: Add on click method in edit callback - pavelshoplik 21-04-2026
-                                            onDeleteClick = {}, // TODO: Add on click method in delete callback - pavelshoplik 21-04-2026
+                                            onEditClick = {
+                                                viewModel.editMeasurement(
+                                                    uiMeasurement = measurement,
+                                                    onEdit = onEditClick,
+                                                )
+                                            },
+                                            onDeleteClick = {
+                                                viewModel.deleteMeasurement(uiMeasurement = measurement)
+                                            },
                                         )
                                     }
                                 }

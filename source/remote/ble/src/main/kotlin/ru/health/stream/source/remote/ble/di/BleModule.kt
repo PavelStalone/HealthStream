@@ -23,10 +23,10 @@ import ru.health.stream.core.monitor.logE
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.starter.ActivityStarter
 import ru.health.stream.core.starter.AppStarter
-import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.copy
 import ru.health.stream.data.vitals.usecase.CreateMeasurementUseCase
+import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.remote.ble.BleSystemManager
 import ru.health.stream.source.remote.ble.BleSystemManagerImpl
 import ru.health.stream.source.remote.ble.lib.device.BleDevice

@@ -2,13 +2,11 @@ package ru.health.stream.source.local.healthconnect.record
 
 import android.content.Context
 import android.health.connect.datatypes.Metadata.RECORDING_METHOD_MANUAL_ENTRY
-import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.health.connect.client.units.Mass
-import androidx.health.connect.client.units.Pressure
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.datetime.Instant
@@ -16,12 +14,11 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
-import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.kg
-import ru.health.stream.data.vitals.model.measurement.BloodPressure
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
+import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.healthconnect.HealthConnectManager
 import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
@@ -71,7 +68,7 @@ internal class BodyWeightSource @Inject constructor(
                 }
 
                 BodyWeight(
-                    id = metadata.id,
+                    id = metadata.clientRecordId ?: metadata.id,
                     weight = record.weight.inKilograms.kg,
                     createdAt = record.time.toKotlinInstant(),
                     resource = resource,
@@ -80,6 +77,21 @@ internal class BodyWeightSource @Inject constructor(
     }.onFailure { exception ->
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
+
+    override suspend fun deleteMeasurement(measurement: BodyWeight): Result<BodyWeight> =
+        runCatching {
+            logV("deleteMeasurement called: measurement=$measurement")
+
+            healthConnectManager.healthConnectClient.deleteRecords(
+                recordType = WeightRecord::class,
+                recordIdsList = emptyList(),
+                clientRecordIdsList = listOf(measurement.id)
+            )
+
+            measurement
+        }.onFailure { exception ->
+            logW("Error while deleteMeasurement running", exception)
+        }
 
     override suspend fun writeMeasurement(
         measurement: BodyWeight,
@@ -98,13 +110,13 @@ internal class BodyWeightSource @Inject constructor(
 
             val records = measurements.map { measurement ->
                 val metadata = when (val res = measurement.resource) {
-                    is Resource.Manual -> Metadata.manualEntryWithId(
-                        id = measurement.id,
+                    is Resource.Manual -> Metadata.manualEntry(
+                        clientRecordId = measurement.id,
                         device = DeviceData(type = DeviceData.TYPE_PHONE)
                     )
 
-                    is Device -> Metadata.autoRecordedWithId(
-                        id = measurement.id,
+                    is Device -> Metadata.autoRecorded(
+                        clientRecordId = measurement.id,
                         device = DeviceData(
                             type = DeviceData.TYPE_UNKNOWN,
                             model = res.id,

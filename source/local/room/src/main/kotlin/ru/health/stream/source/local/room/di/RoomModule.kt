@@ -4,8 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.health.stream.data.personal.api.local.LocalUserSource
-import ru.health.stream.data.vitals.api.local.LocalDeviceSource
+import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
+import ru.health.stream.source.infrastructure.source.local.LocalUserSource
 import ru.health.stream.source.local.PrimaryMeasurementSource
 import ru.health.stream.source.local.room.source.RoomDeviceSource
 import ru.health.stream.source.local.room.source.RoomMeasurementSource

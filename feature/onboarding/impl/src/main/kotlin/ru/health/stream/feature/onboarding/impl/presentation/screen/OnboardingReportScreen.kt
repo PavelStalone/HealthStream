@@ -246,7 +246,7 @@ internal fun OnboardingReportScreen(
                         onCardClick = { },
                         actionIcon = {
                             Checkbox(
-                                checked = false,
+                                checked = true,
                                 onCheckedChange = null
                             )
                         },

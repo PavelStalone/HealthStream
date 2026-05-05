@@ -14,10 +14,10 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
-import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
+import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.healthconnect.HealthConnectManager
 import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
@@ -65,7 +65,7 @@ internal class OxygenSaturationSource @Inject constructor(
                 }
 
                 OxygenSaturation(
-                    id = metadata.id,
+                    id = metadata.clientRecordId ?: metadata.id,
                     saturation = record.percentage.value.toFloat(),
                     createdAt = record.time.toKotlinInstant(),
                     resource = resource,
@@ -74,6 +74,21 @@ internal class OxygenSaturationSource @Inject constructor(
     }.onFailure { exception ->
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
+
+    override suspend fun deleteMeasurement(measurement: OxygenSaturation): Result<OxygenSaturation> =
+        runCatching {
+            logV("deleteMeasurement called: measurement=$measurement")
+
+            healthConnectManager.healthConnectClient.deleteRecords(
+                recordType = OxygenSaturationRecord::class,
+                recordIdsList = emptyList(),
+                clientRecordIdsList = listOf(measurement.id)
+            )
+
+            measurement
+        }.onFailure { exception ->
+            logW("Error while deleteMeasurement running", exception)
+        }
 
     override suspend fun writeMeasurement(
         measurement: OxygenSaturation,
@@ -92,13 +107,13 @@ internal class OxygenSaturationSource @Inject constructor(
 
             val records = measurements.map { measurement ->
                 val metadata = when (val res = measurement.resource) {
-                    is Resource.Manual -> Metadata.manualEntryWithId(
-                        id = measurement.id,
+                    is Resource.Manual -> Metadata.manualEntry(
+                        clientRecordId = measurement.id,
                         device = DeviceData(type = DeviceData.TYPE_PHONE)
                     )
 
-                    is Device -> Metadata.autoRecordedWithId(
-                        id = measurement.id,
+                    is Device -> Metadata.autoRecorded(
+                        clientRecordId = measurement.id,
                         device = DeviceData(
                             type = DeviceData.TYPE_UNKNOWN,
                             model = res.id,

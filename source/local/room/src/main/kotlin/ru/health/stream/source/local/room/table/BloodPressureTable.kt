@@ -32,6 +32,13 @@ internal class BloodPressureTable @Inject constructor(
     ): List<T> = dao.getByRange(start = start, end = end)
         .map { entityWithMetadata -> entityWithMetadata.asBloodPressure() as T }
 
+    override suspend fun <T : Measurement> getAllMeasurementsByRange(
+        start: Instant,
+        end: Instant,
+        type: KClass<T>
+    ): List<T> = dao.getAllByRange(start = start, end = end)
+        .map { entityWithMetadata -> entityWithMetadata.asBloodPressure() as T }
+
     override fun <T : Measurement> getMeasurementsFlowByRange(
         start: Instant,
         end: Instant,
@@ -40,6 +47,23 @@ internal class BloodPressureTable @Inject constructor(
         .map { entitiesWithMetadata ->
             entitiesWithMetadata.map { entityWithMetadata -> entityWithMetadata.asBloodPressure() as T }
         }
+
+    override suspend fun <T : Measurement> deleteMeasurement(
+        measurement: T
+    ): Result<T> = runCatching {
+        val value = measurement as BloodPressure
+
+        val bpWithMetadata = value.asBloodPressureWithMetadata()
+
+        dao.insert(
+            bpWithMetadata.copy(
+                bloodPressureEntity = bpWithMetadata.bloodPressureEntity.copy(isRemoved = true)
+            )
+        )
+        measurement
+    }.onFailure { exception ->
+        logE(exception, "Error while deleteMeasurement running")
+    }
 
     override suspend fun <T : Measurement> writeMeasurement(
         measurement: T

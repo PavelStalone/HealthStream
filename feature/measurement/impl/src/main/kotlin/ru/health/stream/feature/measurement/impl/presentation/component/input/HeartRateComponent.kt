@@ -19,11 +19,14 @@ import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.vitals.model.EmptyMetadata
 import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.HeartRate
+import ru.health.stream.data.vitals.model.measurement.Measurement
 import kotlin.uuid.Uuid
 
-class HeartRateComponent : InputTypeComponent {
+class HeartRateComponent(private val measurement: HeartRate? = null) : InputTypeComponent {
 
-    private val heartRateState = mutableStateOf(HeartRateUi())
+    private val heartRateState = mutableStateOf(HeartRateUi(
+        pulse = measurement?.pulse?.toString() ?: ""
+    ))
 
     override fun build(): Result<HeartRate> = runCatching {
         val heartRateUi = heartRateState.value
@@ -33,9 +36,9 @@ class HeartRateComponent : InputTypeComponent {
         require(pulse < 220) { "Pulse cannot be greater than 220" }
 
         HeartRate(
-            id = Uuid.random().toString(),
-            createdAt = Clock.System.now(),
-            resource = Resource.Manual,
+            id = measurement?.id ?: Uuid.random().toString(),
+            createdAt = measurement?.createdAt ?: Clock.System.now(),
+            resource = measurement?.resource ?: Resource.Manual,
             metadata = EmptyMetadata,
             pulse = pulse,
         )

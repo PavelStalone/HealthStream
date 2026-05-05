@@ -1,11 +1,11 @@
-package ru.health.stream.data.report.repository.impl
+package ru.health.stream.source.infrastructure.repository
 
 import kotlinx.datetime.Instant
 import ru.health.stream.data.personal.repository.UserRepository
-import ru.health.stream.data.report.api.ReportFileGenerator
 import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.data.report.repository.ReportRepository
 import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.source.infrastructure.source.local.ReportFileGenerator
 import java.net.URI
 import javax.inject.Inject
 

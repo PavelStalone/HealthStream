@@ -32,6 +32,13 @@ internal class HeartRateTable @Inject constructor(
     ): List<T> = heartRateDao.getByRange(start = start, end = end)
         .map { heartRateWithMetadata -> heartRateWithMetadata.asHeartRate() as T }
 
+    override suspend fun <T : Measurement> getAllMeasurementsByRange(
+        start: Instant,
+        end: Instant,
+        type: KClass<T>
+    ): List<T> = heartRateDao.getAllByRange(start = start, end = end)
+        .map { entityWithMetadata -> entityWithMetadata.asHeartRate() as T }
+
     override fun <T : Measurement> getMeasurementsFlowByRange(
         start: Instant,
         end: Instant,
@@ -40,6 +47,23 @@ internal class HeartRateTable @Inject constructor(
         .map { heartRatesWithMetadata ->
             heartRatesWithMetadata.map { heartRateWithMetadata -> heartRateWithMetadata.asHeartRate() as T }
         }
+
+    override suspend fun <T : Measurement> deleteMeasurement(
+        measurement: T
+    ): Result<T> = runCatching {
+        val value = measurement as HeartRate
+
+        val heartRateWithMetadata = value.asHeartRateWithMetadata()
+
+        heartRateDao.insert(
+            heartRateWithMetadata.copy(
+                heartRateEntity = heartRateWithMetadata.heartRateEntity.copy(isRemoved = true)
+            )
+        )
+        measurement
+    }.onFailure { exception ->
+        logE(exception, "Error while deleteMeasurement running")
+    }
 
     override suspend fun <T : Measurement> writeMeasurement(
         measurement: T

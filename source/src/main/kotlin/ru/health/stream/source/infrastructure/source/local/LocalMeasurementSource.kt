@@ -1,4 +1,4 @@
-package ru.health.stream.data.vitals.api.local
+package ru.health.stream.source.infrastructure.source.local
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
@@ -23,6 +23,7 @@ interface LocalMeasurementSource {
         type: KClass<T>,
     ): Flow<List<T>>
 
+    suspend fun <T : Measurement> deleteMeasurement(measurement: T): Result<T>
     suspend fun <T : Measurement> writeMeasurement(measurement: T): Result<T>
     suspend fun <T : Measurement> writeMeasurements(measurements: List<T>): Result<List<T>>
 }

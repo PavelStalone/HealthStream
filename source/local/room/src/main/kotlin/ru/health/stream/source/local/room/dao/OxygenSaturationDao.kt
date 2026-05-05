@@ -13,13 +13,16 @@ import ru.health.stream.source.local.room.entity.OxygenSaturationWithMetadata
 @Dao
 internal interface OxygenSaturationDao : ResourceDao, NoteDao {
 
-    @Query("SELECT * FROM oxygenSaturation WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
+    @Query("SELECT * FROM oxygenSaturation WHERE created_at >= :start AND created_at <= :end AND is_removed == FALSE ORDER BY created_at DESC")
     suspend fun getByRange(start: Instant, end: Instant): List<OxygenSaturationWithMetadata>
 
     @Query("SELECT * FROM oxygenSaturation WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
+    suspend fun getAllByRange(start: Instant, end: Instant): List<OxygenSaturationWithMetadata>
+
+    @Query("SELECT * FROM oxygenSaturation WHERE created_at >= :start AND created_at <= :end AND is_removed == FALSE ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<OxygenSaturationWithMetadata>>
 
-    @Query("SELECT * FROM oxygenSaturation WHERE estimation_level IS NULL ORDER BY created_at DESC")
+    @Query("SELECT * FROM oxygenSaturation WHERE estimation_level IS NULL AND is_removed == FALSE ORDER BY created_at DESC")
     suspend fun getWithoutEstimation(): List<OxygenSaturationWithMetadata>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

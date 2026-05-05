@@ -15,9 +15,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import ru.health.stream.core.common.di.Dispatcher
-import ru.health.stream.data.vitals.api.local.LocalMeasurementSource
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.copy
+import ru.health.stream.source.infrastructure.source.local.LocalMeasurementSource
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 
@@ -85,6 +85,30 @@ internal class SyncableMeasurementLocalSource @Inject constructor(
         awaitClose {}
     }.flowOn(ioDispatcher)
 
+    override suspend fun <T : Measurement> deleteMeasurement(
+        measurement: T
+    ): Result<T> = withContext(ioDispatcher) {
+        externalSources.forEach { src -> src.deleteMeasurement(measurement) }
+
+        primarySource.deleteMeasurement(measurement)
+    }
+
+    override suspend fun <T : Measurement> writeMeasurement(
+        measurement: T
+    ): Result<T> = withContext(ioDispatcher) {
+        externalSources.forEach { src -> src.writeMeasurement(measurement) }
+
+        primarySource.writeMeasurement(measurement)
+    }
+
+    override suspend fun <T : Measurement> writeMeasurements(
+        measurements: List<T>
+    ): Result<List<T>> = withContext(ioDispatcher) {
+        externalSources.forEach { src -> src.writeMeasurements(measurements) }
+
+        primarySource.writeMeasurements(measurements)
+    }
+
     private suspend fun <T : Measurement> syncExternalToPrimary(
         externalMeasurements: List<T>,
         start: Instant,
@@ -94,7 +118,7 @@ internal class SyncableMeasurementLocalSource @Inject constructor(
         if (externalMeasurements.isEmpty()) return@withContext
 
         mutex.withLock {
-            val primaryMeasurements = primarySource.getMeasurementsByRange(start, end, type)
+            val primaryMeasurements = primarySource.getAllMeasurementsByRange(start, end, type)
             val primaryTimeSet = primaryMeasurements.map { it.createdAt }.toMutableSet()
             val primaryIdSet = primaryMeasurements.map { it.id }.toMutableSet()
 
@@ -117,21 +141,5 @@ internal class SyncableMeasurementLocalSource @Inject constructor(
                 primarySource.writeMeasurements(measurementsToSave)
             }
         }
-    }
-
-    override suspend fun <T : Measurement> writeMeasurement(
-        measurement: T
-    ): Result<T> = withContext(ioDispatcher) {
-        externalSources.forEach { src -> src.writeMeasurement(measurement) }
-
-        primarySource.writeMeasurement(measurement)
-    }
-
-    override suspend fun <T : Measurement> writeMeasurements(
-        measurements: List<T>
-    ): Result<List<T>> = withContext(ioDispatcher) {
-        externalSources.forEach { src -> src.writeMeasurements(measurements) }
-
-        primarySource.writeMeasurements(measurements)
     }
 }

@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import ru.health.stream.core.common.di.ApplicationCoroutineScope
 import ru.health.stream.core.monitor.logV
-import ru.health.stream.data.vitals.api.remote.RemoteMeasurementSource
 import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.source.infrastructure.source.remote.RemoteMeasurementSource
 
 @Singleton
 internal class BleMeasurementSource @Inject constructor(

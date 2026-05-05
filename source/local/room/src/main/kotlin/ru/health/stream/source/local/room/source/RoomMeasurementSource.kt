@@ -55,6 +55,28 @@ internal class RoomMeasurementSource @Inject constructor(
         logW("Error while getMeasurementByRange running", exception)
     }.getOrElse { emptyList() }
 
+    override suspend fun <T : Measurement> getAllMeasurementsByRange(
+        start: Instant,
+        end: Instant,
+        type: KClass<T>
+    ): List<T> = runCatching {
+        logV("getAllMeasurementsByRange called: start=$start, end=$end, kClass=$type")
+
+        val response = tables.filter { table -> type.java.isAssignableFrom(table.type.java) }
+            .flatMap { table ->
+                table.getAllMeasurementsByRange(
+                    start = start,
+                    end = end,
+                    type = type,
+                )
+            }
+
+        logV("Founded measurements: $response")
+        response
+    }.onFailure { exception ->
+        logW("Error while getAllMeasurementsByRange running", exception)
+    }.getOrElse { emptyList() }
+
     override fun <T : Measurement> getMeasurementsFlowByRange(
         start: Instant,
         end: Instant,
@@ -80,6 +102,19 @@ internal class RoomMeasurementSource @Inject constructor(
     }.onFailure { exception ->
         logW("Error while getMeasurementFlowByRange running", exception)
     }.getOrElse { flowOf(emptyList()) }
+
+    override suspend fun <T : Measurement> deleteMeasurement(
+        measurement: T
+    ): Result<T> = runCatching {
+        logV("deleteMeasurement called: measurement=$measurement")
+
+        val measurementClass = measurement::class
+        val table = tables.first { table -> measurementClass == table.type }
+
+        table.deleteMeasurement(measurement).getOrThrow()
+    }.onFailure { exception ->
+        logW("Error while deleteMeasurement running", exception)
+    }
 
     override suspend fun <T : Measurement> writeMeasurement(measurement: T): Result<T> =
         runCatching {
