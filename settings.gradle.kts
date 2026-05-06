@@ -63,6 +63,7 @@ include(":feature:measurement:impl")
 //endregion
 
 //region Source module
+include(":source")
 include(":source:local")
 include(":source:local:room")
 include(":source:local:file")

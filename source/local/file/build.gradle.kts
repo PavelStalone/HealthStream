@@ -9,6 +9,8 @@ android {
 }
 
 dependencies {
+    implementation(projects.source.local)
+
     implementation(projects.data.report)
     implementation(projects.data.vitals)
     implementation(projects.data.personal)

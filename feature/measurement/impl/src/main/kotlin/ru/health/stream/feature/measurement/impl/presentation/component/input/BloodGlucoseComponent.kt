@@ -21,9 +21,11 @@ import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.BloodGlucose
 import kotlin.uuid.Uuid
 
-class BloodGlucoseComponent : InputTypeComponent {
+class BloodGlucoseComponent(private val measurement: BloodGlucose? = null) : InputTypeComponent {
 
-    private val glucoseState = mutableStateOf(BloodGlucoseUi())
+    private val glucoseState = mutableStateOf(BloodGlucoseUi(
+        level = measurement?.level?.toString() ?: ""
+    ))
 
     override fun build(): Result<BloodGlucose> = runCatching {
         val uiState = glucoseState.value
@@ -33,9 +35,9 @@ class BloodGlucoseComponent : InputTypeComponent {
         require(level >= 0) { "Glucose level cannot be negative" }
 
         BloodGlucose(
-            id = Uuid.random().toString(),
-            createdAt = Clock.System.now(),
-            resource = Resource.Manual,
+            id = measurement?.id ?: Uuid.random().toString(),
+            createdAt = measurement?.createdAt ?: Clock.System.now(),
+            resource = measurement?.resource ?: Resource.Manual,
             metadata = EmptyMetadata,
             level = level,
         )

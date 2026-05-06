@@ -41,7 +41,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 internal class MeasurementViewModel @Inject constructor(
-    measurementRepository: MeasurementRepository,
+    private val measurementRepository: MeasurementRepository,
     groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
 ) : ViewModel() {
 
@@ -150,6 +150,28 @@ internal class MeasurementViewModel @Inject constructor(
 
     fun changeMeasurementType(measurementType: KClass<out Measurement>) {
         measurementTypeFlow.value = measurementType
+    }
+
+    fun editMeasurement(uiMeasurement: UiMeasurement, onEdit: (Measurement) -> Unit) {
+        viewModelScope.launch {
+            runCatching {
+                val measurement = measurementFlow.first()
+                    .first { measurement -> measurement.id == uiMeasurement.id }
+
+                onEdit(measurement)
+            }
+        }
+    }
+
+    fun deleteMeasurement(uiMeasurement: UiMeasurement) {
+        viewModelScope.launch {
+            runCatching {
+                val measurement = measurementFlow.first()
+                    .first { measurement -> measurement.id == uiMeasurement.id }
+
+                measurementRepository.deleteMeasurement(measurement)
+            }
+        }
     }
 
     private data class Query(

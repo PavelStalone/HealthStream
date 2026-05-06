@@ -27,9 +27,14 @@ import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.BloodPressure
 import kotlin.uuid.Uuid
 
-class BloodPressureComponent : InputTypeComponent {
+class BloodPressureComponent(private val measurement: BloodPressure? = null) : InputTypeComponent {
 
-    private val bloodPressureState = mutableStateOf(BloodPressureUi())
+    private val bloodPressureState = mutableStateOf(
+        BloodPressureUi(
+            systolic = measurement?.systolic?.toString() ?: "",
+            diastolic = measurement?.diastolic?.toString() ?: "",
+        )
+    )
 
     override fun build(): Result<BloodPressure> = runCatching {
         val uiState = bloodPressureState.value
@@ -43,9 +48,9 @@ class BloodPressureComponent : InputTypeComponent {
         require(systolic > diastolic) { "Systolic must be greater than diastolic" }
 
         BloodPressure(
-            id = Uuid.random().toString(),
-            createdAt = Clock.System.now(),
-            resource = Resource.Manual,
+            id = measurement?.id ?: Uuid.random().toString(),
+            createdAt = measurement?.createdAt ?: Clock.System.now(),
+            resource = measurement?.resource ?: Resource.Manual,
             metadata = EmptyMetadata,
             systolic = systolic,
             diastolic = diastolic,

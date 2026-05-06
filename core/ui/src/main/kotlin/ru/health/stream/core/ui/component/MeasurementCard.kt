@@ -64,7 +64,7 @@ fun MeasurementCard(
     estimation: UiLevel? = null,
     border: BorderStroke? = null,
     onEditClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
+    onDeleteClick: (() -> Unit)? = {},
     onCardClick: (() -> Unit)? = null,
     shape: Shape = MaterialTheme.shapes.large,
     colors: CardColors = CardDefaults.cardColors(
@@ -267,37 +267,39 @@ fun MeasurementCard(
                     )
                 }
             }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .background(color = deleteBackgroundColor)
-                    .clickable(onClick = onDeleteClick),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        modifier = Modifier.graphicsLayer {
-                            alpha = progress
-                            scaleX = 0.8f + 0.2f * progress
-                            scaleY = 0.8f + 0.2f * progress
-                        },
-                        tint = deleteColor,
-                        contentDescription = null,
-                        imageVector = Icons.Default.Delete,
-                    )
-                    Text(
-                        modifier = Modifier.graphicsLayer {
-                            alpha = progress
-                            scaleX = 1f * progress
-                            scaleY = 0.8f + 0.2f * progress
-                        },
-                        softWrap = false,
-                        text = "Удалить".uppercase(),
-                        color = deleteColor,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+            onDeleteClick?.let {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .background(color = deleteBackgroundColor)
+                        .clickable(onClick = onDeleteClick),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            modifier = Modifier.graphicsLayer {
+                                alpha = progress
+                                scaleX = 0.8f + 0.2f * progress
+                                scaleY = 0.8f + 0.2f * progress
+                            },
+                            tint = deleteColor,
+                            contentDescription = null,
+                            imageVector = Icons.Default.Delete,
+                        )
+                        Text(
+                            modifier = Modifier.graphicsLayer {
+                                alpha = progress
+                                scaleX = 1f * progress
+                                scaleY = 0.8f + 0.2f * progress
+                            },
+                            softWrap = false,
+                            text = "Удалить".uppercase(),
+                            color = deleteColor,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
             }
         }

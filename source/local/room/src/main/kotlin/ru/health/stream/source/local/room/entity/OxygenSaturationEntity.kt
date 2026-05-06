@@ -29,6 +29,7 @@ internal data class OxygenSaturationEntity(
     @ColumnInfo(name = "note_id") val noteId: String?,
     @ColumnInfo(name = "created_at") val createdAt: Instant,
     @ColumnInfo(name = "resource_id") val resourceId: String,
+    @ColumnInfo(name = "is_removed") val isRemoved: Boolean = false,
     @Embedded(prefix = "estimation_") val estimation: EstimationEntity?,
 )
 

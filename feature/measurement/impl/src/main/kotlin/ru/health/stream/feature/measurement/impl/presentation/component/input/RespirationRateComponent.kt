@@ -21,9 +21,15 @@ import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import kotlin.uuid.Uuid
 
-class RespirationRateComponent : InputTypeComponent {
+class RespirationRateComponent(
+    private val measurement: RespirationRate? = null
+) : InputTypeComponent {
 
-    private val respirationRateState = mutableStateOf(RespirationRateUi())
+    private val respirationRateState = mutableStateOf(
+        RespirationRateUi(
+            rate = measurement?.rate?.toString() ?: ""
+        )
+    )
 
     override fun build(): Result<RespirationRate> = runCatching {
         val uiState = respirationRateState.value
@@ -33,9 +39,9 @@ class RespirationRateComponent : InputTypeComponent {
         require(rate >= 0) { "Respiration rate cannot be negative" }
 
         RespirationRate(
-            id = Uuid.random().toString(),
-            createdAt = Clock.System.now(),
-            resource = Resource.Manual,
+            id = measurement?.id ?: Uuid.random().toString(),
+            createdAt = measurement?.createdAt ?: Clock.System.now(),
+            resource = measurement?.resource ?: Resource.Manual,
             metadata = EmptyMetadata,
             rate = rate,
         )

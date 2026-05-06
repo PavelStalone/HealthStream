@@ -22,9 +22,13 @@ import ru.health.stream.data.vitals.model.kg
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import kotlin.uuid.Uuid
 
-class BodyWeightComponent : InputTypeComponent {
+class BodyWeightComponent(private val measurement: BodyWeight? = null) : InputTypeComponent {
 
-    private val weightState = mutableStateOf(BodyWeightUi())
+    private val weightState = mutableStateOf(
+        BodyWeightUi(
+            weight = measurement?.weight?.kg?.toString() ?: ""
+        )
+    )
 
     override fun build(): Result<BodyWeight> = runCatching {
         val uiState = weightState.value
@@ -33,9 +37,9 @@ class BodyWeightComponent : InputTypeComponent {
         require(weightValue > 0) { "Weight must be positive" }
 
         BodyWeight(
-            id = Uuid.random().toString(),
-            createdAt = Clock.System.now(),
-            resource = Resource.Manual,
+            id = measurement?.id ?: Uuid.random().toString(),
+            createdAt = measurement?.createdAt ?: Clock.System.now(),
+            resource = measurement?.resource ?: Resource.Manual,
             metadata = EmptyMetadata,
             weight = weightValue.kg,
         )

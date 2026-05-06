@@ -15,6 +15,7 @@ data class MeasurementNavKey(
 
 @Serializable
 data class AddMeasurementNavKey(
+    val measurement: Measurement? = null,
     @Serializable(with = KClassSerializer::class)
     val measurementType: KClass<out Measurement> = HeartRate::class,
 ) : NavKey

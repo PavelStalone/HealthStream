@@ -1,7 +1,7 @@
 package ru.health.stream.source.local.room.source
 
-import ru.health.stream.data.personal.api.local.LocalUserSource
 import ru.health.stream.data.personal.model.User
+import ru.health.stream.source.infrastructure.source.local.LocalUserSource
 import ru.health.stream.source.local.room.dao.UserDao
 import ru.health.stream.source.local.room.mapper.asUser
 import ru.health.stream.source.local.room.mapper.asUserEntity

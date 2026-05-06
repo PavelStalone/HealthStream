@@ -17,12 +17,12 @@ import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.common.di.Dispatcher
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.data.personal.model.User
-import ru.health.stream.data.report.api.ReportFileGenerator
 import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.data.report.usecase.CalculateMeasurementSummaryUseCase
 import ru.health.stream.data.vitals.domain.estimation.MeasurementAnalyzer
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
+import ru.health.stream.source.infrastructure.source.local.ReportFileGenerator
 import ru.health.stream.source.local.file.pdf.PdfReportGenerator
 import java.net.URI
 import javax.inject.Inject

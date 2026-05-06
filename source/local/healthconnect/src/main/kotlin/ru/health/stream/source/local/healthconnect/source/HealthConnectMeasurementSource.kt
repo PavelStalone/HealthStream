@@ -44,6 +44,20 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         return flow { emit(getMeasurementsByRange(start = start, end = end, type = type)) }
     }
 
+    override suspend fun <T : Measurement> deleteMeasurement(
+        measurement: T
+    ): Result<T> = runCatching {
+        logV("deleteMeasurement called: measurement=$measurement")
+
+        val measurementClass = measurement::class
+        val record = measurementsSources.first { record -> measurementClass == record.type }
+
+        record.deleteMeasurement(measurement)
+        measurement
+    }.onFailure { exception ->
+        logW("Error while deleteMeasurement running", exception)
+    }
+
     override suspend fun <T : Measurement> writeMeasurement(
         measurement: T
     ): Result<T> = runCatching {

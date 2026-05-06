@@ -10,6 +10,7 @@ internal interface MeasurementSourceContract<T : Measurement> {
         end: Instant,
     ): List<T>
 
+    suspend fun deleteMeasurement(measurement: T): Result<T>
     suspend fun writeMeasurement(measurement: T): Result<T>
     suspend fun writeMeasurements(measurements: List<T>): Result<List<T>>
 }

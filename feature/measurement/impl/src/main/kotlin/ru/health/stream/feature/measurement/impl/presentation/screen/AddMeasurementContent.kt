@@ -62,13 +62,18 @@ internal fun AddMeasurementContent(
     onClose: () -> Unit,
     measurementType: KClass<out Measurement>,
     modifier: Modifier = Modifier,
+    measurement: Measurement? = null,
 ) {
     val viewModel: AddMeasurementViewModel = hiltViewModel()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.onTypeSelected(type = measurementType)
+        if (measurement != null) {
+            viewModel.updateMeasurement(measurement = measurement)
+        } else {
+            viewModel.onTypeSelected(type = measurementType)
+        }
     }
 
     Column(modifier = modifier) {

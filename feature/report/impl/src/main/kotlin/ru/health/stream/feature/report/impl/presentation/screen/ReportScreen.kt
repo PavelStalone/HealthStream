@@ -87,6 +87,7 @@ import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.core.ui.modifier.shimmer
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.report.model.ReportFormat
+import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.report.impl.presentation.viewmodel.MeasurementUiState
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportUiState
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewModel
@@ -95,6 +96,7 @@ import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewMod
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 internal fun ReportScreen(
     onBackClick: () -> Unit,
+    onEditClick: (Measurement) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ReportViewModel = hiltViewModel(),
 ) {
@@ -356,8 +358,14 @@ internal fun ReportScreen(
                                                 measurementIcon = type.icon,
                                                 note = note?.asText(),
                                                 estimation = estimation,
-                                                onEditClick = {}, // TODO: Add on click method in edit callback - pavelshoplik 21-04-2026
-                                                onDeleteClick = {}, // TODO: Add on click method in delete callback - pavelshoplik 21-04-2026
+                                                swipeWidth = 84.dp,
+                                                onEditClick = {
+                                                    viewModel.editMeasurement(
+                                                        uiMeasurement = measurement,
+                                                        onEdit = onEditClick,
+                                                    )
+                                                },
+                                                onDeleteClick = null,
                                                 onCardClick = {
                                                     if (isMeasurementBanned) {
                                                         viewModel.unbanMeasurement(id)

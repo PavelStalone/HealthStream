@@ -1,4 +1,4 @@
-package ru.health.stream.data.report.api
+package ru.health.stream.source.infrastructure.source.local
 
 import kotlinx.datetime.Instant
 import ru.health.stream.data.personal.model.User

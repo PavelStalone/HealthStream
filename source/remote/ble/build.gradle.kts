@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.source)
     implementation(projects.source.remote.ble.lib)
 
     implementation(projects.core.common)

@@ -13,13 +13,16 @@ import ru.health.stream.source.local.room.entity.BodyWeightWithMetadata
 @Dao
 internal interface BodyWeightDao : ResourceDao, NoteDao {
 
-    @Query("SELECT * FROM bodyWeight WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
+    @Query("SELECT * FROM bodyWeight WHERE created_at >= :start AND created_at <= :end AND is_removed == FALSE ORDER BY created_at DESC")
     suspend fun getByRange(start: Instant, end: Instant): List<BodyWeightWithMetadata>
 
     @Query("SELECT * FROM bodyWeight WHERE created_at >= :start AND created_at <= :end ORDER BY created_at DESC")
+    suspend fun getAllByRange(start: Instant, end: Instant): List<BodyWeightWithMetadata>
+
+    @Query("SELECT * FROM bodyWeight WHERE created_at >= :start AND created_at <= :end AND is_removed == FALSE ORDER BY created_at DESC")
     fun getFlowByRange(start: Instant, end: Instant): Flow<List<BodyWeightWithMetadata>>
 
-    @Query("SELECT * FROM bodyWeight WHERE estimation_level IS NULL ORDER BY created_at DESC")
+    @Query("SELECT * FROM bodyWeight WHERE estimation_level IS NULL AND is_removed == FALSE ORDER BY created_at DESC")
     suspend fun getWithoutEstimation(): List<BodyWeightWithMetadata>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

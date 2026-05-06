@@ -1,11 +1,11 @@
-package ru.health.stream.data.vitals.repository.impl
+package ru.health.stream.source.infrastructure.repository
 
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import ru.health.stream.data.vitals.api.local.LocalMeasurementSource
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.repository.MeasurementRepository
+import ru.health.stream.source.infrastructure.source.local.LocalMeasurementSource
 import kotlin.reflect.KClass
 
 internal class MeasurementRepositoryImpl @Inject constructor(
@@ -38,7 +38,9 @@ internal class MeasurementRepositoryImpl @Inject constructor(
 
     override suspend fun <T : Measurement> createMeasurement(
         measurement: T
-    ): Result<T> = localMeasurementSource.writeMeasurement(
-        measurement = measurement
-    )
+    ): Result<T> = localMeasurementSource.writeMeasurement(measurement = measurement)
+
+    override suspend fun <T : Measurement> deleteMeasurement(
+        measurement: T
+    ): Result<T> = localMeasurementSource.deleteMeasurement(measurement = measurement)
 }

@@ -14,8 +14,13 @@ import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.vitals.model.EmptyMetadata
 import ru.health.stream.data.vitals.model.Metadata
 import ru.health.stream.data.vitals.model.Note
+import ru.health.stream.data.vitals.model.measurement.BloodGlucose
+import ru.health.stream.data.vitals.model.measurement.BloodPressure
+import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
+import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.copy
 import ru.health.stream.data.vitals.usecase.CreateMeasurementUseCase
 import ru.health.stream.feature.measurement.impl.presentation.component.input.BloodGlucoseComponent
@@ -44,13 +49,11 @@ internal class AddMeasurementViewModel @Inject constructor(
     fun onTypeSelected(type: UiMeasurement.Type) {
         val state = _uiState.value
 
-        if (state.selectedType != type) {
-            _uiState.update {
-                state.copy(
-                    selectedType = type,
-                    inputTypeComponent = getInputComponent(measurementType = type)
-                )
-            }
+        _uiState.update {
+            state.copy(
+                selectedType = type,
+                inputTypeComponent = getInputComponent(measurementType = type)
+            )
         }
     }
 
@@ -58,6 +61,23 @@ internal class AddMeasurementViewModel @Inject constructor(
 
     fun onNoteChange(note: String) {
         _uiState.update { it.copy(note = note) }
+    }
+
+    fun updateMeasurement(measurement: Measurement) {
+        val state = _uiState.value
+        val type = measurement::class.asUi()
+        val note = measurement[Note]?.description
+
+        _uiState.update {
+            state.copy(
+                selectedType = type,
+                inputTypeComponent = getInputComponent(
+                    measurementType = type,
+                    measurement = measurement,
+                ),
+                note = note ?: state.note
+            )
+        }
     }
 
     fun saveMeasurement(onSuccess: () -> Unit) {
@@ -75,14 +95,15 @@ internal class AddMeasurementViewModel @Inject constructor(
     }
 
     private fun getInputComponent(
-        measurementType: UiMeasurement.Type
+        measurementType: UiMeasurement.Type,
+        measurement: Measurement? = null,
     ): InputTypeComponent = when (measurementType) {
-        UiMeasurement.Type.WEIGHT -> BodyWeightComponent()
-        UiMeasurement.Type.HEART_RATE -> HeartRateComponent()
-        UiMeasurement.Type.BLOOD_GLUCOSE -> BloodGlucoseComponent()
-        UiMeasurement.Type.BLOOD_PRESSURE -> BloodPressureComponent()
-        UiMeasurement.Type.RESPIRATION_RATE -> RespirationRateComponent()
-        UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturationComponent()
+        UiMeasurement.Type.WEIGHT -> BodyWeightComponent(measurement as? BodyWeight)
+        UiMeasurement.Type.HEART_RATE -> HeartRateComponent(measurement as? HeartRate)
+        UiMeasurement.Type.BLOOD_GLUCOSE -> BloodGlucoseComponent(measurement as? BloodGlucose)
+        UiMeasurement.Type.BLOOD_PRESSURE -> BloodPressureComponent(measurement as? BloodPressure)
+        UiMeasurement.Type.RESPIRATION_RATE -> RespirationRateComponent(measurement as? RespirationRate)
+        UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturationComponent(measurement as? OxygenSaturation)
     }
 
     private fun getInputComponent(

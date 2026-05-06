@@ -10,6 +10,7 @@ android {
 
 dependencies {
     api(projects.feature.report.api)
+    api(projects.feature.measurement.api)
 
     implementation(projects.data.vitals)
     implementation(projects.data.report)

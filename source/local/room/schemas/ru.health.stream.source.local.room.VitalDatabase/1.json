@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d2a83359d873cd284ffe2b2a92a165e9",
+    "identityHash": "5c6e94e0dec569b32fb5ee423f7e00e4",
     "entities": [
       {
         "tableName": "user",
@@ -171,7 +171,7 @@
       },
       {
         "tableName": "heartRate",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `pulse_rate` INTEGER NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `pulse_rate` INTEGER NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `is_removed` INTEGER NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -200,6 +200,12 @@
             "fieldPath": "resourceId",
             "columnName": "resource_id",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRemoved",
+            "columnName": "is_removed",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -233,7 +239,7 @@
       },
       {
         "tableName": "bodyWeight",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `weight_in_kg` REAL NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `weight_in_kg` REAL NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `is_removed` INTEGER NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -262,6 +268,12 @@
             "fieldPath": "resourceId",
             "columnName": "resource_id",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRemoved",
+            "columnName": "is_removed",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -295,7 +307,7 @@
       },
       {
         "tableName": "bloodPressure",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `systolic` REAL NOT NULL, `diastolic` REAL NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `systolic` REAL NOT NULL, `diastolic` REAL NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `is_removed` INTEGER NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -333,6 +345,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "isRemoved",
+            "columnName": "is_removed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "estimation.level",
             "columnName": "estimation_level",
             "affinity": "TEXT"
@@ -363,7 +381,7 @@
       },
       {
         "tableName": "oxygenSaturation",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `saturation` REAL NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `saturation` REAL NOT NULL, `note_id` TEXT, `created_at` INTEGER NOT NULL, `resource_id` TEXT NOT NULL, `is_removed` INTEGER NOT NULL, `estimation_level` TEXT, `estimation_description` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -392,6 +410,12 @@
             "fieldPath": "resourceId",
             "columnName": "resource_id",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRemoved",
+            "columnName": "is_removed",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -426,7 +450,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd2a83359d873cd284ffe2b2a92a165e9')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5c6e94e0dec569b32fb5ee423f7e00e4')"
     ]
   }
 }

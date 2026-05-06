@@ -1,4 +1,4 @@
-package ru.health.stream.data.personal.api.local
+package ru.health.stream.source.infrastructure.source.local
 
 import ru.health.stream.data.personal.model.User
 

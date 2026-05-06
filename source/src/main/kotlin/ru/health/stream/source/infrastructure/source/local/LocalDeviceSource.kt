@@ -1,4 +1,4 @@
-package ru.health.stream.data.vitals.api.local
+package ru.health.stream.source.infrastructure.source.local
 
 import ru.health.stream.data.vitals.model.Device
 

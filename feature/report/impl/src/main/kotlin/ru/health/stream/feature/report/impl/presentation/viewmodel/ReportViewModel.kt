@@ -207,6 +207,17 @@ internal class ReportViewModel @Inject constructor(
         }
     }
 
+    fun editMeasurement(uiMeasurement: UiMeasurement, onEdit: (Measurement) -> Unit) {
+        viewModelScope.launch {
+            runCatching {
+                val measurement = measurementsFlow.first()
+                    .first { measurement -> measurement.id == uiMeasurement.id }
+
+                onEdit(measurement)
+            }
+        }
+    }
+
     private fun UiMeasurement.Type.toMeasurementClass(): KClass<out Measurement> = when (this) {
         UiMeasurement.Type.WEIGHT -> BodyWeight::class
         UiMeasurement.Type.HEART_RATE -> HeartRate::class

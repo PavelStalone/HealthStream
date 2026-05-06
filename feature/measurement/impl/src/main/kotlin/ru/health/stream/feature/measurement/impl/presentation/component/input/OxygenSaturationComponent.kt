@@ -21,9 +21,15 @@ import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import kotlin.uuid.Uuid
 
-class OxygenSaturationComponent : InputTypeComponent {
+class OxygenSaturationComponent(
+    private val measurement: OxygenSaturation? = null
+) : InputTypeComponent {
 
-    private val saturationState = mutableStateOf(OxygenSaturationUi())
+    private val saturationState = mutableStateOf(
+        OxygenSaturationUi(
+            saturation = measurement?.saturation?.toString() ?: ""
+        )
+    )
 
     override fun build(): Result<OxygenSaturation> = runCatching {
         val uiState = saturationState.value
@@ -33,9 +39,9 @@ class OxygenSaturationComponent : InputTypeComponent {
         require(saturation in 0f..100f) { "Oxygen saturation must be between 0 and 100" }
 
         OxygenSaturation(
-            id = Uuid.random().toString(),
-            createdAt = Clock.System.now(),
-            resource = Resource.Manual,
+            id = measurement?.id ?: Uuid.random().toString(),
+            createdAt = measurement?.createdAt ?: Clock.System.now(),
+            resource = measurement?.resource ?: Resource.Manual,
             metadata = EmptyMetadata,
             saturation = saturation,
         )

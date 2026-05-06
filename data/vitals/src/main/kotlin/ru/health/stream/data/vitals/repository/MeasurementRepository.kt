@@ -24,4 +24,5 @@ interface MeasurementRepository {
     ): Flow<List<T>>
 
     suspend fun <T : Measurement> createMeasurement(measurement: T): Result<T>
+    suspend fun <T : Measurement> deleteMeasurement(measurement: T): Result<T>
 }

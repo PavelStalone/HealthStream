@@ -1,7 +1,7 @@
 package ru.health.stream.source.local.room.source
 
-import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.data.vitals.model.Device
+import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.room.dao.DeviceDao
 import ru.health.stream.source.local.room.entity.resource.DeviceEntity
 import ru.health.stream.source.local.room.mapper.asDeviceEntityStatus

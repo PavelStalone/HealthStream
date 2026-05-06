@@ -13,10 +13,10 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
-import ru.health.stream.data.vitals.api.local.LocalDeviceSource
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.HeartRate
+import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.healthconnect.HealthConnectManager
 import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
@@ -53,7 +53,7 @@ internal class HeartRateSource @Inject constructor(
         response.records.map { record -> record.metadata to record.samples }
             .flatMap { (metadata, records) ->
                 val packageName = metadata.dataOrigin.packageName
-                val recordId = Uuid.parse(metadata.id).toLongs(Long::to)
+                val recordId = Uuid.parse(metadata.clientRecordId ?: metadata.id).toLongs(Long::to)
                 val resource = if (packageName.equals(context.packageName, ignoreCase = true)) {
                     runCatching {
                         require(metadata.recordingMethod != RECORDING_METHOD_MANUAL_ENTRY)
@@ -83,6 +83,21 @@ internal class HeartRateSource @Inject constructor(
         logW("Error while getHeartRateByRange running", exception)
     }.getOrElse { emptyList() }
 
+    override suspend fun deleteMeasurement(measurement: HeartRate): Result<HeartRate> =
+        runCatching {
+            logV("deleteMeasurement called: measurement=$measurement")
+
+            healthConnectManager.healthConnectClient.deleteRecords(
+                recordType = HeartRateRecord::class,
+                recordIdsList = emptyList(),
+                clientRecordIdsList = listOf(measurement.id)
+            )
+
+            measurement
+        }.onFailure { exception ->
+            logW("Error while deleteMeasurement running", exception)
+        }
+
     override suspend fun writeMeasurement(
         measurement: HeartRate,
     ): Result<HeartRate> = runCatching {
@@ -100,13 +115,13 @@ internal class HeartRateSource @Inject constructor(
 
             val heartRateRecords = measurements.map { measurement ->
                 val metadata = when (val res = measurement.resource) {
-                    is Resource.Manual -> Metadata.manualEntryWithId(
-                        id = measurement.id,
+                    is Resource.Manual -> Metadata.manualEntry(
+                        clientRecordId = measurement.id,
                         device = DeviceData(type = DeviceData.TYPE_PHONE)
                     )
 
-                    is Device -> Metadata.autoRecordedWithId(
-                        id = measurement.id,
+                    is Device -> Metadata.autoRecorded(
+                        clientRecordId = measurement.id,
                         device = DeviceData(
                             type = DeviceData.TYPE_UNKNOWN,
                             model = res.id,
