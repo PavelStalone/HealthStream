@@ -16,6 +16,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -64,10 +65,10 @@ class MainActivity : StarterActivity() {
             ) {
                 val backStack = rememberNavBackStack(HomeNavKey)
 
-                var onboarding by remember { mutableStateOf(false) }
+                var onboarding by retain { mutableStateOf(true) }
 
                 LaunchedEffect(Unit) {
-                    onboarding = (userRepository.getUser() == null) // TODO: Use DataStore for this flag - shoplikpavel 2026-05-05
+//                    onboarding = (userRepository.getUser() == null) // TODO: Use DataStore for this flag - shoplikpavel 2026-05-05
                 }
 
                 if (onboarding) {
