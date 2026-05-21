@@ -34,7 +34,6 @@ import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.theme.HealthStreamTheme
-import ru.health.stream.data.personal.repository.UserRepository
 import ru.health.stream.data.setting.model.AppParam
 import ru.health.stream.data.setting.repository.AppParamRepository
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
@@ -45,9 +44,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : StarterActivity() {
-
-    @Inject
-    lateinit var userRepository: UserRepository
 
     @Inject
     lateinit var appParamRepository: AppParamRepository

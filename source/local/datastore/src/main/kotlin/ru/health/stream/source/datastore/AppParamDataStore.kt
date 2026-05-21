@@ -27,6 +27,7 @@ internal class AppParamDataStore @Inject constructor(
     }
 
     private object PreferencesKeys {
+
         val IS_FIRST_START = booleanPreferencesKey("is_first_start")
     }
 }
