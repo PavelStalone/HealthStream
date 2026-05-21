@@ -13,5 +13,5 @@ dependencies {
 
     implementation(projects.core.ui)
 
-    implementation(projects.feature.chart)
+    implementation(projects.core.chart)
 }

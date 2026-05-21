@@ -13,10 +13,10 @@ import kotlinx.datetime.DayOfWeek
 import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.data.vitals.model.Period
-import ru.health.stream.feature.chart.api.LineChart
-import ru.health.stream.feature.chart.core.Drawable
-import ru.health.stream.feature.chart.core.YAxisSide
-import ru.health.stream.feature.chart.core.drawable.GridLines
+import ru.health.stream.core.chart.api.LineChart
+import ru.health.stream.core.chart.core.Drawable
+import ru.health.stream.core.chart.core.YAxisSide
+import ru.health.stream.core.chart.core.drawable.GridLines
 
 @Composable
 internal fun MeasurementTrendCard(

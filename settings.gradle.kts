@@ -33,23 +33,22 @@ include(":app")
 //region Core module
 include(":core:ui")
 include(":core:test")
+include(":core:chart")
 include(":core:common")
 include(":core:starter")
 include(":core:monitor")
 include(":core:monitor:timber")
 include(":core:navigation")
-include(":core:store:datastore")
-include(":core:store:healthconnect")
 //endregion
 
 //region Data module
 include(":data:vitals")
 include(":data:report")
+include(":data:setting")
 include(":data:personal")
 //endregion
 
 //region Feature module
-include(":feature:chart")
 include(":feature:settings")
 include(":feature:user:api")
 include(":feature:user:impl")
@@ -67,6 +66,7 @@ include(":source")
 include(":source:local")
 include(":source:local:room")
 include(":source:local:file")
+include(":source:local:datastore")
 include(":source:local:healthconnect")
 include(":source:remote:ble")
 include(":source:remote:ble:lib")

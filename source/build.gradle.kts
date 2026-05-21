@@ -6,6 +6,7 @@ plugins {
 dependencies {
     api(projects.data.vitals)
     api(projects.data.report)
+    api(projects.data.setting)
     api(projects.data.personal)
 
     implementation(projects.core.common)

@@ -35,12 +35,12 @@ import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.content
 import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.data.vitals.model.Period
-import ru.health.stream.feature.chart.api.LineChart
-import ru.health.stream.feature.chart.core.ChartScope
-import ru.health.stream.feature.chart.core.Drawable
-import ru.health.stream.feature.chart.core.drawable.CubicArea
-import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.chart.model.ChartPosition
+import ru.health.stream.core.chart.api.LineChart
+import ru.health.stream.core.chart.core.ChartScope
+import ru.health.stream.core.chart.core.Drawable
+import ru.health.stream.core.chart.core.drawable.CubicArea
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.model.ChartPosition
 import java.lang.Math.random
 
 @Composable

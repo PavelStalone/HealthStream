@@ -62,8 +62,8 @@ import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.core.ui.modifier.shimmer
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.feature.measurement.impl.R
 import ru.health.stream.feature.measurement.impl.presentation.component.MeasurementTrendCard
 import ru.health.stream.feature.measurement.impl.presentation.model.UiPeriod

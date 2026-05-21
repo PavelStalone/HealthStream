@@ -20,7 +20,7 @@ dependencies {
     implementation(projects.core.monitor)
     implementation(projects.core.starter)
 
-    implementation(projects.feature.chart)
+    implementation(projects.core.chart)
 
     implementation(libs.itext7.core)
 }

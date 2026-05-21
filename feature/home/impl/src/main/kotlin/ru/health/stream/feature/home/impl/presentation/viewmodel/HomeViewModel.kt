@@ -31,7 +31,7 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
-import ru.health.stream.feature.chart.model.DrawableData
+import ru.health.stream.core.chart.model.DrawableData
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
