@@ -3,6 +3,21 @@ import ru.health.stream.buildlogic.extension.libs
 
 plugins {
     kotlin("jvm")
+    id("org.jetbrains.kotlinx.kover")
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "*_Factory",
+                    "*Module",
+                    "*NavKey",
+                )
+            }
+        }
+    }
 }
 
 kotlin {

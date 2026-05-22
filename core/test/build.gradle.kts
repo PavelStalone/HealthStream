@@ -1,7 +1,10 @@
 plugins {
-    id("android.library")
+    id("kotlin.library")
+    id("kotlin.hilt")
 }
 
-android {
-    namespace = "ru.health.stream.core.test"
+dependencies {
+    implementation(projects.core.common)
+
+    api(libs.bundles.health.stream.test)
 }

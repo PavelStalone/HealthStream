@@ -3,6 +3,10 @@ plugins {
     id("kotlin.hilt")
 }
 
+tasks.withType<Test> {
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
+}
+
 dependencies {
     api(libs.kotlinx.datetime)
 
@@ -10,4 +14,6 @@ dependencies {
     implementation(projects.data.personal)
 
     implementation(projects.core.common)
+
+    testImplementation(projects.core.test)
 }
