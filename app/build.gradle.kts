@@ -31,21 +31,21 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(projects.data.vitals)
+    implementation(projects.data.setting)
 
     implementation(projects.core.ui)
     implementation(projects.core.common)
     implementation(projects.core.starter)
     implementation(projects.core.monitor)
     implementation(projects.core.navigation)
-    implementation(projects.core.store.datastore)
 
     implementation(projects.source.remote.ble)
     implementation(projects.source.local)
     implementation(projects.source.local.file)
     implementation(projects.source.local.room)
+    implementation(projects.source.local.datastore)
     implementation(projects.source.local.healthconnect)
 
-    implementation(projects.feature.chart)
     implementation(projects.feature.settings)
     implementation(projects.feature.home.impl)
     implementation(projects.feature.user.impl)

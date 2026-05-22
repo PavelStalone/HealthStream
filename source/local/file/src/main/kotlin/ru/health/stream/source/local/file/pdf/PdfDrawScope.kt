@@ -35,7 +35,7 @@ import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants
 import com.itextpdf.kernel.pdf.extgstate.PdfExtGState
-import ru.health.stream.feature.chart.model.path.DashPathEffect
+import ru.health.stream.core.chart.model.path.DashPathEffect
 import java.io.ByteArrayOutputStream
 import kotlin.math.cos
 import kotlin.math.sin

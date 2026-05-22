@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.copy
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import com.itextpdf.kernel.font.PdfFont
-import ru.health.stream.feature.chart.core.ChartDrawScope
+import ru.health.stream.core.chart.core.ChartDrawScope
 
 internal class PdfChartDrawScopeImpl(
     private val drawScope: PdfDrawScope,

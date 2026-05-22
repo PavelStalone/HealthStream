@@ -28,8 +28,8 @@ import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.feature.home.impl.presentation.component.MeasurementCard
 import ru.health.stream.feature.home.impl.presentation.viewmodel.HomeViewModel
 import ru.health.stream.feature.home.impl.presentation.viewmodel.WeekCardState

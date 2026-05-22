@@ -41,9 +41,9 @@ import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
-import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.chart.core.drawable.Scatter
-import ru.health.stream.feature.chart.model.ChartPosition
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.model.ChartPosition
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementSwipeableCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementTrendCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.onboardingTarget

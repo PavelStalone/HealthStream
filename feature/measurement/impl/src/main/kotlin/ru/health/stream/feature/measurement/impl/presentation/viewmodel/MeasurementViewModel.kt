@@ -33,7 +33,7 @@ import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
-import ru.health.stream.feature.chart.model.DrawableData
+import ru.health.stream.core.chart.model.DrawableData
 import ru.health.stream.feature.measurement.impl.presentation.model.UiPeriod
 import ru.health.stream.feature.measurement.impl.presentation.model.asPeriod
 import kotlin.reflect.KClass

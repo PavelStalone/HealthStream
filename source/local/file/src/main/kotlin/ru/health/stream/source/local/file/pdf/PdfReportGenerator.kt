@@ -46,10 +46,10 @@ import ru.health.stream.data.vitals.model.Period
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.usecase.DateTransformerUseCase
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
-import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.chart.core.drawable.Scatter
-import ru.health.stream.feature.chart.model.ChartPosition
-import ru.health.stream.feature.chart.model.path.DashPathEffect
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.model.ChartPosition
+import ru.health.stream.core.chart.model.path.DashPathEffect
 import ru.health.stream.source.local.file.ReportGenerator
 import ru.health.stream.source.local.file.model.ACCENT
 import ru.health.stream.source.local.file.model.HEADER_BG

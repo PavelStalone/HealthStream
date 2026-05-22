@@ -30,10 +30,10 @@ import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiText
-import ru.health.stream.feature.chart.core.Drawable
-import ru.health.stream.feature.chart.core.drawable.CubicLine
-import ru.health.stream.feature.chart.core.drawable.Scatter
-import ru.health.stream.feature.chart.model.ChartPosition
+import ru.health.stream.core.chart.core.Drawable
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.model.ChartPosition
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementsCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.onboardingTarget
 import ru.health.stream.feature.onboarding.impl.presentation.composition.LocalOnboardingScope

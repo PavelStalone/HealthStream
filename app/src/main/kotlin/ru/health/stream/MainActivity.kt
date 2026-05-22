@@ -11,14 +11,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -27,6 +26,7 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.icon.Icons
@@ -34,7 +34,8 @@ import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.theme.HealthStreamTheme
-import ru.health.stream.data.personal.repository.UserRepository
+import ru.health.stream.data.setting.model.AppParam
+import ru.health.stream.data.setting.repository.AppParamRepository
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
 import ru.health.stream.feature.onboarding.impl.presentation.screen.OnboardingScreen
 import ru.health.stream.feature.report.api.navigation.ReportNavKey
@@ -45,7 +46,7 @@ import javax.inject.Inject
 class MainActivity : StarterActivity() {
 
     @Inject
-    lateinit var userRepository: UserRepository
+    lateinit var appParamRepository: AppParamRepository
 
     @Inject
     lateinit var navigationRouter: Router<NavKey>
@@ -64,17 +65,18 @@ class MainActivity : StarterActivity() {
             ) {
                 val backStack = rememberNavBackStack(HomeNavKey)
 
-                var onboarding by remember { mutableStateOf(false) }
+                val appParam by appParamRepository.appParamFlow.collectAsStateWithLifecycle(
+                    initialValue = AppParam()
+                )
 
-                LaunchedEffect(Unit) {
-                    onboarding = (userRepository.getUser() == null) // TODO: Use DataStore for this flag - shoplikpavel 2026-05-05
-                }
-
-                if (onboarding) {
+                if (appParam.isFirstStart) {
                     OnboardingScreen(
                         onFinish = {
                             backStack.add(UserNavKey)
-                            onboarding = false
+
+                            lifecycleScope.launch {
+                                appParamRepository.setAppParam(appParam.copy(isFirstStart = false))
+                            }
                         }
                     )
                 } else {
