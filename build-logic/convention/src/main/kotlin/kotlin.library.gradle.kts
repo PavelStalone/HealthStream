@@ -13,6 +13,7 @@ kover {
                 classes(
                     "*_Factory",
                     "*Module",
+                    "*NavKey",
                 )
             }
         }
