@@ -16,8 +16,11 @@ material3AdaptiveNav3 = "1.3.0-alpha09"
 
 #region Test
 junit = "4.13.2"
+mockk = "1.14.9"
+turbine = "1.2.1"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
+kotlinx-coroutines-test = "1.11.0"
 #endregion
 
 #region Bluetooth
@@ -64,6 +67,9 @@ io-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coi
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 #endregion
 
 #region Android base libraries
@@ -146,6 +152,7 @@ gradlePlugin-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.seri
 #endregion
 
 [bundles]
+health-stream-test = ["junit", "kotlinx-coroutines-test", "mockk", "turbine"]
 health-stream-ble = ["nordic-ble", "nordic-ble-ktx", "nordic-support-ble-scanner", "nordic-android-common-uiscanner", "com-polidea-rxandroidble"]
 health-stream-compose = ["androidx-compose-material3", "androidx-compose-ui", "androidx-compose-runtime", "androidx-compose-ui-tooling-preview", "androidx-constraintlayout-compose", "androidx-activity-compose", "androidx-lifecycle-viewmodel-compose"]
 
