@@ -31,6 +31,10 @@ nordic-android-common-uiscanner = "1.0.11"
 com-polidea-rxandroidble = "1.19.1"
 #endregion
 
+#region Security
+sqlcipherAndroid = "4.16.0"
+#endregion
+
 room = "2.8.4"
 navRouter = "1.0.3"
 datastore = "1.2.1"
@@ -70,6 +74,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipherAndroid" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 #endregion
 

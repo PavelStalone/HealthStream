@@ -16,16 +16,29 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import ru.health.stream.data.setting.repository.AppParamRepository
+import ru.health.stream.source.datastore.InternalDataStore
 import ru.health.stream.source.datastore.infrastructure.AppParamRepositoryImpl
+import ru.health.stream.source.local.KeyValueSource
+import javax.inject.Qualifier
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+internal annotation class InternalStore
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+internal annotation class DefaultStore
 
 @Module
 @InstallIn(SingletonComponent::class)
 internal object DataStoreModule {
 
     private const val PREFERENCES_NAME = "params"
+    private const val INTERNAL_PREFERENCES_NAME = "internal_store"
 
     @Provides
     @Singleton
+    @DefaultStore
     fun provideDataStore(
         @ApplicationContext context: Context,
     ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
@@ -33,9 +46,23 @@ internal object DataStoreModule {
         produceFile = { context.preferencesDataStoreFile(PREFERENCES_NAME) }
     )
 
+    @Provides
+    @Singleton
+    @InternalStore
+    fun provideInternalDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+        produceFile = { context.preferencesDataStoreFile(INTERNAL_PREFERENCES_NAME) }
+    )
+
     @Module
     @InstallIn(SingletonComponent::class)
     interface BindModule {
+
+        @Binds
+        @Singleton
+        fun bindKeyValueSource(impl: InternalDataStore): KeyValueSource
 
         @Binds
         @Singleton

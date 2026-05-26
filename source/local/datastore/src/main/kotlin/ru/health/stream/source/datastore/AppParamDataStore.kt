@@ -4,13 +4,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import ru.health.stream.data.setting.model.AppParam
-import javax.inject.Inject
+import ru.health.stream.source.datastore.di.DefaultStore
 
 internal class AppParamDataStore @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    @DefaultStore private val dataStore: DataStore<Preferences>
 ) {
 
     val appParam: Flow<AppParam> = dataStore.data

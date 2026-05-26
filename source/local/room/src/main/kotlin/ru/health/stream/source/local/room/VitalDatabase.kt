@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import kotlinx.coroutines.runBlocking
 import ru.health.stream.source.local.room.converter.EmailConverter
 import ru.health.stream.source.local.room.converter.InstantConverter
 import ru.health.stream.source.local.room.converter.LengthConverter
@@ -62,8 +63,11 @@ internal abstract class VitalDatabase : RoomDatabase() {
 
         private const val DATABASE_NAME = "vital-database"
 
-        fun buildDatabase(context: Context): VitalDatabase =
+        fun buildDatabase(context: Context, sqlCipherKeyManager: SqlCipherKeyManager): VitalDatabase = runBlocking {
+            System.loadLibrary("sqlcipher")
             Room.databaseBuilder(context, VitalDatabase::class.java, DATABASE_NAME)
+                .openHelperFactory(sqlCipherKeyManager.getSupportFactory())
                 .build()
+        }
     }
 }

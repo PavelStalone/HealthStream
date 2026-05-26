@@ -14,6 +14,8 @@ dependencies {
 
     implementation(projects.core.monitor)
 
+    implementation(libs.sqlcipher.android)
+
     implementation(libs.io.github.automapper.annotation)
     ksp(libs.io.github.automapper.processor)
 }
