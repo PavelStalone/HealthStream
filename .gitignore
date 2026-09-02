@@ -95,6 +95,8 @@ google-services.json
 .idea/jarRepositories.xml
 .idea/modules.xml
 .idea/*.iml
+.idea/statistic.xml
+.idea/valkyrie_settings.xml
 .idea/modules
 *.iml
 *.ipr
