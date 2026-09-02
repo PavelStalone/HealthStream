@@ -95,14 +95,14 @@ internal class PdfReportGenerator(
             PdfDocument(writer).use { pdf ->
                 val font = requireNotNull(
                     PdfFontFactory.createFont(
-                        context.assets.open("fonts/arial.ttf").readBytes(),
+                        context.assets.open("fonts/arial.otf").readBytes(),
                         PdfEncodings.IDENTITY_H,
                         PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
                     )
                 )
                 val fontBold = requireNotNull(
                     PdfFontFactory.createFont(
-                        context.assets.open("fonts/arial_bolditalic.ttf").readBytes(),
+                        context.assets.open("fonts/arial_bolditalic.otf").readBytes(),
                         PdfEncodings.IDENTITY_H,
                         PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
                     )
