@@ -3,14 +3,23 @@ package ru.health.stream.core.common.permission
 enum class Permission {
 
     BluetoothConnect,
-    BLUETOOTH_SCAN,
+    BluetoothScan,
+
+    ReadHeartRate,
+    ReadBloodPressure,
+    ReadOxygenSaturation,
+    ReadWeightScale,
+
+    WriteHeartRate,
+    WriteBloodPressure,
+    WriteOxygenSaturation,
+    WriteWeightScale,
+    ;
 }
 
 enum class PermissionStatus {
 
     Granted,
     Denied,
-    DeniedAlways,
-    ShowRequestPermissionRationale,
     ;
 }

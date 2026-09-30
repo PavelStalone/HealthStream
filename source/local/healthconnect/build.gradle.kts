@@ -13,9 +13,10 @@ dependencies {
     implementation(projects.source.local)
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.health.connect.client)
+    api(libs.androidx.health.connect.client)
 
     implementation(projects.core.ui)
+    implementation(projects.core.common)
     implementation(projects.core.monitor)
     implementation(projects.core.starter)
     implementation(projects.core.navigation)

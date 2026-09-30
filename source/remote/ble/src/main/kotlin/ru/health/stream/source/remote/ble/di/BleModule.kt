@@ -23,7 +23,6 @@ import ru.health.stream.core.common.permission.Permission
 import ru.health.stream.core.common.permission.PermissionManager
 import ru.health.stream.core.common.permission.PermissionStatus
 import ru.health.stream.core.monitor.logE
-import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.starter.ActivityStarter
 import ru.health.stream.core.starter.AppStarter
@@ -93,22 +92,18 @@ internal object BleModule {
         @ApplicationCoroutineScope coroutineScope: CoroutineScope,
         @ApplicationContext context: Context,
     ) = object : ActivityStarter {
+
         override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
             when (event) {
                 Lifecycle.Event.ON_CREATE -> {
                     coroutineScope.launch {
-                        require(permissionManager.request(Permission.BLUETOOTH_SCAN) == PermissionStatus.Granted)
-                        val result = permissionManager.request(Permission.BluetoothConnect)
-                        when (result) {
-                            PermissionStatus.Granted -> {
-                                logI("BLUETOOTH permission granted")
+                        val result = permissionManager.requestGroup(
+                            Permission.BluetoothConnect,
+                            Permission.BluetoothScan
+                        )
 
-                                bleSystemManager.launchBroadcastReceiver(context)
-                            }
-
-                            PermissionStatus.Denied -> logI("BLUETOOTH permission denied")
-                            PermissionStatus.DeniedAlways -> logI("BLUETOOTH permission denied always")
-                            PermissionStatus.ShowRequestPermissionRationale -> logI("BLUETOOTH permission need show rationale")
+                        if (result.all { (_, status) -> status == PermissionStatus.Granted }) {
+                            bleSystemManager.launchBroadcastReceiver(context)
                         }
                     }
                 }

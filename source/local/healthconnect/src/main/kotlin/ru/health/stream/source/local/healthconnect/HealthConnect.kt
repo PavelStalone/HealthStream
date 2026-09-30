@@ -18,7 +18,6 @@ class HealthConnect constructor(
         get() = HealthConnectClient.getOrCreate(context)
 
     private val PERMISSIONS = setOf(
-        HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getReadPermission(WeightRecord::class),
         HealthPermission.getWritePermission(WeightRecord::class),
         HealthPermission.getReadPermission(HeartRateRecord::class),

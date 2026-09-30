@@ -12,6 +12,7 @@ import jakarta.inject.Inject
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
+import ru.health.stream.core.common.permission.Permission
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.data.vitals.model.Device
@@ -32,6 +33,8 @@ internal class BodyWeightSource @Inject constructor(
 ) : MeasurementSource<BodyWeight>() {
 
     override val type: KClass<BodyWeight> = BodyWeight::class
+    override val readPermission: Permission = Permission.ReadWeightScale
+    override val writePermission: Permission = Permission.WriteWeightScale
 
     override suspend fun getMeasurementByRange(
         start: Instant,
