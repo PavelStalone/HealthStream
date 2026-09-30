@@ -3,6 +3,8 @@ package ru.health.stream.source.local.healthconnect.source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Instant
+import ru.health.stream.core.common.permission.PermissionManager
+import ru.health.stream.core.common.permission.PermissionStatus
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.data.vitals.model.measurement.Measurement
@@ -13,6 +15,7 @@ import kotlin.reflect.KClass
 
 @Suppress("UNCHECKED_CAST")
 internal class HealthConnectMeasurementSource @Inject constructor(
+    private val permissionManager: PermissionManager,
     private val measurementsSources: List<@JvmSuppressWildcards MeasurementSource<Measurement>>
 ) : ExternalMeasurementSource {
 
@@ -23,9 +26,14 @@ internal class HealthConnectMeasurementSource @Inject constructor(
     ): List<T> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end, kClass=$type")
 
-        val response = measurementsSources
-            .filter { record -> type.java.isAssignableFrom(record.type.java) }
-            .flatMap { record -> record.getMeasurementByRange(start = start, end = end) }
+        val sources =
+            measurementsSources.filter { source -> type.java.isAssignableFrom(source.type.java) }
+        val permissions =
+            permissionManager.requestGroup(*sources.map { it.readPermission }.toTypedArray())
+
+        val response = sources
+            .filter { source -> permissions[source.readPermission] == PermissionStatus.Granted }
+            .flatMap { source -> source.getMeasurementByRange(start = start, end = end) }
 
         logV("Founded measurements: $response")
 
@@ -50,9 +58,10 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         logV("deleteMeasurement called: measurement=$measurement")
 
         val measurementClass = measurement::class
-        val record = measurementsSources.first { record -> measurementClass == record.type }
+        val source = measurementsSources.first { source -> measurementClass == source.type }
+        check(permissionManager.request(source.writePermission) == PermissionStatus.Granted)
 
-        record.deleteMeasurement(measurement)
+        source.deleteMeasurement(measurement).getOrThrow()
         measurement
     }.onFailure { exception ->
         logW("Error while deleteMeasurement running", exception)
@@ -64,9 +73,10 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         logV("writeMeasurement called: measurement=$measurement")
 
         val measurementClass = measurement::class
-        val record = measurementsSources.first { record -> measurementClass == record.type }
+        val source = measurementsSources.first { source -> measurementClass == source.type }
+        check(permissionManager.request(source.writePermission) == PermissionStatus.Granted)
 
-        record.writeMeasurement(measurement)
+        source.writeMeasurement(measurement).getOrThrow()
         measurement
     }.onFailure { exception ->
         logW("Error while writeMeasurement running", exception)
@@ -79,13 +89,22 @@ internal class HealthConnectMeasurementSource @Inject constructor(
 
         val measurementsWithType = measurements.groupBy { measurement -> measurement::class }
 
-        measurementsWithType.forEach { (type, measurements) ->
-            val record = measurementsSources.first { record -> type == record.type }
+        val sources =
+            measurementsSources.filter { source -> measurementsWithType.keys.any { it == source.type } }
+        val permissions =
+            permissionManager.requestGroup(*sources.map { it.writePermission }.toTypedArray())
 
-            record.writeMeasurements(measurements = measurements)
-        }
+        check(permissions.any { (_, status) -> status == PermissionStatus.Granted })
 
-        measurements
+        sources.filter { source -> permissions[source.writePermission] == PermissionStatus.Granted }
+            .fold(mutableListOf<T>()) { acc, source ->
+                val measurements = measurementsWithType.firstNotNullOf { (type, measurements) ->
+                    if (type == source.type) measurements else null
+                }
+
+                source.writeMeasurements(measurements).onSuccess { acc.addAll(measurements) }
+                acc
+            }
     }.onFailure { exception ->
         logW("Error while writeMeasurements running", exception)
     }
