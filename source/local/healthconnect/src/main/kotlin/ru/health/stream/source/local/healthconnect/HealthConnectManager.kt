@@ -12,9 +12,4 @@ internal class HealthConnectManager @Inject constructor(
 ) {
 
     val healthConnectClient by lazy { HealthConnectClient.getOrCreate(context) }
-
-    suspend fun hasAllPermissions(permissions: Set<String>): Boolean {
-        return healthConnectClient.permissionController.getGrantedPermissions()
-            .containsAll(permissions)
-    }
 }

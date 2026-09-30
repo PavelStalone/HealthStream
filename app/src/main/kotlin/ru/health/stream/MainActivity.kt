@@ -65,8 +65,8 @@ class MainActivity : StarterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        androidPermissionManager = AndroidPermissionManager(this)
         logD("Set permissionManager")
+        androidPermissionManager = AndroidPermissionManager(this)
         androidPermissionManagerProxy.setManager(androidPermissionManager)
 
         enableEdgeToEdge()

@@ -26,12 +26,13 @@ import kotlin.coroutines.resume
 @Singleton
 class AndroidPermissionManagerProxy @Inject constructor() : PermissionManager {
 
-    private var permissionManager: PermissionManager? = null
-
     private val mutex: Mutex = Mutex(locked = true)
+
+    private var permissionManager: PermissionManager? = null
 
     override suspend fun request(permission: Permission): PermissionStatus {
         logD("Try request permission: $permission")
+
         return mutex.withLock {
             val manager = permissionManager
 
@@ -69,9 +70,6 @@ internal class AndroidPermissionManager(
     private val context: ComponentActivity
 ) : PermissionManager {
 
-    private var continuation: Continuation<PermissionStatus>? = null
-    private var multipleContinuation: Continuation<Map<Permission, PermissionStatus>>? = null
-
     private val requestOnePermissionLauncher = context.registerForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -94,6 +92,9 @@ internal class AndroidPermissionManager(
 
         c.resume(result)
     }
+
+    private var continuation: Continuation<PermissionStatus>? = null
+    private var multipleContinuation: Continuation<Map<Permission, PermissionStatus>>? = null
 
     override suspend fun request(permission: Permission): PermissionStatus {
         val androidPermission = permission.asAndroid() ?: return PermissionStatus.Granted
@@ -123,10 +124,10 @@ internal class AndroidPermissionManager(
         val unknownPermission = permissions.filter { permission -> permission.asAndroid() == null }
         val alreadyGranted = androidPermissions.filter { checkAlreadyGranted(it) }
 
+        val needRequestPermissions = androidPermissions.minus(alreadyGranted)
         val notNeedRequestPermissions = alreadyGranted.mapNotNull { it.asCommon() }
             .plus(unknownPermission)
             .associateWith { PermissionStatus.Granted }
-        val needRequestPermissions = androidPermissions.minus(alreadyGranted)
 
         val result = if (needRequestPermissions.isNotEmpty()) {
             val requestedResult = suspendCancellableCoroutine { continuation ->
@@ -155,6 +156,7 @@ internal class AndroidPermissionManager(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    // @formatter:off
     private fun Permission.asAndroid(): String? = when (this) {
         Permission.BluetoothConnect -> Manifest.permission.BLUETOOTH_CONNECT
         Permission.BluetoothScan -> Manifest.permission.BLUETOOTH_SCAN
@@ -166,12 +168,10 @@ internal class AndroidPermissionManager(
 
         Permission.WriteHeartRate -> HealthPermission.getWritePermission(HeartRateRecord::class)
         Permission.WriteBloodPressure -> HealthPermission.getWritePermission(BloodPressureRecord::class)
-        Permission.WriteOxygenSaturation -> HealthPermission.getWritePermission(
-            OxygenSaturationRecord::class
-        )
-
+        Permission.WriteOxygenSaturation -> HealthPermission.getWritePermission(OxygenSaturationRecord::class)
         Permission.WriteWeightScale -> HealthPermission.getWritePermission(WeightRecord::class)
     }
+    // @formatter:on
 
     private fun String.asCommon(): Permission? = when (this) {
         Manifest.permission.BLUETOOTH_CONNECT -> Permission.BluetoothConnect
