@@ -11,6 +11,7 @@ import jakarta.inject.Inject
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
+import ru.health.stream.core.common.permission.Permission
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.data.vitals.model.Device
@@ -31,6 +32,8 @@ internal class HeartRateSource @Inject constructor(
 ) : MeasurementSource<HeartRate>() {
 
     override val type: KClass<HeartRate> = HeartRate::class
+    override val readPermission: Permission = Permission.ReadHeartRate
+    override val writePermission: Permission = Permission.WriteHeartRate
 
     override suspend fun getMeasurementByRange(
         start: Instant,
