@@ -27,6 +27,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import ru.health.stream.core.monitor.logD
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.icon.Icons
@@ -40,10 +41,15 @@ import ru.health.stream.feature.home.api.navigation.HomeNavKey
 import ru.health.stream.feature.onboarding.impl.presentation.screen.OnboardingScreen
 import ru.health.stream.feature.report.api.navigation.ReportNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
+import ru.health.stream.permission.AndroidPermissionManager
+import ru.health.stream.permission.AndroidPermissionManagerProxy
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : StarterActivity() {
+
+    @Inject
+    lateinit var androidPermissionManagerProxy: AndroidPermissionManagerProxy
 
     @Inject
     lateinit var appParamRepository: AppParamRepository
@@ -54,8 +60,14 @@ class MainActivity : StarterActivity() {
     @Inject
     lateinit var entryProviders: Set<@JvmSuppressWildcards EntryProviderScope<NavKey>.(Router<NavKey>) -> Unit>
 
+    private lateinit var androidPermissionManager: AndroidPermissionManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        androidPermissionManager = AndroidPermissionManager(this)
+        logD("Set permissionManager")
+        androidPermissionManagerProxy.setManager(androidPermissionManager)
 
         enableEdgeToEdge()
         setContent {
@@ -110,6 +122,13 @@ class MainActivity : StarterActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        logD("Remove permissionManager")
+        androidPermissionManagerProxy.removeManager(androidPermissionManager)
+
+        super.onDestroy()
     }
 }
 

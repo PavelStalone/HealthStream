@@ -19,7 +19,11 @@ import no.nordicsemi.android.support.v18.scanner.ScanSettings
 import no.nordicsemi.ui.scanner.scanner.repository.DevicesDataStore
 import ru.health.stream.core.common.di.ApplicationCoroutineScope
 import ru.health.stream.core.common.di.Dispatcher
+import ru.health.stream.core.common.permission.Permission
+import ru.health.stream.core.common.permission.PermissionManager
+import ru.health.stream.core.common.permission.PermissionStatus
 import ru.health.stream.core.monitor.logE
+import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.starter.ActivityStarter
 import ru.health.stream.core.starter.AppStarter
@@ -85,12 +89,28 @@ internal object BleModule {
     @Provides
     fun provideBleScanStarter(
         bleSystemManager: BleSystemManager,
+        permissionManager: PermissionManager,
+        @ApplicationCoroutineScope coroutineScope: CoroutineScope,
         @ApplicationContext context: Context,
     ) = object : ActivityStarter {
         override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
             when (event) {
-                Lifecycle.Event.ON_RESUME -> {
-                    bleSystemManager.launchBroadcastReceiver(context)
+                Lifecycle.Event.ON_CREATE -> {
+                    coroutineScope.launch {
+                        require(permissionManager.request(Permission.BLUETOOTH_SCAN) == PermissionStatus.Granted)
+                        val result = permissionManager.request(Permission.BluetoothConnect)
+                        when (result) {
+                            PermissionStatus.Granted -> {
+                                logI("BLUETOOTH permission granted")
+
+                                bleSystemManager.launchBroadcastReceiver(context)
+                            }
+
+                            PermissionStatus.Denied -> logI("BLUETOOTH permission denied")
+                            PermissionStatus.DeniedAlways -> logI("BLUETOOTH permission denied always")
+                            PermissionStatus.ShowRequestPermissionRationale -> logI("BLUETOOTH permission need show rationale")
+                        }
+                    }
                 }
 
                 else -> {}
