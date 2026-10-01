@@ -30,7 +30,7 @@ import javax.inject.Inject
 internal class ReportFileGeneratorImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val measurementAnalyzer: MeasurementAnalyzer,
-    @Dispatcher(Dispatcher.IO) val ioDispatcher: CoroutineDispatcher,
+    @Dispatcher(Dispatcher.Default) val dispatcher: CoroutineDispatcher,
     private val groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
     private val calculateMeasurementSummaryUseCase: CalculateMeasurementSummaryUseCase,
 ) : ReportFileGenerator {
@@ -63,7 +63,7 @@ internal class ReportFileGeneratorImpl @Inject constructor(
     ): URI {
         logV("generateFile called: user: $user, format: $format, measurements: ${measurements.size}, dateRange: $dateRange")
 
-        return withContext(ioDispatcher) {
+        return withContext(dispatcher) {
             val fileName = createFileName(format)
             val contentUri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
             val contentValues = ContentValues().apply {

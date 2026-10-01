@@ -60,7 +60,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -89,6 +92,7 @@ import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.report.impl.presentation.viewmodel.MeasurementUiState
+import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportEffect
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportUiState
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewModel
 
@@ -102,6 +106,7 @@ internal fun ReportScreen(
 ) {
     val context = LocalContext.current
     val timeZone = LocalTimeZone.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val reportFormat by viewModel.reportFormat.collectAsStateWithLifecycle()
     val dateRange by viewModel.selectedDateRange.collectAsStateWithLifecycle()
@@ -127,13 +132,17 @@ internal fun ReportScreen(
         }
     }
 
-    LaunchedEffect(reportUiState) {
-        (reportUiState as? ReportUiState.Generated)?.let { state ->
-            shareFile(
-                uri = state.uri,
-                context = context,
-                format = state.format,
-            )
+    LaunchedEffect(viewModel.effectFlow, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effectFlow.collect { effect ->
+                when (effect) {
+                    is ReportEffect.ShareReport -> shareFile(
+                        uri = effect.uri,
+                        context = context,
+                        format = effect.format
+                    )
+                }
+            }
         }
     }
 
