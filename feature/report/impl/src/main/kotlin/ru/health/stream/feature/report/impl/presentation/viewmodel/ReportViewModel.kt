@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
@@ -79,6 +82,9 @@ internal class ReportViewModel @Inject constructor(
 
     private val _reportStateFlow = MutableStateFlow<ReportUiState>(ReportUiState.Init)
     val reportStateFlow: StateFlow<ReportUiState> = _reportStateFlow.asStateFlow()
+
+    private val _effectChannel = Channel<ReportEffect>(capacity = 3)
+    val effectFlow: Flow<ReportEffect> = _effectChannel.receiveAsFlow()
 
     private val measurementQueryFlow = combine(
         selectedDateRange,
@@ -198,8 +204,9 @@ internal class ReportViewModel @Inject constructor(
                 dateRange = _selectedDateRange.value,
             )
 
-            _reportStateFlow.emit(
-                ReportUiState.Generated(
+            _reportStateFlow.emit(ReportUiState.Init)
+            _effectChannel.send(
+                ReportEffect.ShareReport(
                     uri = result.toString().toUri(),
                     format = _reportFormat.value,
                 )
@@ -250,11 +257,12 @@ internal sealed interface ReportUiState {
     data object Init : ReportUiState
 
     data object Generating : ReportUiState
+}
 
-    data class Generated(
-        val uri: Uri,
-        val format: ReportFormat,
-    ) : ReportUiState
+@Immutable
+internal sealed interface ReportEffect {
+
+    data class ShareReport(val uri: Uri, val format: ReportFormat) : ReportEffect
 }
 
 @Immutable

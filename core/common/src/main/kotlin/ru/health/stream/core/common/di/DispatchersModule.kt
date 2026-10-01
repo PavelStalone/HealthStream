@@ -16,6 +16,7 @@ annotation class Dispatcher(val qualifier: String) {
 
         const val IO = "IO"
         const val Main = "Main"
+        const val Default = "Default"
     }
 }
 
@@ -30,4 +31,8 @@ object DispatchersModule {
     @Provides
     @Dispatcher(Dispatcher.Main)
     fun providesMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
+
+    @Provides
+    @Dispatcher(Dispatcher.Default)
+    fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }
