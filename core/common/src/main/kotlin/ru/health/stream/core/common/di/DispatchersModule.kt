@@ -7,7 +7,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Qualifier
-import kotlin.random.Random
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
