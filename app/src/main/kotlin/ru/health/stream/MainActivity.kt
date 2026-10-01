@@ -72,7 +72,6 @@ class MainActivity : StarterActivity() {
         enableEdgeToEdge()
         setContent {
             HealthStreamTheme(
-                darkTheme = false, // TODO: Remove after release - shoplikpavel 2026-03-30
                 dynamicColor = false,
             ) {
                 val backStack = rememberNavBackStack(HomeNavKey)
