@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Qualifier
+import kotlin.random.Random
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
@@ -16,6 +17,7 @@ annotation class Dispatcher(val qualifier: String) {
 
         const val IO = "IO"
         const val Main = "Main"
+        const val Default = "Default"
     }
 }
 
@@ -30,4 +32,8 @@ object DispatchersModule {
     @Provides
     @Dispatcher(Dispatcher.Main)
     fun providesMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
+
+    @Provides
+    @Dispatcher(Dispatcher.Default)
+    fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }
