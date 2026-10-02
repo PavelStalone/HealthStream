@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -37,6 +38,7 @@ import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Calendar
@@ -57,201 +59,203 @@ import ru.health.stream.feature.onboarding.impl.presentation.viewmodel.Onboardin
 internal fun OnboardingReportScreen(
     viewModel: OnboardingViewModel
 ) {
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
     val onboardingScope = LocalOnboardingScope.current
 
     val currentStep by viewModel.currentStepFlow.collectAsState()
 
     val isExpanded by remember { derivedStateOf { currentStep.id == "report_expand" } }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = UiText.NonTranslatable("Отчет"),
-            navigationIcon = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.ArrowBack,
-                    )
-                }
-            },
-        )
+    LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = UiText.NonTranslatable("Отчет"),
+                navigationIcon = {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.ArrowBack,
+                        )
+                    }
+                },
+            )
+        }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                Column(
+        scaffoldCustomizer.setFab {}
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                SectionHeader(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .padding(bottom = 4.dp)
                         .padding(horizontal = 8.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    SectionHeader(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp)
-                            .padding(horizontal = 8.dp),
-                        text = "Конфигурация",
-                    )
-                    Column {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            text = "Период",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        DateRangePlaceholder(
-                            modifier = Modifier
-                                .height(TextFieldDefaults.MinHeight)
-                                .onboardingTarget(
-                                    key = "report_date_range",
-                                    scope = onboardingScope
-                                )
-                                .padding(all = 8.dp),
-                            startDate = "1 мая 2026",
-                            endDate = "7 мая 2026"
-                        )
-                    }
-
+                    text = "Конфигурация",
+                )
+                Column {
                     Text(
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .padding(horizontal = 8.dp),
-                        text = "Формат",
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = "Период",
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    FlowRow(
+                    DateRangePlaceholder(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .height(TextFieldDefaults.MinHeight)
                             .onboardingTarget(
-                                key = "report_type_selection",
-                                scope = onboardingScope,
+                                key = "report_date_range",
+                                scope = onboardingScope
                             )
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        ReportFormat.entries.forEach { format ->
-                            FilterChip(
-                                selected = format == ReportFormat.PDF,
-                                onClick = { },
-                                label = { Text(text = format.name) },
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                        }
-                    }
-
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .padding(horizontal = 8.dp),
-                        text = "Типы данных",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onboardingTarget(
-                                key = "report_measurement_selection",
-                                scope = onboardingScope,
-                            )
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        UiMeasurement.Type.entries.forEach { type ->
-                            FilterChip(
-                                selected = type == UiMeasurement.Type.HEART_RATE,
-                                onClick = {},
-                                label = { Text(text = type.text.asText()) },
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                        }
-                    }
-
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onboardingTarget(
-                                key = "report_generate_button",
-                                scope = onboardingScope,
-                            )
-                            .padding(all = 8.dp)
-                            .height(TextFieldDefaults.MinHeight),
-                        onClick = { },
-                    ) {
-                        Text(
-                            text = "Сгенерировать отчет",
-                            fontWeight = FontWeight.ExtraBold,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-
-                    SectionHeader(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .padding(horizontal = 8.dp),
-                        text = "Данные",
+                            .padding(all = 8.dp),
+                        startDate = "1 мая 2026",
+                        endDate = "7 мая 2026"
                     )
                 }
-            }
 
-            item {
-                ExpandableHeader(
+                Text(
                     modifier = Modifier
-                        .height(32.dp)
+                        .padding(top = 4.dp)
+                        .padding(horizontal = 8.dp),
+                    text = "Формат",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                FlowRow(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    isExpanded = isExpanded,
-                    title = "Сегодня",
-                    onClick = { },
-                    actions = {
-                        TextButton(
-                            modifier = Modifier.onboardingTarget(
-                                key = "report_title_exclude",
-                                scope = onboardingScope,
-                            ),
-                            onClick = {}
-                        ) {
-                            Text(
-                                text = "Исключить все".uppercase(),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        }
+                        .onboardingTarget(
+                            key = "report_type_selection",
+                            scope = onboardingScope,
+                        )
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ReportFormat.entries.forEach { format ->
+                        FilterChip(
+                            selected = format == ReportFormat.PDF,
+                            onClick = { },
+                            label = { Text(text = format.name) },
+                            shape = RoundedCornerShape(20.dp)
+                        )
                     }
+                }
+
+                Text(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .padding(horizontal = 8.dp),
+                    text = "Типы данных",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onboardingTarget(
+                            key = "report_measurement_selection",
+                            scope = onboardingScope,
+                        )
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    UiMeasurement.Type.entries.forEach { type ->
+                        FilterChip(
+                            selected = type == UiMeasurement.Type.HEART_RATE,
+                            onClick = {},
+                            label = { Text(text = type.text.asText()) },
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                    }
+                }
+
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onboardingTarget(
+                            key = "report_generate_button",
+                            scope = onboardingScope,
+                        )
+                        .padding(all = 8.dp)
+                        .height(TextFieldDefaults.MinHeight),
+                    onClick = { },
+                ) {
+                    Text(
+                        text = "Сгенерировать отчет",
+                        fontWeight = FontWeight.ExtraBold,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+
+                SectionHeader(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .padding(horizontal = 8.dp),
+                    text = "Данные",
                 )
             }
+        }
 
-            if (isExpanded) {
-                item {
-                    MeasurementCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .onboardingTarget(key = "report_card", scope = onboardingScope),
-                        enabled = true,
-                        type = "Пульс",
-                        unit = "уд/мин",
-                        time = "12:00",
-                        value = "82",
-                        sourceIcon = UiMeasurement.Resource.Manual.icon,
-                        sourceName = "Ручная запись",
-                        measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
-                        estimation = UiLevel.NORMAL,
-                        onEditClick = {},
-                        onDeleteClick = {},
-                        onCardClick = { },
-                        actionIcon = {
-                            Checkbox(
-                                checked = true,
-                                onCheckedChange = null
-                            )
-                        },
-                    )
+        item {
+            ExpandableHeader(
+                modifier = Modifier
+                    .height(32.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                isExpanded = isExpanded,
+                title = "Сегодня",
+                onClick = { },
+                actions = {
+                    TextButton(
+                        modifier = Modifier.onboardingTarget(
+                            key = "report_title_exclude",
+                            scope = onboardingScope,
+                        ),
+                        onClick = {}
+                    ) {
+                        Text(
+                            text = "Исключить все".uppercase(),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                 }
+            )
+        }
+
+        if (isExpanded) {
+            item {
+                MeasurementCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .onboardingTarget(key = "report_card", scope = onboardingScope),
+                    enabled = true,
+                    type = "Пульс",
+                    unit = "уд/мин",
+                    time = "12:00",
+                    value = "82",
+                    sourceIcon = UiMeasurement.Resource.Manual.icon,
+                    sourceName = "Ручная запись",
+                    measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
+                    estimation = UiLevel.NORMAL,
+                    onEditClick = {},
+                    onDeleteClick = {},
+                    onCardClick = { },
+                    actionIcon = {
+                        Checkbox(
+                            checked = true,
+                            onCheckedChange = null
+                        )
+                    },
+                )
             }
         }
     }

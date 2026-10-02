@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.ArrowDropDown
@@ -64,11 +64,28 @@ internal fun AddMeasurementContent(
     modifier: Modifier = Modifier,
     measurement: Measurement? = null,
 ) {
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
     val viewModel: AddMeasurementViewModel = hiltViewModel()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = UiText.NonTranslatable(value = "Измерение"),
+                navigationIcon = {
+                    IconButton(
+                        onClick = onClose
+                    ) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.ArrowBack,
+                        )
+                    }
+                },
+            )
+        }
+
         if (measurement != null) {
             viewModel.updateMeasurement(measurement = measurement)
         } else {
@@ -76,113 +93,93 @@ internal fun AddMeasurementContent(
         }
     }
 
-    Column(modifier = modifier) {
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = UiText.NonTranslatable(value = "Измерение"),
-            navigationIcon = {
-                IconButton(
-                    onClick = onClose
-                ) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.ArrowBack,
-                    )
-                }
-            },
+    Column(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = "Заполните данные вручную",
+            color = MaterialTheme.colorScheme.outline,
+            style = MaterialTheme.typography.bodyMedium,
         )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(state = rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                modifier = Modifier.padding(top = 8.dp),
-                text = "Заполните данные вручную",
-                color = MaterialTheme.colorScheme.outline,
-                style = MaterialTheme.typography.bodyMedium,
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(text = "Категория измерения")
+            MeasurementTypeSelector(
+                modifier = Modifier.fillMaxWidth(),
+                selectedType = uiState.selectedType,
+                onTypeSelected = { type -> viewModel.onTypeSelected(type) }
             )
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                SectionHeader(text = "Категория измерения")
-                MeasurementTypeSelector(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedType = uiState.selectedType,
-                    onTypeSelected = { type -> viewModel.onTypeSelected(type) }
-                )
-            }
-            Column(modifier = Modifier.animateContentSize()) {
-                SectionHeader(text = "Показатели и значения")
-                uiState.inputTypeComponent.Content(modifier = Modifier.fillMaxWidth())
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                SectionHeader(text = "Дополнительные данные")
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 120.dp),
-                    value = uiState.note,
-                    onValueChange = { note -> viewModel.onNoteChange(note) },
-                    placeholder = {
-                        Text(
-                            text = "Любые полезные заметки...",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    ),
-                    prefix = {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                )
-            }
-            Row(
+        }
+        Column(modifier = Modifier.animateContentSize()) {
+            SectionHeader(text = "Показатели и значения")
+            uiState.inputTypeComponent.Content(modifier = Modifier.fillMaxWidth())
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(text = "Дополнительные данные")
+            OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Button(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(60.dp),
-                    onClick = onClose,
-                    shape = MaterialTheme.shapes.large,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                ) {
-                    Text(text = "Отменить", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                }
-                Button(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(60.dp),
-                    onClick = { viewModel.saveMeasurement(onSuccess = onClose) },
-                    shape = MaterialTheme.shapes.large,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                ) {
+                    .heightIn(min = 120.dp),
+                value = uiState.note,
+                onValueChange = { note -> viewModel.onNoteChange(note) },
+                placeholder = {
                     Text(
-                        text = "Сохранить",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        text = "Любые полезные заметки...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                shape = MaterialTheme.shapes.large,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                ),
+                prefix = {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(60.dp),
+                onClick = onClose,
+                shape = MaterialTheme.shapes.large,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            ) {
+                Text(text = "Отменить", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(60.dp),
+                onClick = { viewModel.saveMeasurement(onSuccess = onClose) },
+                shape = MaterialTheme.shapes.large,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+            ) {
+                Text(
+                    text = "Сохранить",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                )
             }
         }
     }

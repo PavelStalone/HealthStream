@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -18,6 +18,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
@@ -50,7 +51,9 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
+import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.UiText
@@ -68,6 +71,34 @@ internal fun UserInputScreen(
     var showDatePicker by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
+
+    LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = UiText.NonTranslatable(value = "Профиль"),
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackClick
+                    ) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.ArrowBack,
+                        )
+                    }
+                },
+            )
+        }
+        scaffoldCustomizer.setFab {
+            FloatingActionButton(
+                onClick = { },
+                shape = CircleShape,
+            ) {
+                Icon(Icons.Default.AccountCircle, "Large floating action button")
+            }
+        }
+    }
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
@@ -108,154 +139,132 @@ internal fun UserInputScreen(
     }
 
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = UiText.NonTranslatable(value = "Профиль"),
-            navigationIcon = {
-                IconButton(
-                    onClick = onBackClick
+        Text(
+            modifier = Modifier.padding(top = 16.dp),
+            text = "Пожалуйста, укажите информацию о себе, чтобы алгоритмы могли учитывать ваши индивидуальные характеристики",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.outline
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(text = "Основная информация")
+            UserInputField(
+                value = uiState.firstName,
+                onValueChange = viewModel::onFirstNameChange,
+                label = "Имя",
+                placeholder = "Введите ваше имя"
+            )
+            UserInputField(
+                value = uiState.lastName,
+                onValueChange = viewModel::onLastNameChange,
+                label = "Фамилия",
+                placeholder = "Введите вашу фамилию"
+            )
+            UserInputField(
+                value = uiState.email,
+                onValueChange = viewModel::onEmailChange,
+                label = "Почта",
+                placeholder = "example@mail.com",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
+
+            val birthdayFormatter = remember {
+                LocalDate.Format {
+                    dayOfMonth(Padding.NONE)
+                    char(' ')
+                    monthName(MonthNames.RUSSIAN_FULL)
+                    char(' ')
+                    year()
+                }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Дата рождения",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDatePicker = true }
                 ) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.ArrowBack,
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = uiState.birthday.format(birthdayFormatter),
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = false,
+                        shape = MaterialTheme.shapes.large,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                            disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     )
                 }
-            },
-        )
+            }
+        }
 
-        Column(
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(text = "Физические данные")
+            UserInputField(
+                value = uiState.heightCm,
+                onValueChange = viewModel::onHeightChange,
+                label = "Рост (см)",
+                placeholder = "175",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            Column {
+                Text(
+                    text = "Пол",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = uiState.gender,
+                        onClick = { viewModel.onGenderChange(true) },
+                        label = { Text(text = "Мужской") }
+                    )
+                    FilterChip(
+                        selected = !uiState.gender,
+                        onClick = { viewModel.onGenderChange(false) },
+                        label = { Text(text = "Женский") }
+                    )
+                }
+            }
+        }
+
+        uiState.error?.let { error ->
+            Text(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+
+        Button(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(state = rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(bottom = 16.dp)
+                .height(OutlinedTextFieldDefaults.MinHeight)
+                .fillMaxWidth(),
+            onClick = { viewModel.saveUser(onSuccess = onSuccess) },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
         ) {
             Text(
-                modifier = Modifier.padding(top = 16.dp),
-                text = "Пожалуйста, укажите информацию о себе, чтобы алгоритмы могли учитывать ваши индивидуальные характеристики",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                text = "Сохранить",
+                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.bodyLarge,
             )
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                SectionHeader(text = "Основная информация")
-                UserInputField(
-                    value = uiState.firstName,
-                    onValueChange = viewModel::onFirstNameChange,
-                    label = "Имя",
-                    placeholder = "Введите ваше имя"
-                )
-                UserInputField(
-                    value = uiState.lastName,
-                    onValueChange = viewModel::onLastNameChange,
-                    label = "Фамилия",
-                    placeholder = "Введите вашу фамилию"
-                )
-                UserInputField(
-                    value = uiState.email,
-                    onValueChange = viewModel::onEmailChange,
-                    label = "Почта",
-                    placeholder = "example@mail.com",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                )
-
-                val birthdayFormatter = remember {
-                    LocalDate.Format {
-                        dayOfMonth(Padding.NONE)
-                        char(' ')
-                        monthName(MonthNames.RUSSIAN_FULL)
-                        char(' ')
-                        year()
-                    }
-                }
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = "Дата рождения",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showDatePicker = true }
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            value = uiState.birthday.format(birthdayFormatter),
-                            onValueChange = {},
-                            readOnly = true,
-                            enabled = false,
-                            shape = MaterialTheme.shapes.large,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        )
-                    }
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                SectionHeader(text = "Физические данные")
-                UserInputField(
-                    value = uiState.heightCm,
-                    onValueChange = viewModel::onHeightChange,
-                    label = "Рост (см)",
-                    placeholder = "175",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-                Column {
-                    Text(
-                        text = "Пол",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(
-                            selected = uiState.gender,
-                            onClick = { viewModel.onGenderChange(true) },
-                            label = { Text(text = "Мужской") }
-                        )
-                        FilterChip(
-                            selected = !uiState.gender,
-                            onClick = { viewModel.onGenderChange(false) },
-                            label = { Text(text = "Женский") }
-                        )
-                    }
-                }
-            }
-
-            uiState.error?.let { error ->
-                Text(
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-
-            Button(
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .height(OutlinedTextFieldDefaults.MinHeight)
-                    .fillMaxWidth(),
-                onClick = { viewModel.saveUser(onSuccess = onSuccess) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-            ) {
-                Text(
-                    text = "Сохранить",
-                    fontWeight = FontWeight.ExtraBold,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
         }
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.model.UiText
@@ -42,10 +43,27 @@ import ru.health.stream.feature.onboarding.impl.presentation.viewmodel.Onboardin
 internal fun OnboardingProfileScreen(
     viewModel: OnboardingViewModel
 ) {
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
     val onboardingScope = LocalOnboardingScope.current
     val scrollState = rememberScrollState()
 
     val currentStep by viewModel.currentStepFlow.collectAsState()
+
+    LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = UiText.NonTranslatable(value = "Профиль"),
+                navigationIcon = {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.ArrowBack,
+                        )
+                    }
+                },
+            )
+        }
+    }
 
     LaunchedEffect(currentStep.targetKey) {
         if (currentStep.targetKey == "profile_save_button") {
@@ -54,134 +72,115 @@ internal fun OnboardingProfileScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(state = scrollState),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        TopBar(
+        Text(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = UiText.NonTranslatable(value = "Профиль"),
-            navigationIcon = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.ArrowBack,
-                    )
-                }
-            },
+                .padding(top = 16.dp)
+                .padding(horizontal = 16.dp),
+            text = "Пожалуйста, укажите информацию о себе, чтобы алгоритмы могли учитывать ваши индивидуальные характеристики",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.outline
         )
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            SectionHeader(text = "Основная информация")
+            OnboardingInputField(
+                value = "Иван",
+                label = "Имя",
+                placeholder = "Введите ваше имя"
+            )
+            OnboardingInputField(
+                value = "Иванов",
+                label = "Фамилия",
+                placeholder = "Введите вашу фамилию"
+            )
+            OnboardingInputField(
+                value = "ivan@example.com",
+                label = "Почта",
+                placeholder = "example@mail.com",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Дата рождения",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = "1 января 1990",
+                    onValueChange = {},
+                    readOnly = true,
+                    enabled = false,
+                    shape = MaterialTheme.shapes.large,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                )
+            }
+        }
 
         Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            SectionHeader(text = "Физические данные")
+            OnboardingInputField(
+                value = "180",
+                label = "Рост (см)",
+                placeholder = "175",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            Column {
+                Text(
+                    text = "Пол",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = true,
+                        onClick = { },
+                        label = { Text(text = "Мужской") }
+                    )
+                    FilterChip(
+                        selected = false,
+                        onClick = { },
+                        label = { Text(text = "Женский") }
+                    )
+                }
+            }
+        }
+
+        Button(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(state = scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(bottom = 16.dp)
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()
+                .onboardingTarget(key = "profile_save_button", scope = onboardingScope)
+                .padding(all = 8.dp)
+                .height(OutlinedTextFieldDefaults.MinHeight),
+            onClick = { },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
         ) {
             Text(
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .padding(horizontal = 16.dp),
-                text = "Пожалуйста, укажите информацию о себе, чтобы алгоритмы могли учитывать ваши индивидуальные характеристики",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                text = "Сохранить",
+                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.bodyLarge,
             )
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                SectionHeader(text = "Основная информация")
-                OnboardingInputField(
-                    value = "Иван",
-                    label = "Имя",
-                    placeholder = "Введите ваше имя"
-                )
-                OnboardingInputField(
-                    value = "Иванов",
-                    label = "Фамилия",
-                    placeholder = "Введите вашу фамилию"
-                )
-                OnboardingInputField(
-                    value = "ivan@example.com",
-                    label = "Почта",
-                    placeholder = "example@mail.com",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                )
-
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = "Дата рождения",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = "1 января 1990",
-                        onValueChange = {},
-                        readOnly = true,
-                        enabled = false,
-                        shape = MaterialTheme.shapes.large,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                            disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                SectionHeader(text = "Физические данные")
-                OnboardingInputField(
-                    value = "180",
-                    label = "Рост (см)",
-                    placeholder = "175",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-                Column {
-                    Text(
-                        text = "Пол",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(
-                            selected = true,
-                            onClick = { },
-                            label = { Text(text = "Мужской") }
-                        )
-                        FilterChip(
-                            selected = false,
-                            onClick = { },
-                            label = { Text(text = "Женский") }
-                        )
-                    }
-                }
-            }
-
-            Button(
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .padding(horizontal = 8.dp)
-                    .fillMaxWidth()
-                    .onboardingTarget(key = "profile_save_button", scope = onboardingScope)
-                    .padding(all = 8.dp)
-                    .height(OutlinedTextFieldDefaults.MinHeight),
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-            ) {
-                Text(
-                    text = "Сохранить",
-                    fontWeight = FontWeight.ExtraBold,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
         }
     }
 }

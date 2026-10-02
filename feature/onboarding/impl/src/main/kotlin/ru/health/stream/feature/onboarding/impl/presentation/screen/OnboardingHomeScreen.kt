@@ -1,39 +1,57 @@
 package ru.health.stream.feature.onboarding.impl.presentation.screen
 
 import androidx.collection.FloatFloatPair
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import ru.health.stream.core.chart.core.Drawable
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.model.ChartPosition
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
+import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
-import ru.health.stream.core.chart.core.Drawable
-import ru.health.stream.core.chart.core.drawable.CubicLine
-import ru.health.stream.core.chart.core.drawable.Scatter
-import ru.health.stream.core.chart.model.ChartPosition
+import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementsCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.onboardingTarget
 import ru.health.stream.feature.onboarding.impl.presentation.composition.LocalOnboardingScope
@@ -43,6 +61,7 @@ import ru.health.stream.feature.onboarding.impl.presentation.viewmodel.Onboardin
 internal fun OnboardingHomeScreen(
     viewModel: OnboardingViewModel
 ) {
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
     val onboardingScope = LocalOnboardingScope.current
     val primaryColor = MaterialTheme.colorScheme.primary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
@@ -50,6 +69,40 @@ internal fun OnboardingHomeScreen(
     val currentStep by viewModel.currentStepFlow.collectAsState()
 
     var drawableData by remember { mutableStateOf(emptyList<Drawable>()) }
+
+    LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = UiText.NonTranslatable(value = "Измерения"),
+                navigationIcon = {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.Report,
+                        )
+                    }
+                },
+            )
+        }
+
+        scaffoldCustomizer.setFab {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                FloatingActionButton(
+                    onClick = {},
+                    shape = CircleShape,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add measurement",
+                        modifier = Modifier,
+                    )
+                }
+            }
+        }
+    }
 
     LaunchedEffect(currentStep.id) {
         if (currentStep.id == "home_filled") {
@@ -69,50 +122,25 @@ internal fun OnboardingHomeScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = UiText.NonTranslatable(value = "Измерения"),
-            navigationIcon = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.Report,
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.Add,
-                    )
-                }
-            }
-        )
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(all = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                MeasurementsCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onboardingTarget("vitals_card", onboardingScope),
-                    onClick = {},
-                    measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
-                    measurementUnit = "уд/мин",
-                    measurementTitle = "Пульс",
-                    measurementValue = if (drawableData.isNotEmpty()) "82" else null,
-                    yRange = 50f..120f,
-                    estimationLevel = UiLevel.NORMAL,
-                    chartDrawables = drawableData,
-                )
-            }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(all = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item {
+            MeasurementsCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onboardingTarget("vitals_card", onboardingScope),
+                onClick = {},
+                measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+                measurementUnit = "уд/мин",
+                measurementTitle = "Пульс",
+                measurementValue = if (drawableData.isNotEmpty()) "82" else null,
+                yRange = 50f..120f,
+                estimationLevel = UiLevel.NORMAL,
+                chartDrawables = drawableData,
+            )
         }
     }
 }

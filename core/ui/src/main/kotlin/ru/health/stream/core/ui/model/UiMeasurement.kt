@@ -5,6 +5,7 @@ import kotlinx.datetime.Instant
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Blood
 import ru.health.stream.core.ui.icon.default.Favorite
+import ru.health.stream.core.ui.icon.default.RespirationRate
 import ru.health.stream.core.ui.icon.default.Spo2
 import ru.health.stream.core.ui.icon.default.Weight
 import ru.health.stream.core.ui.icon.device.BPCuff
@@ -12,7 +13,6 @@ import ru.health.stream.core.ui.icon.device.Glucose
 import ru.health.stream.core.ui.icon.device.Pencil
 import ru.health.stream.core.ui.icon.device.PulseOximeter
 import ru.health.stream.core.ui.icon.device.WeightScale
-import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.Note
@@ -98,7 +98,7 @@ data class UiMeasurement(
         ),
         RESPIRATION_RATE(
             text = UiText.NonTranslatable("Дыхание"),
-            icon = UiIcon.Vector(imageVector = Icons.Fill.Favorite),
+            icon = UiIcon.Vector(imageVector = Icons.Default.RespirationRate),
         ),
         OXYGEN_SATURATION(
             text = UiText.NonTranslatable("Сатурация"),
@@ -171,4 +171,13 @@ fun KClass<out Measurement>.asUi(): UiMeasurement.Type = when (this) {
     RespirationRate::class -> UiMeasurement.Type.RESPIRATION_RATE
     OxygenSaturation::class -> UiMeasurement.Type.OXYGEN_SATURATION
     else -> UiMeasurement.Type.HEART_RATE
+}
+
+fun UiMeasurement.Type.asDomain(): KClass<out Measurement> = when (this) {
+    UiMeasurement.Type.WEIGHT -> BodyWeight::class
+    UiMeasurement.Type.HEART_RATE -> HeartRate::class
+    UiMeasurement.Type.BLOOD_GLUCOSE -> BloodGlucose::class
+    UiMeasurement.Type.BLOOD_PRESSURE -> BloodPressure::class
+    UiMeasurement.Type.RESPIRATION_RATE -> RespirationRate::class
+    UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturation::class
 }
