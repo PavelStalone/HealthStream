@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -18,7 +17,6 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,7 +51,6 @@ import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
-import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.UiText
@@ -89,14 +86,6 @@ internal fun UserInputScreen(
                     }
                 },
             )
-        }
-        scaffoldCustomizer.setFab {
-            FloatingActionButton(
-                onClick = { },
-                shape = CircleShape,
-            ) {
-                Icon(Icons.Default.AccountCircle, "Large floating action button")
-            }
         }
     }
 

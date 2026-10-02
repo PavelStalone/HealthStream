@@ -1,5 +1,8 @@
 package ru.health.stream.feature.onboarding.impl.presentation.screen
 
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +44,11 @@ fun OnboardingScreen(
         NavDisplay(
             modifier = Modifier.fillMaxSize(),
             backStack = localBackStack,
+            transitionSpec = {
+                slideInHorizontally(initialOffsetX = { it }).togetherWith(
+                    slideOutHorizontally(targetOffsetX = { -it })
+                )
+            },
             entryProvider = entryProvider {
                 entry<LocalOnboardingNavKey.Home> {
                     OnboardingHomeScreen(viewModel)

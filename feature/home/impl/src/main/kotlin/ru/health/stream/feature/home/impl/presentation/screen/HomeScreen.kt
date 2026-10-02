@@ -47,7 +47,6 @@ import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.Report
-import ru.health.stream.core.ui.icon.default.Settings
 import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asDomain
@@ -84,16 +83,6 @@ internal fun HomeScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(
-                        onClick = {}
-                    ) {
-                        Icon(
-                            contentDescription = null,
-                            imageVector = Icons.Default.Settings,
-                        )
-                    }
-                }
             )
         }
 
