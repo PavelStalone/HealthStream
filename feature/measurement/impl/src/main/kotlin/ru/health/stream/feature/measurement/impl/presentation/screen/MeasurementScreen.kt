@@ -49,10 +49,13 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
@@ -62,8 +65,6 @@ import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.core.ui.modifier.shimmer
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import ru.health.stream.core.chart.core.drawable.CubicLine
-import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.feature.measurement.impl.R
 import ru.health.stream.feature.measurement.impl.presentation.component.MeasurementTrendCard
 import ru.health.stream.feature.measurement.impl.presentation.model.UiPeriod
@@ -83,6 +84,7 @@ internal fun MeasurementScreen(
     startPeriod: UiPeriod = UiPeriod.Week,
 ) {
     val timeZone = LocalTimeZone.current
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
     val viewModel: MeasurementViewModel = hiltViewModel()
 
     val measurementState by viewModel.measurementStateFlow.collectAsStateWithLifecycle()
@@ -92,234 +94,232 @@ internal fun MeasurementScreen(
     val options = listOf(UiPeriod.Today, UiPeriod.Week, UiPeriod.Month, UiPeriod.Year)
 
     LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = measurementType.asUi().text,
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackClick
+                    ) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.ArrowBack,
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { addMeasurementClick(measurementType) }
+                    ) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.Add,
+                        )
+                    }
+                }
+            )
+        }
+
         viewModel.changeMeasurementType(measurementType = measurementType)
         viewModel.changePeriod(period = startPeriod)
     }
 
-    Column(modifier = modifier) {
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = measurementType.asUi().text,
-            navigationIcon = {
-                IconButton(
-                    onClick = onBackClick
-                ) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.ArrowBack,
-                    )
-                }
-            },
-            actions = {
-                IconButton(
-                    onClick = { addMeasurementClick(measurementType) }
-                ) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.Add,
-                    )
-                }
-            }
-        )
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(all = 16.dp),
-        ) {
-            item {
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    options.forEachIndexed { index, option ->
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = options.size,
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(all = 16.dp),
+    ) {
+        item {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                options.forEachIndexed { index, option ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = options.size,
+                        ),
+                        onClick = {
+                            selectedPeriod = option
+                            viewModel.changePeriod(option)
+                        },
+                        selected = option == selectedPeriod,
+                        icon = {},
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContentColor = MaterialTheme.colorScheme.onPrimary,
+                            activeContainerColor = MaterialTheme.colorScheme.primary,
+                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                alpha = 0.3f
+                            )
+                        )
+                    ) {
+                        Text(
+                            text = option.label.asText(),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
                             ),
-                            onClick = {
-                                selectedPeriod = option
-                                viewModel.changePeriod(option)
-                            },
-                            selected = option == selectedPeriod,
-                            icon = {},
-                            colors = SegmentedButtonDefaults.colors(
-                                activeContentColor = MaterialTheme.colorScheme.onPrimary,
-                                activeContainerColor = MaterialTheme.colorScheme.primary,
-                                inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                    alpha = 0.3f
-                                )
-                            )
-                        ) {
-                            Text(
-                                text = option.label.asText(),
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                ),
-                            )
-                        }
+                        )
                     }
                 }
             }
+        }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+        item {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SectionHeader(text = "Динамика показателей")
+                Card(
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    SectionHeader(text = "Динамика показателей")
-                    Card(
-                        shape = MaterialTheme.shapes.large,
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Box(modifier = Modifier.padding(all = 16.dp)) {
-                            AnimatedContent(targetState = measurementState) { state ->
-                                when (state) {
-                                    MeasurementsState.Empty -> {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(220.dp),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            Text(
-                                                text = "Нет данных за этот период",
-                                                textAlign = TextAlign.Center,
-                                                color = MaterialTheme.colorScheme.outline,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                            )
-                                        }
-                                    }
-
-                                    MeasurementsState.Loading -> {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(220.dp),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            val composition by rememberLottieComposition(
-                                                LottieCompositionSpec.RawRes(R.raw.aggregate)
-                                            )
-                                            LottieAnimation(
-                                                modifier = Modifier.fillMaxSize(),
-                                                composition = composition,
-                                                iterations = LottieConstants.IterateForever,
-                                            )
-                                        }
-                                    }
-
-                                    is MeasurementsState.Main -> with(state) {
-                                        MeasurementTrendCard(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(220.dp),
-                                            period = selectedPeriod.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY),
-                                            yRange = drawableData.yRange,
-                                            chartDrawables = buildList {
-                                                drawableData.scatterPositions.forEach { positions ->
-                                                    add(
-                                                        Scatter(
-                                                            positions = positions,
-                                                            pointColor = MaterialTheme.colorScheme.primary,
-                                                            rangeColor = MaterialTheme.colorScheme.primary.copy(
-                                                                alpha = 0.3f
-                                                            ),
-                                                            radiusPoint = 4.dp
-                                                        )
-                                                    )
-                                                }
-                                                drawableData.pointPositions.forEach { positions ->
-                                                    add(
-                                                        CubicLine(
-                                                            points = positions,
-                                                            color = MaterialTheme.colorScheme.tertiary,
-                                                            style = Stroke(
-                                                                width = 6f,
-                                                                cap = StrokeCap.Round
-                                                            ),
-                                                        )
-                                                    )
-                                                }
-                                            },
+                    Box(modifier = Modifier.padding(all = 16.dp)) {
+                        AnimatedContent(targetState = measurementState) { state ->
+                            when (state) {
+                                MeasurementsState.Empty -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(220.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = "Нет данных за этот период",
+                                            textAlign = TextAlign.Center,
+                                            color = MaterialTheme.colorScheme.outline,
+                                            style = MaterialTheme.typography.bodyLarge,
                                         )
                                     }
+                                }
+
+                                MeasurementsState.Loading -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(220.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        val composition by rememberLottieComposition(
+                                            LottieCompositionSpec.RawRes(R.raw.aggregate)
+                                        )
+                                        LottieAnimation(
+                                            modifier = Modifier.fillMaxSize(),
+                                            composition = composition,
+                                            iterations = LottieConstants.IterateForever,
+                                        )
+                                    }
+                                }
+
+                                is MeasurementsState.Main -> with(state) {
+                                    MeasurementTrendCard(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(220.dp),
+                                        period = selectedPeriod.asPeriod(firstDayOfWeek = DayOfWeek.MONDAY),
+                                        yRange = drawableData.yRange,
+                                        chartDrawables = buildList {
+                                            drawableData.scatterPositions.forEach { positions ->
+                                                add(
+                                                    Scatter(
+                                                        positions = positions,
+                                                        pointColor = MaterialTheme.colorScheme.primary,
+                                                        rangeColor = MaterialTheme.colorScheme.primary.copy(
+                                                            alpha = 0.3f
+                                                        ),
+                                                        radiusPoint = 4.dp
+                                                    )
+                                                )
+                                            }
+                                            drawableData.pointPositions.forEach { positions ->
+                                                add(
+                                                    CubicLine(
+                                                        points = positions,
+                                                        color = MaterialTheme.colorScheme.tertiary,
+                                                        style = Stroke(
+                                                            width = 6f,
+                                                            cap = StrokeCap.Round
+                                                        ),
+                                                    )
+                                                )
+                                            }
+                                        },
+                                    )
                                 }
                             }
                         }
                     }
                 }
             }
+        }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            item { SectionHeader(text = "История измерений") }
+        item { SectionHeader(text = "История измерений") }
 
-            when (val state = measurementState) {
-                MeasurementsState.Empty -> {
-                    /* Do nothing */
+        when (val state = measurementState) {
+            MeasurementsState.Empty -> {
+                /* Do nothing */
+            }
+
+            MeasurementsState.Loading -> {
+                items(3) {
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .fillMaxWidth()
+                            .height(32.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .shimmer()
+                    )
                 }
+            }
 
-                MeasurementsState.Loading -> {
-                    items(3) {
-                        Box(
+            is MeasurementsState.Main -> {
+                state.measurements.forEach { group ->
+                    val isExpanded = expandedMeasurements.contains(group.id)
+
+                    item(key = group.id) {
+                        ExpandableHeader(
                             modifier = Modifier
-                                .padding(top = 8.dp)
-                                .fillMaxWidth()
                                 .height(32.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                                .shimmer()
+                                .fillMaxWidth()
+                                .animateItem()
+                                .padding(top = 8.dp),
+                            isExpanded = isExpanded,
+                            title = group.date.format(dateFormatter),
+                            onClick = { viewModel.expandMeasurement(group.id) },
                         )
                     }
-                }
 
-                is MeasurementsState.Main -> {
-                    state.measurements.forEach { group ->
-                        val isExpanded = expandedMeasurements.contains(group.id)
-
-                        item(key = group.id) {
-                            ExpandableHeader(
-                                modifier = Modifier
-                                    .height(32.dp)
-                                    .fillMaxWidth()
-                                    .animateItem()
-                                    .padding(top = 8.dp),
-                                isExpanded = isExpanded,
-                                title = group.date.format(dateFormatter),
-                                onClick = { viewModel.expandMeasurement(group.id) },
-                            )
-                        }
-
-                        if (isExpanded) {
-                            group.measurements.forEach { measurement ->
-                                with(measurement) {
-                                    item(key = id) {
-                                        MeasurementCard(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .animateItem()
-                                                .padding(top = 8.dp),
-                                            value = value,
-                                            unit = unit.asText(),
-                                            note = note?.asText(),
-                                            estimation = estimation,
-                                            type = type.text.asText(),
-                                            sourceIcon = resource.icon,
-                                            measurementIcon = type.icon,
-                                            sourceName = resource.text.asText(),
-                                            time = time.toLocalDateTime(timeZone)
-                                                .format(timeFormatter),
-                                            onEditClick = {
-                                                viewModel.editMeasurement(
-                                                    uiMeasurement = measurement,
-                                                    onEdit = onEditClick,
-                                                )
-                                            },
-                                            onDeleteClick = {
-                                                viewModel.deleteMeasurement(uiMeasurement = measurement)
-                                            },
-                                        )
-                                    }
+                    if (isExpanded) {
+                        group.measurements.forEach { measurement ->
+                            with(measurement) {
+                                item(key = id) {
+                                    MeasurementCard(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateItem()
+                                            .padding(top = 8.dp),
+                                        value = value,
+                                        unit = unit.asText(),
+                                        note = note?.asText(),
+                                        estimation = estimation,
+                                        type = type.text.asText(),
+                                        sourceIcon = resource.icon,
+                                        measurementIcon = type.icon,
+                                        sourceName = resource.text.asText(),
+                                        time = time.toLocalDateTime(timeZone)
+                                            .format(timeFormatter),
+                                        onEditClick = {
+                                            viewModel.editMeasurement(
+                                                uiMeasurement = measurement,
+                                                onEdit = onEditClick,
+                                            )
+                                        },
+                                        onDeleteClick = {
+                                            viewModel.deleteMeasurement(uiMeasurement = measurement)
+                                        },
+                                    )
                                 }
                             }
                         }

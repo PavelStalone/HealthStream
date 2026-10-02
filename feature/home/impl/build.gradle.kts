@@ -14,8 +14,8 @@ dependencies {
     implementation(projects.data.vitals)
 
     implementation(projects.core.ui)
-
     implementation(projects.core.chart)
+
     implementation(projects.feature.report.api)
     implementation(projects.feature.measurement.api)
 }

@@ -38,16 +38,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.common.di.Dispatcher
 import ru.health.stream.core.ui.model.UiMeasurement
+import ru.health.stream.core.ui.model.asDomain
 import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.report.model.ReportFormat
 import ru.health.stream.data.report.repository.ReportRepository
-import ru.health.stream.data.vitals.model.measurement.BloodGlucose
-import ru.health.stream.data.vitals.model.measurement.BloodPressure
-import ru.health.stream.data.vitals.model.measurement.BodyWeight
-import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
-import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -93,7 +88,7 @@ internal class ReportViewModel @Inject constructor(
         MeasurementQuery(
             from = dateRange.start,
             to = dateRange.endInclusive,
-            types = dataTypes.map { type -> type.toMeasurementClass() }
+            types = dataTypes.map { type -> type.asDomain() }
         )
     }.distinctUntilChanged()
 
@@ -223,15 +218,6 @@ internal class ReportViewModel @Inject constructor(
                 onEdit(measurement)
             }
         }
-    }
-
-    private fun UiMeasurement.Type.toMeasurementClass(): KClass<out Measurement> = when (this) {
-        UiMeasurement.Type.WEIGHT -> BodyWeight::class
-        UiMeasurement.Type.HEART_RATE -> HeartRate::class
-        UiMeasurement.Type.BLOOD_GLUCOSE -> BloodGlucose::class
-        UiMeasurement.Type.BLOOD_PRESSURE -> BloodPressure::class
-        UiMeasurement.Type.RESPIRATION_RATE -> RespirationRate::class
-        UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturation::class
     }
 
     private data class MeasurementQuery(
