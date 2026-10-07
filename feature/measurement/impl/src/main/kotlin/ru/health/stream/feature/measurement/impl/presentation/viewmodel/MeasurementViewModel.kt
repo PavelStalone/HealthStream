@@ -26,6 +26,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import ru.health.stream.core.chart.model.DrawableData
 import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.vitals.model.Period
@@ -33,14 +34,15 @@ import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
-import ru.health.stream.core.chart.model.DrawableData
 import ru.health.stream.feature.measurement.impl.presentation.model.UiPeriod
 import ru.health.stream.feature.measurement.impl.presentation.model.asPeriod
+import ru.health.stream.source.remote.ble.BleSystemManager
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 internal class MeasurementViewModel @Inject constructor(
+    bleSystemManager: BleSystemManager,
     private val measurementRepository: MeasurementRepository,
     groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
 ) : ViewModel() {
@@ -50,6 +52,8 @@ internal class MeasurementViewModel @Inject constructor(
 
     private val _expandedMeasurementsFlow = MutableStateFlow<Set<String>>(emptySet())
     val expandedMeasurementsFlow = _expandedMeasurementsFlow.asStateFlow()
+
+    val bleManager = bleSystemManager
 
     private val queryFlow = combine(
         periodFlow,

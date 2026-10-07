@@ -8,148 +8,153 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import ru.health.stream.core.ui.model.UiText
+import ru.health.stream.data.setting.model.AppParam
+import ru.health.stream.data.setting.repository.AppParamRepository
 import ru.health.stream.feature.onboarding.impl.presentation.model.OnboardingStep
+import ru.health.stream.feature.onboarding.impl.presentation.navigation.LocalOnboardingNavKey
 import javax.inject.Inject
 
 @HiltViewModel
-internal class OnboardingViewModel @Inject constructor() : ViewModel() {
+internal class OnboardingViewModel @Inject constructor(
+    private val appParamRepository: AppParamRepository
+) : ViewModel() {
 
     private val onboardingSteps = sequenceOf(
         // Home Screen Steps
         OnboardingStep(
             id = "home",
-            pageIndex = 0,
+            screen = LocalOnboardingNavKey.Home,
             text = UiText.NonTranslatable("Добро пожаловать! Давайте познакомимся с функциями приложения")
         ),
         OnboardingStep(
             id = "home",
-            pageIndex = 0,
+            screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
             text = UiText.NonTranslatable("Здесь будут появляться ваши измерения за неделю. Пока данных нет, вы видите это сообщение")
         ),
         OnboardingStep(
             id = "home_filled",
-            pageIndex = 0,
+            screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
             text = UiText.NonTranslatable("А вот так будут выглядеть данные. Линия на графике показывает среднее арифметическое, а диапазоны - минимальные и максимальные значения")
         ),
         OnboardingStep(
             id = "home_filled",
-            pageIndex = 0,
+            screen = LocalOnboardingNavKey.Home,
             targetKey = "estimation",
             text = UiText.NonTranslatable("Здесь отображается оценка состояния для последнего измерения (Норма, Высоко и др.)")
         ),
         OnboardingStep(
             id = "home_filled",
-            pageIndex = 0,
+            screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
             text = UiText.NonTranslatable("Оценка ваших измерений может появиться не сразу. В течение 15 минут приложение произведёт расчёт и добавит новые оценки")
         ),
         OnboardingStep(
             id = "home_filled",
-            pageIndex = 0,
+            screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
             text = UiText.NonTranslatable("Эта карточка отображает общую картину за неделю. Чтобы изучить данные подробнее, нажмите на неё")
         ),
         // Measurement Screen Steps
         OnboardingStep(
             id = "measurement",
-            pageIndex = 1,
+            screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_chart",
             text = UiText.NonTranslatable("На этом графике можно быстро оценить динамику ваших измерений")
         ),
         OnboardingStep(
             id = "measurement",
-            pageIndex = 1,
+            screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_data",
             text = UiText.NonTranslatable("Здесь можно подробнее изучить значения и их оценку")
         ),
         OnboardingStep(
             id = "measurement",
-            pageIndex = 1,
+            screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_data_title",
             text = UiText.NonTranslatable("Нажмите на заголовок даты, чтобы развернуть список измерений")
         ),
         OnboardingStep(
             id = "measurement_expand",
-            pageIndex = 1,
+            screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_card",
             text = UiText.NonTranslatable("Это карточка измерения: здесь отображаются значение, заметка и оценка")
         ),
         OnboardingStep(
             id = "measurement_expand_edit",
-            pageIndex = 1,
+            screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_card",
             text = UiText.NonTranslatable("Чтобы отредактировать или удалить измерение, смахните карточку влево")
         ),
         OnboardingStep(
             id = "measurement_expand",
-            pageIndex = 1,
+            screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_add_button",
             text = UiText.NonTranslatable("Чтобы внести измерения вручную, нажмите на эту кнопку")
         ),
         // Report Screen Steps
         OnboardingStep(
             id = "report",
-            pageIndex = 2,
+            screen = LocalOnboardingNavKey.Report,
             text = UiText.NonTranslatable("В этом разделе можно настроить и сформировать отчёт для анализа")
         ),
         OnboardingStep(
             id = "report_expand",
-            pageIndex = 2,
+            screen = LocalOnboardingNavKey.Report,
             targetKey = "report_date_range",
             text = UiText.NonTranslatable("Выберите нужный диапазон дат для формирования отчёта")
         ),
         OnboardingStep(
             id = "report_expand",
-            pageIndex = 2,
+            screen = LocalOnboardingNavKey.Report,
             targetKey = "report_type_selection",
             text = UiText.NonTranslatable("Здесь можно изменить формат файла")
         ),
         OnboardingStep(
             id = "report_expand",
-            pageIndex = 2,
+            screen = LocalOnboardingNavKey.Report,
             targetKey = "report_measurement_selection",
             text = UiText.NonTranslatable("Выберите типы измерений, которые должны войти в отчёт")
         ),
         OnboardingStep(
             id = "report_expand",
-            pageIndex = 2,
+            screen = LocalOnboardingNavKey.Report,
             targetKey = "report_title_exclude",
             text = UiText.NonTranslatable("Вы можете убирать целые блоки записей из отчёта")
         ),
         OnboardingStep(
             id = "report_expand",
-            pageIndex = 2,
+            screen = LocalOnboardingNavKey.Report,
             targetKey = "report_card",
             text = UiText.NonTranslatable("Нажав на карточку, можно исключить конкретную запись из отчёта")
         ),
         OnboardingStep(
             id = "report_expand",
-            pageIndex = 2,
+            screen = LocalOnboardingNavKey.Report,
             targetKey = "report_generate_button",
             text = UiText.NonTranslatable("Нажмите кнопку генерации, чтобы получить готовый отчёт")
         ),
         // Profile Screen Steps
         OnboardingStep(
             id = "profile",
-            pageIndex = 3,
+            screen = LocalOnboardingNavKey.Profile,
             text = UiText.NonTranslatable("В профиле нужно указать свои данные, чтобы алгоритмы оценки показателей работали точнее")
         ),
         OnboardingStep(
             id = "profile",
-            pageIndex = 3,
+            screen = LocalOnboardingNavKey.Profile,
             text = UiText.NonTranslatable("Если оставить профиль незаполненным, некоторые оценки будут недоступны")
         ),
         OnboardingStep(
             id = "profile",
-            pageIndex = 3,
+            screen = LocalOnboardingNavKey.Profile,
             targetKey = "profile_save_button",
             text = UiText.NonTranslatable("Не забудьте нажать кнопку сохранения, чтобы применить изменения")
         ),
         OnboardingStep(
             id = "profile",
-            pageIndex = 3,
+            screen = LocalOnboardingNavKey.Profile,
             text = UiText.NonTranslatable("За здоровьем важно следить регулярно, а HealthStream поможет вам делать это просто и эффективно. Желаем отличного самочувствия!")
         )
     ).iterator()
@@ -169,6 +174,7 @@ internal class OnboardingViewModel @Inject constructor() : ViewModel() {
 
     private fun onFinish() {
         viewModelScope.launch {
+            appParamRepository.setAppParam(AppParam(isFirstStart = false))
             _finishEvent.emit(Unit)
         }
     }

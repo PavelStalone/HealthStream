@@ -9,6 +9,7 @@ android {
 
 dependencies {
     implementation(projects.source)
+    implementation(projects.source.local)
     implementation(projects.source.remote.ble.lib)
 
     implementation(projects.core.common)

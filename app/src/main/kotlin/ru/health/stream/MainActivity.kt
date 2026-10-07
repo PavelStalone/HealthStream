@@ -3,21 +3,30 @@ package ru.health.stream
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -26,19 +35,18 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.arttttt.nav3router.Router
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import ru.health.stream.core.monitor.logD
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.theme.HealthStreamTheme
-import ru.health.stream.data.setting.model.AppParam
 import ru.health.stream.data.setting.repository.AppParamRepository
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
-import ru.health.stream.feature.onboarding.impl.presentation.screen.OnboardingScreen
+import ru.health.stream.feature.onboarding.api.OnboardingNavKey
 import ru.health.stream.feature.report.api.navigation.ReportNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
 import ru.health.stream.permission.AndroidPermissionManager
@@ -74,48 +82,76 @@ class MainActivity : StarterActivity() {
             HealthStreamTheme(
                 dynamicColor = false,
             ) {
-                val backStack = rememberNavBackStack(HomeNavKey)
-
                 val appParam by appParamRepository.appParamFlow.collectAsStateWithLifecycle(
-                    initialValue = AppParam()
+                    initialValue = null
                 )
 
-                if (appParam.isFirstStart) {
-                    OnboardingScreen(
-                        onFinish = {
-                            backStack.add(UserNavKey)
+                if (appParam != null) {
+                    val startDestination = remember {
+                        if (appParam?.isFirstStart == true) OnboardingNavKey else HomeNavKey
+                    }
 
-                            lifecycleScope.launch {
-                                appParamRepository.setAppParam(appParam.copy(isFirstStart = false))
-                            }
+                    val backStack = rememberNavBackStack(startDestination)
+                    val snackBarHostState = remember { SnackbarHostState() }
+                    val customizer = remember(snackBarHostState) {
+                        ScaffoldCustomizerImpl(snackBarHostState)
+                    }
+
+                    val isBottomBarVisible by remember(backStack) {
+                        derivedStateOf {
+                            backStack.none { it == OnboardingNavKey }
                         }
-                    )
-                } else {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        bottomBar = {
-                            AppBottomBar(
-                                backStack = backStack,
-                                onTabClick = { screen ->
-                                    navigationRouter.popTo(HomeNavKey)
-                                    navigationRouter.push(screen)
+                    }
+
+                    LaunchedEffect(backStack.last()) {
+                        customizer.clearAll()
+                    }
+
+                    CompositionLocalProvider(LocalScaffoldCustomizer provides customizer) {
+                        Scaffold(
+                            modifier = Modifier.fillMaxSize(),
+                            topBar = { customizer.topBarContent() },
+                            floatingActionButton = {
+                                AnimatedContent(
+                                    targetState = customizer.fabContent,
+                                    transitionSpec = {
+                                        fadeIn(animationSpec = tween(100)).togetherWith(
+                                            fadeOut(animationSpec = tween(90))
+                                        )
+                                    }
+                                ) { it() }
+                            },
+                            snackbarHost = {
+                                SnackbarHost(customizer.snackBarHostState) { data ->
+                                    customizer.snackBarContent(data)
                                 }
-                            )
-                        }
-                    ) { innerPadding ->
-                        NavHost(
-                            backStack = backStack,
-                            router = navigationRouter,
-                        ) { backStack, onBack, router ->
-                            NavDisplay(
-                                modifier = Modifier.padding(paddingValues = innerPadding),
-                                onBack = onBack,
+                            },
+                            bottomBar = {
+                                AnimatedVisibility(visible = isBottomBarVisible) {
+                                    AppBottomBar(
+                                        backStack = backStack,
+                                        onTabClick = { screen ->
+                                            navigationRouter.popTo(HomeNavKey)
+                                            navigationRouter.push(screen)
+                                        }
+                                    )
+                                }
+                            }
+                        ) { innerPadding ->
+                            NavHost(
                                 backStack = backStack,
-                                sceneStrategy = DialogSceneStrategy(),
-                                entryProvider = entryProvider {
-                                    entryProviders.forEach { provider -> provider(router) }
-                                },
-                            )
+                                router = navigationRouter,
+                            ) { backStack, onBack, router ->
+                                NavDisplay(
+                                    modifier = Modifier.padding(paddingValues = innerPadding),
+                                    onBack = onBack,
+                                    backStack = backStack,
+                                    sceneStrategy = DialogSceneStrategy(),
+                                    entryProvider = entryProvider {
+                                        entryProviders.forEach { provider -> provider(router) }
+                                    },
+                                )
+                            }
                         }
                     }
                 }
@@ -134,8 +170,8 @@ class MainActivity : StarterActivity() {
 @Composable
 private fun AppBottomBar(
     backStack: List<NavKey>,
-    modifier: Modifier = Modifier,
     onTabClick: (NavKey) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val tabs = remember {
         listOf(

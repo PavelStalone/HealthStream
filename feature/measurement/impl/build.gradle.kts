@@ -13,8 +13,9 @@ dependencies {
 
     implementation(projects.data.vitals)
 
-    implementation(projects.core.ui)
+    implementation(projects.source.remote.ble)
 
+    implementation(projects.core.ui)
     implementation(projects.core.chart)
 
     implementation(libs.lottie.compose)

@@ -13,7 +13,7 @@ internal fun EntryProviderScope<NavKey>.homeEntry(router: Router<NavKey>) {
     entry<HomeNavKey> {
         HomeScreen(
             onReportIconClick = { router.push(ReportNavKey) },
-            onAddMeasurementIconClick = { router.push(AddMeasurementNavKey()) },
+            onAddMeasurementIconClick = { router.push(AddMeasurementNavKey(measurementType = it)) },
             onMeasurementCardClick = { measurementType ->
                 router.push(MeasurementNavKey(measurementType))
             }

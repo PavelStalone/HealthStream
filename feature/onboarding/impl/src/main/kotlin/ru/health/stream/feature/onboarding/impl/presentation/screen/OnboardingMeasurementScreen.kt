@@ -20,6 +20,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -29,11 +30,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.model.ChartPosition
+import ru.health.stream.core.ui.component.AddMeasurementFab
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
-import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.model.UiIcon
@@ -41,9 +46,6 @@ import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
-import ru.health.stream.core.chart.core.drawable.CubicLine
-import ru.health.stream.core.chart.core.drawable.Scatter
-import ru.health.stream.core.chart.model.ChartPosition
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementSwipeableCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementTrendCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.onboardingTarget
@@ -54,6 +56,7 @@ import ru.health.stream.feature.onboarding.impl.presentation.viewmodel.Onboardin
 internal fun OnboardingMeasurementScreen(
     viewModel: OnboardingViewModel
 ) {
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
     val onboardingScope = LocalOnboardingScope.current
 
     val currentStep by viewModel.currentStepFlow.collectAsState()
@@ -72,182 +75,183 @@ internal fun OnboardingMeasurementScreen(
         UiText.NonTranslatable(value = "Год"),
     )
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = UiText.NonTranslatable("Пульс"),
-            navigationIcon = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.ArrowBack,
-                    )
+    LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = UiText.NonTranslatable("Пульс"),
+                navigationIcon = {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.ArrowBack,
+                        )
+                    }
+                },
+            )
+        }
+
+        scaffoldCustomizer.setFab {
+            val isOpenSection by remember(currentStep.id) {
+                derivedStateOf { currentStep.targetKey == "measurement_add_button" }
+            }
+
+            AddMeasurementFab(
+                mainFabModifier = Modifier.onboardingTarget(
+                    "measurement_add_button",
+                    onboardingScope
+                ),
+                isExpanded = isOpenSection,
+                onExpandedChange = {},
+                onMeasurementTypeClick = {},
+            )
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 16.dp),
+    ) {
+        item {
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                options.forEachIndexed { index, option ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = options.size,
+                        ),
+                        onClick = {},
+                        selected = index == 1,
+                        icon = {},
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContentColor = MaterialTheme.colorScheme.onPrimary,
+                            activeContainerColor = MaterialTheme.colorScheme.primary,
+                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                alpha = 0.3f
+                            )
+                        )
+                    ) {
+                        Text(
+                            text = option.asText(),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
+                            ),
+                        )
+                    }
                 }
-            },
-            actions = {
-                IconButton(
+            }
+        }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
+        item {
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SectionHeader(text = "Динамика показателей")
+                Card(
                     modifier = Modifier.onboardingTarget(
-                        key = "measurement_add_button",
+                        key = "measurement_chart",
                         scope = onboardingScope,
                     ),
-                    onClick = {}
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.Add,
-                    )
-                }
-            }
-        )
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 16.dp),
-        ) {
-            item {
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    options.forEachIndexed { index, option ->
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = options.size,
-                            ),
-                            onClick = {},
-                            selected = index == 1,
-                            icon = {},
-                            colors = SegmentedButtonDefaults.colors(
-                                activeContentColor = MaterialTheme.colorScheme.onPrimary,
-                                activeContainerColor = MaterialTheme.colorScheme.primary,
-                                inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                    alpha = 0.3f
+                    Column(modifier = Modifier.padding(all = 16.dp)) {
+                        MeasurementTrendCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp),
+                            yRange = 50f..120f,
+                            chartDrawables = listOf(
+                                Scatter(
+                                    positions = ranges,
+                                    radiusPoint = 4.dp,
+                                    pointColor = MaterialTheme.colorScheme.primary,
+                                    rangeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                ),
+                                CubicLine(
+                                    points = points,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    style = Stroke(width = 6f, cap = StrokeCap.Round),
                                 )
                             )
-                        ) {
-                            Text(
-                                text = option.asText(),
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                ),
-                            )
-                        }
+                        )
                     }
                 }
             }
+        }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            item {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SectionHeader(text = "Динамика показателей")
-                    Card(
-                        modifier = Modifier.onboardingTarget(
-                            key = "measurement_chart",
+        item {
+            SectionHeader(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .onboardingTarget(
+                        key = "measurement_data",
+                        scope = onboardingScope,
+                    )
+                    .padding(all = 8.dp),
+                text = "История измерений",
+            )
+        }
+
+        item {
+            ExpandableHeader(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItem()
+                    .padding(horizontal = 8.dp)
+                    .onboardingTarget(key = "measurement_data_title", scope = onboardingScope)
+                    .padding(all = 8.dp),
+                isExpanded = isExpanded,
+                title = "Сегодня",
+                onClick = {},
+            )
+        }
+
+        if (isExpanded) {
+            item(key = "Measurement") {
+                MeasurementSwipeableCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 8.dp)
+                        .onboardingTarget(
+                            key = "measurement_card",
                             scope = onboardingScope,
                         ),
-                        shape = MaterialTheme.shapes.large,
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(all = 16.dp)) {
-                            MeasurementTrendCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(220.dp),
-                                yRange = 50f..120f,
-                                chartDrawables = listOf(
-                                    Scatter(
-                                        positions = ranges,
-                                        radiusPoint = 4.dp,
-                                        pointColor = MaterialTheme.colorScheme.primary,
-                                        rangeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                    ),
-                                    CubicLine(
-                                        points = points,
-                                        color = MaterialTheme.colorScheme.tertiary,
-                                        style = Stroke(width = 6f, cap = StrokeCap.Round),
-                                    )
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            item {
-                SectionHeader(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .onboardingTarget(
-                            key = "measurement_data",
-                            scope = onboardingScope,
-                        )
-                        .padding(all = 8.dp),
-                    text = "История измерений",
+                    isEdit = isEdit,
+                    value = "82",
+                    unit = "уд/мин",
+                    note = "После пробежки",
+                    estimation = UiLevel.NORMAL,
+                    type = "Пульс",
+                    sourceIcon = UiMeasurement.Resource.Manual.icon,
+                    measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
+                    sourceName = "Ручная запись",
+                    time = "10:30",
                 )
             }
+        }
 
-            item {
-                ExpandableHeader(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateItem()
-                        .padding(horizontal = 8.dp)
-                        .onboardingTarget(key = "measurement_data_title", scope = onboardingScope)
-                        .padding(all = 8.dp),
-                    isExpanded = isExpanded,
-                    title = "Сегодня",
-                    onClick = {},
-                )
-            }
-
-            if (isExpanded) {
-                item(key = "Measurement") {
-                    MeasurementSwipeableCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateItem()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 8.dp)
-                            .onboardingTarget(
-                                key = "measurement_card",
-                                scope = onboardingScope,
-                            ),
-                        isEdit = isEdit,
-                        value = "82",
-                        unit = "уд/мин",
-                        note = "После пробежки",
-                        estimation = UiLevel.NORMAL,
-                        type = "Пульс",
-                        sourceIcon = UiMeasurement.Resource.Manual.icon,
-                        measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
-                        sourceName = "Ручная запись",
-                        time = "10:30",
-                    )
-                }
-            }
-
-            item(key = "Yesterday") {
-                ExpandableHeader(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateItem()
-                        .padding(horizontal = 16.dp),
-                    isExpanded = false,
-                    title = "Вчера",
-                    onClick = {},
-                )
-            }
+        item(key = "Yesterday") {
+            ExpandableHeader(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItem()
+                    .padding(horizontal = 16.dp),
+                isExpanded = false,
+                title = "Вчера",
+                onClick = {},
+            )
         }
     }
 }

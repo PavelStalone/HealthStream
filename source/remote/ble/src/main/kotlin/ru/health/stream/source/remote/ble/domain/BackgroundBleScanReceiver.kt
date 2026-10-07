@@ -60,6 +60,19 @@ class BackgroundBleScanReceiver : BroadcastReceiver() {
         private const val SOURCE_NAME = "BackgroundBleScanReceiver"
         private const val INTENT_ACTION = "ru.health.stream.ble.ACTION_FOUND"
 
+        internal fun stop(
+            context: Context,
+            scannerRepository: ScannerRepository,
+        ) {
+            val pendingIntent = createPendingIntent(context)
+
+            scannerRepository.stopScan(
+                context = context,
+                requestCode = REQUEST_CODE,
+                pendingIntent = pendingIntent,
+            )
+        }
+
         /**
          * Creates and launches a PendingIntent for background BLE scanning
          *
@@ -74,22 +87,44 @@ class BackgroundBleScanReceiver : BroadcastReceiver() {
             context: Context,
             scannerRepository: ScannerRepository,
         ) {
-            val intent = Intent(context, BackgroundBleScanReceiver::class.java).apply {
-                action = INTENT_ACTION
-                setPackage(context.packageName)
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                REQUEST_CODE,
-                intent,
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
+            val pendingIntent = createPendingIntent(context)
 
             scannerRepository.startScan(
                 context = context,
                 requestCode = REQUEST_CODE,
                 pendingIntent = pendingIntent,
             )
+        }
+
+        internal fun isPendingActive(context: Context): Boolean {
+            val intent = createIntent(context)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_NO_CREATE
+            )
+
+            return pendingIntent != null
+        }
+
+        private fun createPendingIntent(context: Context): PendingIntent {
+            val intent = createIntent(context)
+
+            return PendingIntent.getBroadcast(
+                context,
+                REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
+
+        private fun createIntent(context: Context) = Intent(
+            context,
+            BackgroundBleScanReceiver::class.java
+        ).apply {
+            action = INTENT_ACTION
+            setPackage(context.packageName)
         }
     }
 }

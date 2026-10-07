@@ -76,6 +76,7 @@ import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
@@ -107,6 +108,7 @@ internal fun ReportScreen(
     val context = LocalContext.current
     val timeZone = LocalTimeZone.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val scaffoldCustomizer = LocalScaffoldCustomizer.current
 
     val reportFormat by viewModel.reportFormat.collectAsStateWithLifecycle()
     val dateRange by viewModel.selectedDateRange.collectAsStateWithLifecycle()
@@ -123,7 +125,6 @@ internal fun ReportScreen(
     )
 
     var showDatePicker by remember { mutableStateOf(false) }
-
     val reportButtonEnabled by remember {
         derivedStateOf {
             (measurementUiState as? MeasurementUiState.Loaded)?.measurementGroups
@@ -132,6 +133,21 @@ internal fun ReportScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        scaffoldCustomizer.setTopBar {
+            TopBar(
+                title = UiText.NonTranslatable("Отчет"),
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = Icons.Default.ArrowBack,
+                        )
+                    }
+                },
+            )
+        }
+    }
     LaunchedEffect(viewModel.effectFlow, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effectFlow.collect { effect ->
@@ -146,251 +162,234 @@ internal fun ReportScreen(
         }
     }
 
-    Column(modifier = modifier) {
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            title = UiText.NonTranslatable("Отчет"),
-            navigationIcon = {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        contentDescription = null,
-                        imageVector = Icons.Default.ArrowBack,
-                    )
-                }
-            },
-        )
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                SectionHeader(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    text = "Конфигурация",
+                )
+                Text(
+                    text = "Период",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                DateRange(
+                    modifier = Modifier.height(TextFieldDefaults.MinHeight),
+                    onClick = { showDatePicker = true },
+                    prefixIcon = UiIcon.Vector(Icons.Default.Calendar),
+                    actionIcon = UiIcon.Vector(Icons.Default.KeyboardArrowDown),
+                    startDate = dateRange.start
+                        .toLocalDateTime(timeZone).date
+                        .format(dateFormatter),
+                    endDate = dateRange.endInclusive
+                        .toLocalDateTime(timeZone).date
+                        .format(dateFormatter),
+                )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                Column(
+                Text(
+                    modifier = Modifier.padding(top = 4.dp),
+                    text = "Формат",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    SectionHeader(
-                        modifier = Modifier.padding(bottom = 4.dp),
-                        text = "Конфигурация",
-                    )
-                    Text(
-                        text = "Период",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    DateRange(
-                        modifier = Modifier.height(TextFieldDefaults.MinHeight),
-                        onClick = { showDatePicker = true },
-                        prefixIcon = UiIcon.Vector(Icons.Default.Calendar),
-                        actionIcon = UiIcon.Vector(Icons.Default.KeyboardArrowDown),
-                        startDate = dateRange.start
-                            .toLocalDateTime(timeZone).date
-                            .format(dateFormatter),
-                        endDate = dateRange.endInclusive
-                            .toLocalDateTime(timeZone).date
-                            .format(dateFormatter),
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(top = 4.dp),
-                        text = "Формат",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        ReportFormat.entries.forEach { format ->
-                            FilterChip(
-                                selected = reportFormat == format,
-                                onClick = { viewModel.onFormatChange(format) },
-                                label = { Text(text = format.name) },
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                        }
-                    }
-
-                    Text(
-                        modifier = Modifier.padding(top = 4.dp),
-                        text = "Типы данных",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        UiMeasurement.Type.entries.forEach { type ->
-                            FilterChip(
-                                selected = dataTypes.contains(type),
-                                onClick = { viewModel.onDataTypeToggle(type) },
-                                label = { Text(text = type.text.asText()) },
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                        }
-                    }
-
-                    Button(
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .height(TextFieldDefaults.MinHeight)
-                            .fillMaxWidth(),
-                        onClick = { viewModel.generateReport() },
-                        enabled = reportButtonEnabled,
-                    ) {
-                        AnimatedContent(
-                            targetState = reportUiState,
-                            transitionSpec = {
-                                fadeIn(animationSpec = tween(220, delayMillis = 90))
-                                    .togetherWith(fadeOut(animationSpec = tween(90)))
-                            },
-                        ) { reportState ->
-                            when (reportState) {
-                                ReportUiState.Generating -> {
-                                    CircularProgressIndicator(color = LocalContentColor.current)
-                                }
-
-                                else -> {
-                                    Text(
-                                        text = "Сгенерировать отчет",
-                                        fontWeight = FontWeight.ExtraBold,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    SectionHeader(
-                        modifier = Modifier.padding(top = 8.dp),
-                        text = "Данные",
-                    )
-                }
-            }
-
-            when (val state = measurementUiState) {
-                MeasurementUiState.Loading -> {
-                    items(3) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(32.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                                .shimmer()
+                    ReportFormat.entries.forEach { format ->
+                        FilterChip(
+                            selected = reportFormat == format,
+                            onClick = { viewModel.onFormatChange(format) },
+                            label = { Text(text = format.name) },
+                            shape = RoundedCornerShape(20.dp)
                         )
                     }
                 }
 
-                is MeasurementUiState.Loaded -> {
-                    if (state.measurementGroups.isEmpty()) {
-                        item {
-                            Text(
-                                text = "Нет данных за этот период",
-                                color = MaterialTheme.colorScheme.outline,
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
+                Text(
+                    modifier = Modifier.padding(top = 4.dp),
+                    text = "Типы данных",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    UiMeasurement.Type.entries.forEach { type ->
+                        FilterChip(
+                            selected = dataTypes.contains(type),
+                            onClick = { viewModel.onDataTypeToggle(type) },
+                            label = { Text(text = type.text.asText()) },
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                    }
+                }
+
+                Button(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .height(TextFieldDefaults.MinHeight)
+                        .fillMaxWidth(),
+                    onClick = { viewModel.generateReport() },
+                    enabled = reportButtonEnabled,
+                ) {
+                    AnimatedContent(
+                        targetState = reportUiState,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(220, delayMillis = 90))
+                                .togetherWith(fadeOut(animationSpec = tween(90)))
+                        },
+                    ) { reportState ->
+                        when (reportState) {
+                            ReportUiState.Generating -> {
+                                CircularProgressIndicator(color = LocalContentColor.current)
+                            }
+
+                            else -> {
+                                Text(
+                                    text = "Сгенерировать отчет",
+                                    fontWeight = FontWeight.ExtraBold,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            }
                         }
                     }
-                    state.measurementGroups.forEach { measurementGroup ->
-                        with(measurementGroup) {
-                            val isExpand = expandedMeasurementGroup.contains(id)
-                            val measurementsId = measurements.map(UiMeasurement::id)
+                }
 
-                            item(key = id) {
-                                val isSectorBanned by remember {
-                                    derivedStateOf { bannedMeasurements.containsAll(measurementsId) }
-                                }
+                SectionHeader(
+                    modifier = Modifier.padding(top = 8.dp),
+                    text = "Данные",
+                )
+            }
+        }
 
-                                ExpandableHeader(
-                                    modifier = Modifier
-                                        .height(32.dp)
-                                        .fillMaxWidth()
-                                        .animateItem(),
-                                    isExpanded = isExpand,
-                                    title = date.format(dateFormatter),
-                                    onClick = { viewModel.expandMeasurementGroup(id) },
-                                    actions = {
-                                        TextButton(
-                                            onClick = {
-                                                if (isSectorBanned) {
-                                                    viewModel.unbanMeasurements(measurementsId)
-                                                } else {
-                                                    viewModel.banMeasurements(measurementsId)
-                                                }
+        when (val state = measurementUiState) {
+            MeasurementUiState.Loading -> {
+                items(3) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(32.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .shimmer()
+                    )
+                }
+            }
+
+            is MeasurementUiState.Loaded -> {
+                if (state.measurementGroups.isEmpty()) {
+                    item {
+                        Text(
+                            text = "Нет данных за этот период",
+                            color = MaterialTheme.colorScheme.outline,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+                state.measurementGroups.forEach { measurementGroup ->
+                    with(measurementGroup) {
+                        val isExpand = expandedMeasurementGroup.contains(id)
+                        val measurementsId = measurements.map(UiMeasurement::id)
+
+                        item(key = id) {
+                            val isSectorBanned by remember {
+                                derivedStateOf { bannedMeasurements.containsAll(measurementsId) }
+                            }
+
+                            ExpandableHeader(
+                                modifier = Modifier
+                                    .height(32.dp)
+                                    .fillMaxWidth()
+                                    .animateItem(),
+                                isExpanded = isExpand,
+                                title = date.format(dateFormatter),
+                                onClick = { viewModel.expandMeasurementGroup(id) },
+                                actions = {
+                                    TextButton(
+                                        onClick = {
+                                            if (isSectorBanned) {
+                                                viewModel.unbanMeasurements(measurementsId)
+                                            } else {
+                                                viewModel.banMeasurements(measurementsId)
                                             }
-                                        ) {
-                                            AnimatedContent(
-                                                targetState = isSectorBanned,
-                                                transitionSpec = {
-                                                    (slideInVertically { it } + fadeIn()) togetherWith (slideOutVertically { -it } + fadeOut())
-                                                }
-                                            ) { isBanned ->
-                                                if (isBanned) {
-                                                    Text(
-                                                        text = "Выбрать все".uppercase(),
-                                                        fontWeight = FontWeight.Bold,
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                    )
-                                                } else {
-                                                    Text(
-                                                        text = "Исключить все".uppercase(),
-                                                        fontWeight = FontWeight.Bold,
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                    )
-                                                }
+                                        }
+                                    ) {
+                                        AnimatedContent(
+                                            targetState = isSectorBanned,
+                                            transitionSpec = {
+                                                (slideInVertically { it } + fadeIn()) togetherWith (slideOutVertically { -it } + fadeOut())
+                                            }
+                                        ) { isBanned ->
+                                            if (isBanned) {
+                                                Text(
+                                                    text = "Выбрать все".uppercase(),
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "Исключить все".uppercase(),
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                )
                                             }
                                         }
                                     }
-                                )
-                            }
+                                }
+                            )
+                        }
 
-                            if (isExpand) {
-                                measurements.forEach { measurement ->
-                                    with(measurement) {
-                                        item(key = id) {
-                                            val isMeasurementBanned =
-                                                bannedMeasurements.contains(id)
-                                            MeasurementCard(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .animateItem(),
-                                                enabled = !isMeasurementBanned,
-                                                type = type.text.asText(),
-                                                unit = unit.asText(),
-                                                time = time.toLocalDateTime(timeZone)
-                                                    .format(timeFormatter),
-                                                value = value,
-                                                sourceIcon = resource.icon,
-                                                sourceName = resource.text.asText(),
-                                                measurementIcon = type.icon,
-                                                note = note?.asText(),
-                                                estimation = estimation,
-                                                swipeWidth = 84.dp,
-                                                onEditClick = {
-                                                    viewModel.editMeasurement(
-                                                        uiMeasurement = measurement,
-                                                        onEdit = onEditClick,
-                                                    )
-                                                },
-                                                onDeleteClick = null,
-                                                onCardClick = {
-                                                    if (isMeasurementBanned) {
-                                                        viewModel.unbanMeasurement(id)
-                                                    } else {
-                                                        viewModel.banMeasurement(id)
-                                                    }
-                                                },
-                                                actionIcon = {
-                                                    Checkbox(
-                                                        modifier = Modifier.fillMaxHeight(),
-                                                        checked = !isMeasurementBanned,
-                                                        onCheckedChange = null
-                                                    )
-                                                },
-                                            )
-                                        }
+                        if (isExpand) {
+                            measurements.forEach { measurement ->
+                                with(measurement) {
+                                    item(key = id) {
+                                        val isMeasurementBanned =
+                                            bannedMeasurements.contains(id)
+                                        MeasurementCard(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .animateItem(),
+                                            enabled = !isMeasurementBanned,
+                                            type = type.text.asText(),
+                                            unit = unit.asText(),
+                                            time = time.toLocalDateTime(timeZone)
+                                                .format(timeFormatter),
+                                            value = value,
+                                            sourceIcon = resource.icon,
+                                            sourceName = resource.text.asText(),
+                                            measurementIcon = type.icon,
+                                            note = note?.asText(),
+                                            estimation = estimation,
+                                            swipeWidth = 84.dp,
+                                            onEditClick = {
+                                                viewModel.editMeasurement(
+                                                    uiMeasurement = measurement,
+                                                    onEdit = onEditClick,
+                                                )
+                                            },
+                                            onDeleteClick = null,
+                                            onCardClick = {
+                                                if (isMeasurementBanned) {
+                                                    viewModel.unbanMeasurement(id)
+                                                } else {
+                                                    viewModel.banMeasurement(id)
+                                                }
+                                            },
+                                            actionIcon = {
+                                                Checkbox(
+                                                    modifier = Modifier.fillMaxHeight(),
+                                                    checked = !isMeasurementBanned,
+                                                    onCheckedChange = null
+                                                )
+                                            },
+                                        )
                                     }
                                 }
                             }
