@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.chart.core.drawable.CubicLine
 import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.ui.component.AddMeasurementFab
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
 import ru.health.stream.core.ui.component.SectionHeader
@@ -58,8 +61,8 @@ import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
-import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.ArrowBack
+import ru.health.stream.core.ui.icon.default.Bluetooth
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.asUi
@@ -71,6 +74,7 @@ import ru.health.stream.feature.measurement.impl.presentation.model.UiPeriod
 import ru.health.stream.feature.measurement.impl.presentation.model.asPeriod
 import ru.health.stream.feature.measurement.impl.presentation.viewmodel.MeasurementViewModel
 import ru.health.stream.feature.measurement.impl.presentation.viewmodel.MeasurementsState
+import ru.health.stream.source.remote.ble.BluetoothStatus
 import kotlin.reflect.KClass
 
 @Composable
@@ -83,9 +87,11 @@ internal fun MeasurementScreen(
     modifier: Modifier = Modifier,
     startPeriod: UiPeriod = UiPeriod.Week,
 ) {
+    val context = LocalContext.current
     val timeZone = LocalTimeZone.current
     val scaffoldCustomizer = LocalScaffoldCustomizer.current
     val viewModel: MeasurementViewModel = hiltViewModel()
+    val bleManager = remember(viewModel) { viewModel.bleManager }
 
     val measurementState by viewModel.measurementStateFlow.collectAsStateWithLifecycle()
     val expandedMeasurements by viewModel.expandedMeasurementsFlow.collectAsStateWithLifecycle()
@@ -108,15 +114,30 @@ internal fun MeasurementScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = { addMeasurementClick(measurementType) }
+                    val checked by bleManager.isScanning.collectAsStateWithLifecycle(BluetoothStatus.Idle)
+
+                    FilledIconToggleButton(
+                        checked = checked == BluetoothStatus.Scanning,
+                        onCheckedChange = {
+                            when (checked) {
+                                BluetoothStatus.Idle -> bleManager.startScan()
+                                BluetoothStatus.Scanning -> bleManager.stopScan()
+                                BluetoothStatus.Disabled -> bleManager.enableBluetooth(context)
+                            }
+                        }
                     ) {
-                        Icon(
-                            contentDescription = null,
-                            imageVector = Icons.Default.Add,
-                        )
+                        Icon(Icons.Default.Bluetooth, null)
                     }
                 }
+            )
+        }
+
+        scaffoldCustomizer.setFab {
+            AddMeasurementFab(
+                onMeasurementTypeClick = {},
+                isExpanded = false,
+                onExpandedChange = { addMeasurementClick(measurementType) },
+                measurementTypes = emptyList(),
             )
         }
 

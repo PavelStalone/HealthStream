@@ -1,6 +1,8 @@
 package ru.health.stream.source.remote.ble.di
 
+import android.app.Activity
 import android.content.Context
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import dagger.Binds
@@ -16,12 +18,8 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat
 import no.nordicsemi.android.support.v18.scanner.ScanFilter
 import no.nordicsemi.android.support.v18.scanner.ScanSettings
-import no.nordicsemi.ui.scanner.scanner.repository.DevicesDataStore
 import ru.health.stream.core.common.di.ApplicationCoroutineScope
 import ru.health.stream.core.common.di.Dispatcher
-import ru.health.stream.core.common.permission.Permission
-import ru.health.stream.core.common.permission.PermissionManager
-import ru.health.stream.core.common.permission.PermissionStatus
 import ru.health.stream.core.monitor.logE
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.starter.ActivityStarter
@@ -30,8 +28,9 @@ import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.copy
 import ru.health.stream.data.vitals.usecase.CreateMeasurementUseCase
 import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
+import ru.health.stream.source.remote.ble.AndroidBleSystemManager
 import ru.health.stream.source.remote.ble.BleSystemManager
-import ru.health.stream.source.remote.ble.BleSystemManagerImpl
+import ru.health.stream.source.remote.ble.domain.BluetoothStateReceiver
 import ru.health.stream.source.remote.ble.lib.device.BleDevice
 import ru.health.stream.source.remote.ble.lib.scan.ScanService
 import ru.health.stream.source.remote.ble.lib.scan.ScannerRepository
@@ -62,12 +61,10 @@ internal object BleModule {
         scanSettings: ScanSettings,
         scanFilters: List<ScanFilter>,
         scanner: BluetoothLeScannerCompat,
-        devicesDataStore: DevicesDataStore,
     ) = ScannerRepository(
         scanner = scanner,
         scanFilters = scanFilters,
         scanSettings = scanSettings,
-        devicesDataStore = devicesDataStore,
     )
 
     @Provides
@@ -87,26 +84,21 @@ internal object BleModule {
     @IntoSet
     @Provides
     fun provideBleScanStarter(
-        bleSystemManager: BleSystemManager,
-        permissionManager: PermissionManager,
-        @ApplicationCoroutineScope coroutineScope: CoroutineScope,
-        @ApplicationContext context: Context,
+        bluetoothStateReceiver: BluetoothStateReceiver
     ) = object : ActivityStarter {
 
         override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> {
-                    coroutineScope.launch {
-                        val result = permissionManager.requestGroup(
-                            Permission.BluetoothConnect,
-                            Permission.BluetoothScan
-                        )
+            val activity = source as? Activity ?: return
 
-                        if (result.all { (_, status) -> status == PermissionStatus.Granted }) {
-                            bleSystemManager.launchBroadcastReceiver(context)
-                        }
-                    }
-                }
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> ContextCompat.registerReceiver(
+                    activity,
+                    bluetoothStateReceiver,
+                    BluetoothStateReceiver.IntentFilter,
+                    ContextCompat.RECEIVER_NOT_EXPORTED
+                )
+
+                Lifecycle.Event.ON_DESTROY -> activity.unregisterReceiver(bluetoothStateReceiver)
 
                 else -> {}
             }
@@ -153,6 +145,6 @@ internal object BleModule {
     interface BindsModule {
 
         @Binds
-        fun bindBleSystemManager(impl: BleSystemManagerImpl): BleSystemManager
+        fun bindBleSystemManager(impl: AndroidBleSystemManager): BleSystemManager
     }
 }

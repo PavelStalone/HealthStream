@@ -1,61 +1,45 @@
 package ru.health.stream.feature.home.impl.presentation.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.health.stream.core.chart.core.drawable.CubicLine
 import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.ui.component.AddMeasurementFab
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
-import ru.health.stream.core.ui.icon.default.Add
+import ru.health.stream.core.ui.icon.default.Bluetooth
 import ru.health.stream.core.ui.icon.default.Report
-import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asDomain
 import ru.health.stream.core.ui.model.asText
-import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.home.impl.presentation.component.MeasurementCard
 import ru.health.stream.feature.home.impl.presentation.viewmodel.HomeViewModel
 import ru.health.stream.feature.home.impl.presentation.viewmodel.WeekCardState
+import ru.health.stream.source.remote.ble.BluetoothStatus
 import kotlin.reflect.KClass
 
 @Composable
@@ -65,8 +49,10 @@ internal fun HomeScreen(
     onMeasurementCardClick: (measurementType: KClass<out Measurement>) -> Unit,
 ) {
     val scaffoldCustomizer = LocalScaffoldCustomizer.current
-
+    val context = LocalContext.current
     val vitalsViewModel: HomeViewModel = hiltViewModel()
+    val bleManager = remember(vitalsViewModel) { vitalsViewModel.bleManager }
+
     val weekCards by vitalsViewModel.weekCardStates.collectAsStateWithLifecycle(initialValue = emptyList())
 
     LaunchedEffect(Unit) {
@@ -83,68 +69,31 @@ internal fun HomeScreen(
                         )
                     }
                 },
+                actions = {
+                    val checked by bleManager.isScanning.collectAsStateWithLifecycle(BluetoothStatus.Idle)
+
+                    FilledIconToggleButton(
+                        checked = checked == BluetoothStatus.Scanning,
+                        onCheckedChange = {
+                            when (checked) {
+                                BluetoothStatus.Idle -> bleManager.startScan()
+                                BluetoothStatus.Scanning -> bleManager.stopScan()
+                                BluetoothStatus.Disabled -> bleManager.enableBluetooth(context)
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Bluetooth, null)
+                    }
+                }
             )
         }
 
         scaffoldCustomizer.setFab {
-            var isOpenSection by remember { mutableStateOf(false) }
-
-            val rotation by animateFloatAsState(
-                targetValue = if (isOpenSection) 45f else 0f,
-                label = "fab_rotation",
+            AddMeasurementFab(
+                onMeasurementTypeClick = { type ->
+                    onAddMeasurementIconClick(type.asDomain())
+                },
             )
-
-            val measurementTypes = UiMeasurement.Type.entries
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                measurementTypes.forEach { type ->
-                    AnimatedVisibility(
-                        visible = isOpenSection,
-                        enter = fadeIn(tween(AnimateDuration))
-                            .plus(slideInVertically(tween(AnimateDuration), { it }))
-                            .plus(
-                                scaleIn(
-                                    tween(AnimateDuration),
-                                    transformOrigin = TransformOrigin(0.5f, 0f)
-                                )
-                            ),
-                        exit = fadeOut(tween(AnimateDuration))
-                            .plus(slideOutVertically(tween(AnimateDuration), { it }))
-                            .plus(
-                                scaleOut(
-                                    tween(AnimateDuration),
-                                    transformOrigin = TransformOrigin(0.5f, 0f)
-                                )
-                            ),
-                    ) {
-                        SmallFloatingActionButton(
-                            onClick = {
-                                isOpenSection = false
-                                onAddMeasurementIconClick(type.asDomain())
-                            },
-                            shape = CircleShape,
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        ) {
-                            type.icon.drawIcon()
-                        }
-                    }
-                }
-
-                FloatingActionButton(
-                    onClick = { isOpenSection = !isOpenSection },
-                    shape = CircleShape,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Large floating action button",
-                        modifier = Modifier.rotate(rotation),
-                    )
-                }
-            }
         }
     }
 
@@ -207,5 +156,3 @@ internal fun HomeScreen(
         }
     }
 }
-
-private const val AnimateDuration = 200

@@ -115,8 +115,8 @@ class MainActivity : StarterActivity() {
                                 AnimatedContent(
                                     targetState = customizer.fabContent,
                                     transitionSpec = {
-                                        fadeIn(animationSpec = tween(300)).togetherWith(
-                                            fadeOut(animationSpec = tween(200))
+                                        fadeIn(animationSpec = tween(100)).togetherWith(
+                                            fadeOut(animationSpec = tween(90))
                                         )
                                     }
                                 ) { it() }
