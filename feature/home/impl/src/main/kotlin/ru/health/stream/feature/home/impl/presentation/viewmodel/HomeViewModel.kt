@@ -32,12 +32,14 @@ import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
 import ru.health.stream.core.chart.model.DrawableData
+import ru.health.stream.source.remote.ble.BleSystemManager
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    bleSystemManager: BleSystemManager,
     measurementRepository: MeasurementRepository,
     groupMeasurementByPeriodUseCase: GroupMeasurementByPeriodUseCase,
 ) : ViewModel() {
@@ -47,6 +49,8 @@ class HomeViewModel @Inject constructor(
     private val period = Period.Week(firstDayOfWeek = DayOfWeek.MONDAY)
     private val range =
         period.calculateRange(date = Clock.System.now(), timeZone = timeZone)
+
+    val bleManager = bleSystemManager
 
     val heartRateFlow = measurementRepository.getMeasurementsFlowByRange(
         from = range.start,

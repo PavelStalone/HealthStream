@@ -1,15 +1,6 @@
 package ru.health.stream.feature.onboarding.impl.presentation.screen
 
 import androidx.collection.FloatFloatPair
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,17 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,23 +25,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.health.stream.core.chart.core.drawable.CubicLine
 import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.core.chart.model.ChartPosition
+import ru.health.stream.core.ui.component.AddMeasurementFab
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
-import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.model.UiIcon
@@ -61,7 +46,6 @@ import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
-import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementSwipeableCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.MeasurementTrendCard
 import ru.health.stream.feature.onboarding.impl.presentation.component.onboardingTarget
@@ -111,60 +95,14 @@ internal fun OnboardingMeasurementScreen(
                 derivedStateOf { currentStep.targetKey == "measurement_add_button" }
             }
 
-            val rotation by animateFloatAsState(
-                targetValue = if (isOpenSection) 45f else 0f,
-                label = "fab_rotation",
+            AddMeasurementFab(
+                isExpanded = isOpenSection,
+                onMeasurementTypeClick = {},
+                mainFabModifier = Modifier.onboardingTarget(
+                    "measurement_add_button",
+                    onboardingScope
+                ),
             )
-
-            val measurementTypes = UiMeasurement.Type.entries
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                measurementTypes.forEach { type ->
-                    AnimatedVisibility(
-                        visible = isOpenSection,
-                        enter = fadeIn(tween(AnimateDuration))
-                            .plus(slideInVertically(tween(AnimateDuration), { it }))
-                            .plus(
-                                scaleIn(
-                                    tween(AnimateDuration),
-                                    transformOrigin = TransformOrigin(0.5f, 0f)
-                                )
-                            ),
-                        exit = fadeOut(tween(AnimateDuration))
-                            .plus(slideOutVertically(tween(AnimateDuration), { it }))
-                            .plus(
-                                scaleOut(
-                                    tween(AnimateDuration),
-                                    transformOrigin = TransformOrigin(0.5f, 0f)
-                                )
-                            ),
-                    ) {
-                        SmallFloatingActionButton(
-                            onClick = {},
-                            shape = CircleShape,
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        ) {
-                            type.icon.drawIcon()
-                        }
-                    }
-                }
-
-                FloatingActionButton(
-                    modifier = Modifier.onboardingTarget("measurement_add_button", onboardingScope),
-                    onClick = {},
-                    shape = CircleShape,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Large floating action button",
-                        modifier = Modifier.rotate(rotation),
-                    )
-                }
-            }
         }
     }
 
@@ -354,5 +292,3 @@ private val ranges = listOf(
     ChartPosition.Range.Vertical(x = 0.56f, y = FloatFloatPair(60f, 85f)),
     ChartPosition.Range.Vertical(x = 0.60f, y = FloatFloatPair(64f, 97f)),
 )
-
-private const val AnimateDuration = 200
