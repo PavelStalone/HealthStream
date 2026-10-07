@@ -96,12 +96,13 @@ internal fun OnboardingMeasurementScreen(
             }
 
             AddMeasurementFab(
-                isExpanded = isOpenSection,
-                onMeasurementTypeClick = {},
                 mainFabModifier = Modifier.onboardingTarget(
                     "measurement_add_button",
                     onboardingScope
                 ),
+                isExpanded = isOpenSection,
+                onExpandedChange = {},
+                onMeasurementTypeClick = {},
             )
         }
     }

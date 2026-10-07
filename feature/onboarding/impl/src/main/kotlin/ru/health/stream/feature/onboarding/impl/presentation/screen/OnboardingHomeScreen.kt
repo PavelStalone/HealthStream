@@ -68,6 +68,9 @@ internal fun OnboardingHomeScreen(
 
         scaffoldCustomizer.setFab {
             AddMeasurementFab(
+                isExpanded = false,
+                measurementTypes = emptyList(),
+                onExpandedChange = {},
                 onMeasurementTypeClick = {},
             )
         }

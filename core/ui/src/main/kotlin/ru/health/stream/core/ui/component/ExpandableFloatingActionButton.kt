@@ -133,10 +133,10 @@ fun AddMeasurementFab(
     measurementTypes: List<UiMeasurement.Type> = UiMeasurement.Type.entries,
 ) {
     ExpandableFloatingActionButton(
-        items = measurementTypes,
-        onItemClick = onMeasurementTypeClick,
         modifier = modifier,
         mainFabModifier = mainFabModifier,
+        items = measurementTypes,
+        onItemClick = onMeasurementTypeClick,
         isExpanded = isExpanded,
         onExpandedChange = onExpandedChange,
         itemIcon = { type ->
