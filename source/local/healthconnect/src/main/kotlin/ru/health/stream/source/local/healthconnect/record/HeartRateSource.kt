@@ -19,6 +19,7 @@ import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.healthconnect.HealthConnectManager
+import ru.health.stream.source.local.healthconnect.HealthConnectProvider
 import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -28,7 +29,7 @@ import androidx.health.connect.client.records.metadata.Device as DeviceData
 internal class HeartRateSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val localDeviceSource: LocalDeviceSource,
-    private val healthConnectManager: HealthConnectManager,
+    private val healthConnectProvider: HealthConnectProvider,
 ) : MeasurementSource<HeartRate>() {
 
     override val type: KClass<HeartRate> = HeartRate::class
@@ -41,7 +42,7 @@ internal class HeartRateSource @Inject constructor(
     ): List<HeartRate> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end")
 
-        val response = healthConnectManager.healthConnectClient.readRecords(
+        val response = healthConnectProvider.value.readRecords(
             ReadRecordsRequest(
                 HeartRateRecord::class,
                 timeRangeFilter = TimeRangeFilter.between(
@@ -90,7 +91,7 @@ internal class HeartRateSource @Inject constructor(
         runCatching {
             logV("deleteMeasurement called: measurement=$measurement")
 
-            healthConnectManager.healthConnectClient.deleteRecords(
+            healthConnectProvider.value.deleteRecords(
                 recordType = HeartRateRecord::class,
                 recordIdsList = emptyList(),
                 clientRecordIdsList = listOf(measurement.id)
@@ -150,7 +151,7 @@ internal class HeartRateSource @Inject constructor(
                 )
             }
 
-            healthConnectManager.healthConnectClient.insertRecords(records = heartRateRecords)
+            healthConnectProvider.value.insertRecords(records = heartRateRecords)
             measurements
         }.onFailure { exception ->
             logW("Error while writeHeartRate running", exception)

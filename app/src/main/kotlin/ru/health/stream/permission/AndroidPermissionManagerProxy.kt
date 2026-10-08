@@ -16,6 +16,8 @@ import kotlinx.coroutines.sync.withLock
 import ru.health.stream.core.common.permission.Permission
 import ru.health.stream.core.common.permission.PermissionManager
 import ru.health.stream.core.common.permission.PermissionStatus
+import ru.health.stream.core.common.permission.PermissionStatus.Denied
+import ru.health.stream.core.common.permission.PermissionStatus.Granted
 import ru.health.stream.core.monitor.logD
 import ru.health.stream.core.monitor.logI
 import javax.inject.Inject
@@ -32,29 +34,26 @@ class AndroidPermissionManagerProxy @Inject constructor() : PermissionManager {
 
     override suspend fun request(permission: Permission): PermissionStatus {
         logD("Try request permission: $permission")
-
-        return mutex.withLock {
-            val manager = permissionManager
-
-            checkNotNull(manager) { "Android permission manager not initialized" }
-            manager.request(permission)
-        }
+        return withLock { request(permission) }
     }
 
     override suspend fun requestGroup(vararg permissions: Permission): Map<Permission, PermissionStatus> {
         logD("Try request permissions: ${permissions.toList()}")
+        return withLock { requestGroup(*permissions) }
+    }
 
-        return mutex.withLock {
-            val manager = permissionManager
+    override suspend fun check(permission: Permission): PermissionStatus {
+        logD("Try check permission: $permission")
+        return withLock { check(permission) }
+    }
 
-            checkNotNull(manager) { "Android permission manager not initialized" }
-            manager.requestGroup(*permissions)
-        }
+    override suspend fun checkGroup(vararg permissions: Permission): Map<Permission, PermissionStatus> {
+        logD("Try check permissions: ${permissions.toList()}")
+        return withLock { checkGroup(*permissions) }
     }
 
     fun setManager(permissionManager: PermissionManager) {
         this.permissionManager = permissionManager
-
         if (mutex.isLocked) mutex.unlock()
     }
 
@@ -63,6 +62,13 @@ class AndroidPermissionManagerProxy @Inject constructor() : PermissionManager {
             if (!mutex.isLocked) mutex.tryLock()
             this.permissionManager = null
         }
+    }
+
+    private suspend fun <T> withLock(block: suspend PermissionManager.() -> T) = mutex.withLock {
+        val manager = permissionManager
+
+        checkNotNull(manager) { "Android permission manager not initialized" }
+        manager.block()
     }
 }
 
@@ -76,9 +82,9 @@ internal class AndroidPermissionManager(
         val c = continuation ?: return@registerForActivityResult
 
         if (isGranted) {
-            c.resume(PermissionStatus.Granted)
+            c.resume(Granted)
         } else {
-            c.resume(PermissionStatus.Denied)
+            c.resume(Denied)
         }
     }
 
@@ -88,7 +94,7 @@ internal class AndroidPermissionManager(
         val c = multipleContinuation ?: return@registerForActivityResult
         val result = grantedMap.filterKeys { permission -> permission.asCommon() != null }
             .mapKeys { (permission, _) -> permission.asCommon()!! }
-            .mapValues { (_, isGranted) -> if (isGranted) PermissionStatus.Granted else PermissionStatus.Denied }
+            .mapValues { (_, isGranted) -> if (isGranted) Granted else Denied }
 
         c.resume(result)
     }
@@ -97,10 +103,10 @@ internal class AndroidPermissionManager(
     private var multipleContinuation: Continuation<Map<Permission, PermissionStatus>>? = null
 
     override suspend fun request(permission: Permission): PermissionStatus {
-        val androidPermission = permission.asAndroid() ?: return PermissionStatus.Granted
+        val androidPermission = permission.asAndroid() ?: return Granted
 
         val result = when {
-            checkAlreadyGranted(androidPermission) -> PermissionStatus.Granted
+            checkAlreadyGranted(androidPermission) -> Granted
 
             else -> {
                 suspendCancellableCoroutine { continuation ->
@@ -127,7 +133,7 @@ internal class AndroidPermissionManager(
         val needRequestPermissions = androidPermissions.minus(alreadyGranted)
         val notNeedRequestPermissions = alreadyGranted.mapNotNull { it.asCommon() }
             .plus(unknownPermission)
-            .associateWith { PermissionStatus.Granted }
+            .associateWith { Granted }
 
         val result = if (needRequestPermissions.isNotEmpty()) {
             val requestedResult = suspendCancellableCoroutine { continuation ->
@@ -147,6 +153,16 @@ internal class AndroidPermissionManager(
 
         result.forEach { (permission, status) -> logI("Permission status for $permission: $status") }
         return result
+    }
+
+    override suspend fun check(permission: Permission): PermissionStatus {
+        val androidPermission = permission.asAndroid() ?: return Granted
+        if (checkAlreadyGranted(androidPermission)) return Granted
+        return Denied
+    }
+
+    override suspend fun checkGroup(vararg permissions: Permission): Map<Permission, PermissionStatus> {
+        return permissions.associateWith { permission -> check(permission) }
     }
 
     private fun checkAlreadyGranted(androidPermission: String): Boolean {

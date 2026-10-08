@@ -1,6 +1,7 @@
 package ru.health.stream.source.local.healthconnect.source
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Instant
 import ru.health.stream.core.common.permission.PermissionManager
@@ -9,6 +10,7 @@ import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.monitor.logW
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.source.local.ExternalMeasurementSource
+import ru.health.stream.source.local.healthconnect.HealthConnectManager
 import ru.health.stream.source.local.healthconnect.record.MeasurementSource
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -16,6 +18,7 @@ import kotlin.reflect.KClass
 @Suppress("UNCHECKED_CAST")
 internal class HealthConnectMeasurementSource @Inject constructor(
     private val permissionManager: PermissionManager,
+    private val healthConnectManager: HealthConnectManager,
     private val measurementsSources: List<@JvmSuppressWildcards MeasurementSource<Measurement>>
 ) : ExternalMeasurementSource {
 
@@ -26,10 +29,12 @@ internal class HealthConnectMeasurementSource @Inject constructor(
     ): List<T> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end, kClass=$type")
 
+        require(healthConnectManager.isActiveHealthConnect.first()) { "HealthConnect disabled" }
+
         val sources =
             measurementsSources.filter { source -> type.java.isAssignableFrom(source.type.java) }
         val permissions =
-            permissionManager.requestGroup(*sources.map { it.readPermission }.toTypedArray())
+            permissionManager.checkGroup(*sources.map { it.readPermission }.toTypedArray())
 
         val response = sources
             .filter { source -> permissions[source.readPermission] == PermissionStatus.Granted }
@@ -57,9 +62,11 @@ internal class HealthConnectMeasurementSource @Inject constructor(
     ): Result<T> = runCatching {
         logV("deleteMeasurement called: measurement=$measurement")
 
+        require(healthConnectManager.isActiveHealthConnect.first()) { "HealthConnect disabled" }
+
         val measurementClass = measurement::class
         val source = measurementsSources.first { source -> measurementClass == source.type }
-        check(permissionManager.request(source.writePermission) == PermissionStatus.Granted)
+        check(permissionManager.check(source.writePermission) == PermissionStatus.Granted)
 
         source.deleteMeasurement(measurement).getOrThrow()
         measurement
@@ -71,6 +78,8 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         measurement: T
     ): Result<T> = runCatching {
         logV("writeMeasurement called: measurement=$measurement")
+
+        require(healthConnectManager.isActiveHealthConnect.first()) { "HealthConnect disabled" }
 
         val measurementClass = measurement::class
         val source = measurementsSources.first { source -> measurementClass == source.type }
@@ -86,6 +95,8 @@ internal class HealthConnectMeasurementSource @Inject constructor(
         measurements: List<T>
     ): Result<List<T>> = runCatching {
         logV("writeMeasurements called: measurements=$measurements")
+
+        require(healthConnectManager.isActiveHealthConnect.first()) { "HealthConnect disabled" }
 
         val measurementsWithType = measurements.groupBy { measurement -> measurement::class }
 

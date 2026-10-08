@@ -61,6 +61,7 @@ include(":feature:onboarding:api")
 include(":feature:onboarding:impl")
 include(":feature:measurement:api")
 include(":feature:measurement:impl")
+include(":feature:healthconnect:impl")
 //endregion
 
 //region Source module
