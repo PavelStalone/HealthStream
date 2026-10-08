@@ -1,7 +1,7 @@
 plugins {
     id("android.library")
-    id("kotlin.navigation")
     id("android.compose")
+    id("kotlin.navigation")
 }
 
 android {

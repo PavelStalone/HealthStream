@@ -18,6 +18,4 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.common)
     implementation(projects.core.monitor)
-    implementation(projects.core.starter)
-    implementation(projects.core.navigation)
 }
