@@ -79,9 +79,7 @@ class MainActivity : StarterActivity() {
 
         enableEdgeToEdge()
         setContent {
-            HealthStreamTheme(
-                dynamicColor = false,
-            ) {
+            HealthStreamTheme {
                 val appParam by appParamRepository.appParamFlow.collectAsStateWithLifecycle(
                     initialValue = null
                 )

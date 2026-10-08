@@ -20,6 +20,4 @@ dependencies {
     implementation(projects.core.monitor)
     implementation(projects.core.starter)
     implementation(projects.core.navigation)
-
-    implementation(projects.feature.settings)
 }
