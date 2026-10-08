@@ -32,6 +32,7 @@ import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Bluetooth
 import ru.health.stream.core.ui.icon.default.Report
+import ru.health.stream.core.ui.icon.default.Settings
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asDomain
 import ru.health.stream.core.ui.model.asText
@@ -44,7 +45,7 @@ import kotlin.reflect.KClass
 
 @Composable
 internal fun HomeScreen(
-    onReportIconClick: () -> Unit,
+    onSettingsIconClick: () -> Unit,
     onAddMeasurementIconClick: (measurementType: KClass<out Measurement>) -> Unit,
     onMeasurementCardClick: (measurementType: KClass<out Measurement>) -> Unit,
 ) {
@@ -61,11 +62,11 @@ internal fun HomeScreen(
                 title = UiText.NonTranslatable(value = "Измерения"),
                 navigationIcon = {
                     IconButton(
-                        onClick = onReportIconClick
+                        onClick = onSettingsIconClick
                     ) {
                         Icon(
                             contentDescription = null,
-                            imageVector = Icons.Default.Report,
+                            imageVector = Icons.Default.Settings,
                         )
                     }
                 },

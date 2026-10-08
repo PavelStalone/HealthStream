@@ -18,5 +18,6 @@ dependencies {
     implementation(projects.core.chart)
 
     implementation(projects.feature.report.api)
+    implementation(projects.feature.settings.api)
     implementation(projects.feature.measurement.api)
 }

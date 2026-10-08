@@ -49,13 +49,14 @@ include(":data:personal")
 //endregion
 
 //region Feature module
-include(":feature:settings")
 include(":feature:user:api")
 include(":feature:user:impl")
 include(":feature:home:api")
 include(":feature:home:impl")
 include(":feature:report:api")
 include(":feature:report:impl")
+include(":feature:settings:api")
+include(":feature:settings:impl")
 include(":feature:onboarding:api")
 include(":feature:onboarding:impl")
 include(":feature:measurement:api")

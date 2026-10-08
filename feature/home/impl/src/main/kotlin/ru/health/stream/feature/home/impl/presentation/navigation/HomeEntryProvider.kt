@@ -7,12 +7,12 @@ import ru.health.stream.feature.home.api.navigation.HomeNavKey
 import ru.health.stream.feature.home.impl.presentation.screen.HomeScreen
 import ru.health.stream.feature.measurement.api.navigation.AddMeasurementNavKey
 import ru.health.stream.feature.measurement.api.navigation.MeasurementNavKey
-import ru.health.stream.feature.report.api.navigation.ReportNavKey
+import ru.health.stream.feature.settings.api.navigation.SettingsNavKey
 
 internal fun EntryProviderScope<NavKey>.homeEntry(router: Router<NavKey>) {
     entry<HomeNavKey> {
         HomeScreen(
-            onReportIconClick = { router.push(ReportNavKey) },
+            onSettingsIconClick = { router.push(SettingsNavKey) },
             onAddMeasurementIconClick = { router.push(AddMeasurementNavKey(measurementType = it)) },
             onMeasurementCardClick = { measurementType ->
                 router.push(MeasurementNavKey(measurementType))

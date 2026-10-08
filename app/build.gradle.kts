@@ -46,10 +46,10 @@ dependencies {
     implementation(projects.source.local.datastore)
     implementation(projects.source.local.healthconnect)
 
-    implementation(projects.feature.settings)
     implementation(projects.feature.home.impl)
     implementation(projects.feature.user.impl)
     implementation(projects.feature.report.impl)
+    implementation(projects.feature.settings.impl)
     implementation(projects.feature.onboarding.impl)
     implementation(projects.feature.measurement.impl)
 }
