@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.health.stream.core.ui.shape.multiShape
@@ -28,12 +30,14 @@ internal fun SettingsContent(
     LazyColumn(modifier = modifier) {
         categories.forEach { category ->
             item(key = category.key) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    category.header(this)
+                CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleMedium) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        category.header(this)
+                    }
                 }
             }
 
@@ -48,12 +52,14 @@ internal fun SettingsContent(
                         count = category.items.size,
                     ),
                     content = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            field.content(this)
+                        CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyMedium) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                field.content(this)
+                            }
                         }
                     },
                 )

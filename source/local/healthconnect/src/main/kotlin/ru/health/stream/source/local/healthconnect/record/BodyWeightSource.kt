@@ -21,6 +21,7 @@ import ru.health.stream.data.vitals.model.kg
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.healthconnect.HealthConnectManager
+import ru.health.stream.source.local.healthconnect.HealthConnectProvider
 import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
 import androidx.health.connect.client.records.metadata.Device as DeviceData
@@ -29,7 +30,7 @@ import androidx.health.connect.client.records.metadata.Device as DeviceData
 internal class BodyWeightSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val localDeviceSource: LocalDeviceSource,
-    private val healthConnectManager: HealthConnectManager,
+    private val healthConnectProvider: HealthConnectProvider,
 ) : MeasurementSource<BodyWeight>() {
 
     override val type: KClass<BodyWeight> = BodyWeight::class
@@ -42,7 +43,7 @@ internal class BodyWeightSource @Inject constructor(
     ): List<BodyWeight> = runCatching {
         logV("getMeasurementByRange called: start=$start, end=$end")
 
-        val response = healthConnectManager.healthConnectClient.readRecords(
+        val response = healthConnectProvider.value.readRecords(
             ReadRecordsRequest(
                 WeightRecord::class,
                 timeRangeFilter = TimeRangeFilter.between(
@@ -85,7 +86,7 @@ internal class BodyWeightSource @Inject constructor(
         runCatching {
             logV("deleteMeasurement called: measurement=$measurement")
 
-            healthConnectManager.healthConnectClient.deleteRecords(
+            healthConnectProvider.value.deleteRecords(
                 recordType = WeightRecord::class,
                 recordIdsList = emptyList(),
                 clientRecordIdsList = listOf(measurement.id)
@@ -138,7 +139,7 @@ internal class BodyWeightSource @Inject constructor(
                 )
             }
 
-            healthConnectManager.healthConnectClient.insertRecords(records = records)
+            healthConnectProvider.value.insertRecords(records = records)
             measurements
         }.onFailure { exception ->
             logW("Error while writeMeasurements running", exception)

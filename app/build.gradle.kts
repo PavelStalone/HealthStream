@@ -52,4 +52,5 @@ dependencies {
     implementation(projects.feature.settings.impl)
     implementation(projects.feature.onboarding.impl)
     implementation(projects.feature.measurement.impl)
+    implementation(projects.feature.healthconnect.impl)
 }
