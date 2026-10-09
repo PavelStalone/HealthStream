@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HealthConnectProvider @Inject constructor(
+internal class HealthConnectProvider @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 

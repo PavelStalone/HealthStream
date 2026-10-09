@@ -3,7 +3,6 @@ package ru.health.stream.feature.healthconnect.impl.presentation.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -63,14 +62,14 @@ fun HealthConnectSettingsField(
         Switch(
             checked = checked,
             enabled = isEnabled,
-            onCheckedChange = {
+            onCheckedChange = { newCheckedStatus ->
                 isEnabled = false
 
                 coroutineScope.launch {
-                    if (checked) {
-                        healthConnectManager.disableHealthConnect()
-                    } else {
+                    if (newCheckedStatus) {
                         healthConnectManager.enableHealthConnect()
+                    } else {
+                        healthConnectManager.disableHealthConnect()
                     }
 
                     isEnabled = true
