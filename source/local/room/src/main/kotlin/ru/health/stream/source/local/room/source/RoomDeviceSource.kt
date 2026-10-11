@@ -4,7 +4,7 @@ import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.room.dao.DeviceDao
 import ru.health.stream.source.local.room.entity.resource.DeviceEntity
-import ru.health.stream.source.local.room.mapper.asDeviceEntityStatus
+import ru.health.stream.source.local.room.entity.resource.asDeviceEntity
 import ru.health.stream.source.local.room.mapper.asDeviceStatus
 import javax.inject.Inject
 
@@ -42,15 +42,7 @@ internal class RoomDeviceSource @Inject constructor(
     }
 
     override suspend fun <T : Device> writeDevice(device: T): Result<T> {
-        deviceDao.insert(
-            DeviceEntity(
-                id = device.id,
-                macAddress = device.macAddress,
-                status = device.status.asDeviceEntityStatus(),
-                lastMeasured = device.lastMeasured,
-                type = DeviceEntity.DeviceType.PULSE_OXIMETER, // TODO: Change - shoplikpavel 2026-04-11
-            )
-        )
+        deviceDao.insert(device.asDeviceEntity())
 
         return Result.success(device)
     }

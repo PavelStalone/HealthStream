@@ -63,10 +63,19 @@ internal abstract class VitalDatabase : RoomDatabase() {
 
         private const val DATABASE_NAME = "vital-database"
 
-        fun buildDatabase(context: Context, sqlCipherKeyManager: SqlCipherKeyManager): VitalDatabase = runBlocking {
-            System.loadLibrary("sqlcipher")
+        fun buildDatabase(
+            context: Context,
+            sqlCipherKeyManager: SqlCipherKeyManager,
+            encryptDatabase: Boolean = true,
+        ): VitalDatabase = runBlocking {
             Room.databaseBuilder(context, VitalDatabase::class.java, DATABASE_NAME)
-                .openHelperFactory(sqlCipherKeyManager.getSupportFactory())
+                .apply {
+                    if (encryptDatabase) {
+                        System.loadLibrary("sqlcipher")
+
+                        openHelperFactory(sqlCipherKeyManager.getSupportFactory())
+                    }
+                }
                 .build()
         }
     }
