@@ -11,13 +11,6 @@ import java.nio.ByteOrder
 
 object TimeStampPacket {
 
-    /**
-     * Definition for parsing time information from blood pressure monitor packets
-     *
-     * This definition handles the device's timestamp format which includes
-     * year, month, day, hour, minute, and second values. It converts these
-     * components into Calendar and Instant objects for easier use in the application
-     */
     object Definition : BlePacket.Definition<TimeFilled>() {
 
         override val structure: PacketStructure
@@ -82,9 +75,6 @@ object TimeStampPacket {
         private const val SECOND_VALUE = "second"
     }
 
-    /**
-     * Represents parsed time data from blood pressure monitor
-     */
     sealed interface TimeFilled : BlePacket.Data {
 
         /**

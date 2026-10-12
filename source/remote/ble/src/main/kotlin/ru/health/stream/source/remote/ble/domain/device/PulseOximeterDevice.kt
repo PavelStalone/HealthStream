@@ -15,9 +15,6 @@ import ru.health.stream.source.remote.ble.lib.device.createUUID
 import ru.health.stream.source.remote.ble.source.BleMeasurementSource
 import java.util.UUID
 
-/**
- * BLE implementation for PC-60F pulse oximeter device
- */
 internal class PulseOximeterDevice(
     private val measurementSource: BleMeasurementSource,
 ) : BleDevice() {

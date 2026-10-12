@@ -18,9 +18,6 @@ import ru.health.stream.source.remote.ble.source.BleMeasurementSource
 import java.util.UUID
 import ru.health.stream.source.remote.ble.domain.device.TimeStampPacket.Definition as TimeStampDefinition
 
-/**
- * BLE implementation for TMB2084 blood pressure monitor device
- */
 internal class BloodPressureDevice(
     private val measurementSource: BleMeasurementSource,
 ) : BleDevice() {
@@ -28,7 +25,7 @@ internal class BloodPressureDevice(
     private var measurementBuilder: BloodPressureMeasurementBuilder? = null
 
     override val scanFilters: List<ScanFilter> = listOf(
-        buildScanFilter { setServiceUuid(ParcelUuid(MEASUREMENT_SERVICE_UUID)) }
+        buildScanFilter { setServiceUuid(ParcelUuid(DATA_SERVICE_UUID)) }
     )
 
     override fun ConfigurationScope.init() {
@@ -47,8 +44,8 @@ internal class BloodPressureDevice(
                 }
             }
         }
-        service(uuid = MEASUREMENT_SERVICE_UUID) {
-            characteristic(MEASUREMENT_UUID) {
+        service(uuid = DATA_SERVICE_UUID) {
+            characteristic(DATA_UUID) {
                 indicationCallback(
                     packet = BloodPressurePacket.Definition,
                     callback = { packet ->
@@ -74,7 +71,7 @@ internal class BloodPressureDevice(
         logV("isDeviceSupported called: ${discoveredDevice.device.name}")
 
         val scanRecord = with(discoveredDevice) { (lastScanResult ?: scanResult)?.scanRecord }
-        val hasUUID = scanRecord?.serviceUuids?.contains(ParcelUuid(MEASUREMENT_SERVICE_UUID))
+        val hasUUID = scanRecord?.serviceUuids?.contains(ParcelUuid(DATA_SERVICE_UUID))
         if (hasUUID != true) return false
 
         measurementBuilder = BloodPressureMeasurementBuilder(discoveredDevice.device)
@@ -83,7 +80,7 @@ internal class BloodPressureDevice(
 
     companion object {
 
-        private val MEASUREMENT_UUID = createUUID("2A35")
-        private val MEASUREMENT_SERVICE_UUID: UUID = createUUID("1810")
+        private val DATA_UUID = createUUID("2A35")
+        private val DATA_SERVICE_UUID: UUID = createUUID("1810")
     }
 }

@@ -17,12 +17,6 @@ import ru.health.stream.source.remote.ble.lib.packet.model.convertToPacket
 import java.nio.ByteOrder
 import ru.health.stream.source.remote.ble.domain.device.TimeStampPacket.Definition as TimeStampDefinition
 
-/**
- * BLE packet definitions for TMB2048 blood pressure monitor device
- *
- * This object provides the packet structures and parsing logic for communicating with TMB2048
- * series blood pressure monitors over Bluetooth Low Energy
- */
 internal object BloodPressurePacket {
 
     /**

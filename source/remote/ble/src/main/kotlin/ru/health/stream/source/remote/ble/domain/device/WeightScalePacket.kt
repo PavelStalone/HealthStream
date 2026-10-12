@@ -81,9 +81,6 @@ internal object WeightScalePacket {
         private const val TIMESTAMP_VALUE = "timeStamp"
     }
 
-    /**
-     * Represents parsed blood pressure data from the device
-     */
     sealed interface Filled : BlePacket.Data {
 
         data class WeightScaleData(
