@@ -198,28 +198,6 @@ data class DrawableData(
                             yMin = min(group.range.start, yMin)
                             yMax = max(group.range.endInclusive, yMax)
                         }
-
-                        is MeasurementGroup.RespirationRate -> {
-                            scatterPositions.add(
-                                ChartPosition.Range.Vertical(
-                                    x = x,
-                                    y = FloatFloatPair(
-                                        first = group.range.start.toFloat(),
-                                        second = group.range.endInclusive.toFloat(),
-                                    )
-                                )
-                            )
-
-                            meanPositions.add(
-                                ChartPosition.Point(
-                                    x = x,
-                                    y = group.mean.value.toFloat(),
-                                )
-                            )
-
-                            yMin = min(group.range.start.toFloat(), yMin)
-                            yMax = max(group.range.endInclusive.toFloat(), yMax)
-                        }
                     }
                 }
 

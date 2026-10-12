@@ -5,7 +5,6 @@ import kotlinx.datetime.Instant
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Blood
 import ru.health.stream.core.ui.icon.default.Favorite
-import ru.health.stream.core.ui.icon.default.RespirationRate
 import ru.health.stream.core.ui.icon.default.Spo2
 import ru.health.stream.core.ui.icon.default.Weight
 import ru.health.stream.core.ui.icon.device.BPCuff
@@ -24,7 +23,6 @@ import ru.health.stream.data.vitals.model.measurement.DiastolicPressure
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.SystolicPressure
 import kotlin.reflect.KClass
 
@@ -96,10 +94,6 @@ data class UiMeasurement(
             text = UiText.NonTranslatable("Пульс"),
             icon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
         ),
-        RESPIRATION_RATE(
-            text = UiText.NonTranslatable("Дыхание"),
-            icon = UiIcon.Vector(imageVector = Icons.Default.RespirationRate),
-        ),
         OXYGEN_SATURATION(
             text = UiText.NonTranslatable("Сатурация"),
             icon = UiIcon.Vector(imageVector = Icons.Default.Spo2),
@@ -117,12 +111,10 @@ fun Measurement.asUi(): UiMeasurement {
         is HeartRate -> "$pulse" to UiText.NonTranslatable(value = "уд/мин")
         is BodyWeight -> "${weight.kg}" to UiText.NonTranslatable(value = "кг")
         is OxygenSaturation -> "$saturation" to UiText.NonTranslatable(value = "%")
+        is BloodGlucose -> "${level.toInt()}" to UiText.NonTranslatable(value = "ммоль/л")
         is BloodPressure -> "${systolic.toInt()}/${diastolic.toInt()}" to UiText.NonTranslatable(
             value = "мм рт. ст."
         )
-
-        is RespirationRate -> "$rate" to UiText.NonTranslatable(value = "дых/мин")
-        is BloodGlucose -> "${level.toInt()}" to UiText.NonTranslatable(value = "ммоль/л")
 
         is SystolicPressure -> "$systolic" to UiText.NonTranslatable(value = "мм рт. ст.")
         is DiastolicPressure -> "$diastolic" to UiText.NonTranslatable(value = "мм рт. ст.")
@@ -132,7 +124,6 @@ fun Measurement.asUi(): UiMeasurement {
         is BodyWeight -> UiMeasurement.Type.WEIGHT
         is HeartRate -> UiMeasurement.Type.HEART_RATE
         is BloodGlucose -> UiMeasurement.Type.BLOOD_GLUCOSE
-        is RespirationRate -> UiMeasurement.Type.RESPIRATION_RATE
         is OxygenSaturation -> UiMeasurement.Type.OXYGEN_SATURATION
 
         is BloodPressure,
@@ -169,7 +160,6 @@ fun KClass<out Measurement>.asUi(): UiMeasurement.Type = when (this) {
     HeartRate::class -> UiMeasurement.Type.HEART_RATE
     BloodGlucose::class -> UiMeasurement.Type.BLOOD_GLUCOSE
     BloodPressure::class -> UiMeasurement.Type.BLOOD_PRESSURE
-    RespirationRate::class -> UiMeasurement.Type.RESPIRATION_RATE
     OxygenSaturation::class -> UiMeasurement.Type.OXYGEN_SATURATION
     else -> UiMeasurement.Type.HEART_RATE
 }
@@ -179,6 +169,5 @@ fun UiMeasurement.Type.asDomain(): KClass<out Measurement> = when (this) {
     UiMeasurement.Type.HEART_RATE -> HeartRate::class
     UiMeasurement.Type.BLOOD_GLUCOSE -> BloodGlucose::class
     UiMeasurement.Type.BLOOD_PRESSURE -> BloodPressure::class
-    UiMeasurement.Type.RESPIRATION_RATE -> RespirationRate::class
     UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturation::class
 }

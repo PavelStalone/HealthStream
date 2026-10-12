@@ -20,7 +20,6 @@ import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.copy
 import ru.health.stream.data.vitals.usecase.CreateMeasurementUseCase
 import ru.health.stream.feature.measurement.impl.presentation.component.input.BloodGlucoseComponent
@@ -29,7 +28,6 @@ import ru.health.stream.feature.measurement.impl.presentation.component.input.Bo
 import ru.health.stream.feature.measurement.impl.presentation.component.input.HeartRateComponent
 import ru.health.stream.feature.measurement.impl.presentation.component.input.InputTypeComponent
 import ru.health.stream.feature.measurement.impl.presentation.component.input.OxygenSaturationComponent
-import ru.health.stream.feature.measurement.impl.presentation.component.input.RespirationRateComponent
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 
@@ -102,7 +100,6 @@ internal class AddMeasurementViewModel @Inject constructor(
         UiMeasurement.Type.HEART_RATE -> HeartRateComponent(measurement as? HeartRate)
         UiMeasurement.Type.BLOOD_GLUCOSE -> BloodGlucoseComponent(measurement as? BloodGlucose)
         UiMeasurement.Type.BLOOD_PRESSURE -> BloodPressureComponent(measurement as? BloodPressure)
-        UiMeasurement.Type.RESPIRATION_RATE -> RespirationRateComponent(measurement as? RespirationRate)
         UiMeasurement.Type.OXYGEN_SATURATION -> OxygenSaturationComponent(measurement as? OxygenSaturation)
     }
 
