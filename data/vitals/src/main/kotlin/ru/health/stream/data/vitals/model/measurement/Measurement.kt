@@ -23,7 +23,6 @@ fun Measurement.copy(
     is BodyWeight -> copy(id = id, metadata = metadata)
     is BloodGlucose -> copy(id = id, metadata = metadata)
     is BloodPressure -> copy(id = id, metadata = metadata)
-    is RespirationRate -> copy(id = id, metadata = metadata)
     is OxygenSaturation -> copy(id = id, metadata = metadata)
     else -> this
 }

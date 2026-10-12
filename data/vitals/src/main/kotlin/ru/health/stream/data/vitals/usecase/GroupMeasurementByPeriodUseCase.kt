@@ -16,7 +16,6 @@ import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import kotlin.reflect.KClass
 
 @Singleton
@@ -101,13 +100,6 @@ class GroupMeasurementByPeriodUseCase @Inject constructor() {
                 estimation = newEstimation,
                 mean = mean.add((measurement as OxygenSaturation).saturation.toDouble()),
                 range = range.changeRange(measurement.saturation),
-            )
-
-            is MeasurementGroup.RespirationRate -> copy(
-                note = newNote,
-                estimation = newEstimation,
-                mean = mean.add((measurement as RespirationRate).rate),
-                range = range.changeRange(measurement.rate),
             )
         }
     }

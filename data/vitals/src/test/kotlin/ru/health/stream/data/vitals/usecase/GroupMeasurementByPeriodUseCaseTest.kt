@@ -18,7 +18,6 @@ import ru.health.stream.data.vitals.model.measurement.BloodPressure
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import java.time.DayOfWeek.MONDAY
 
 class GroupMeasurementByPeriodUseCaseTest {
@@ -311,12 +310,6 @@ class GroupMeasurementByPeriodUseCaseTest {
                 createdAt = baseTime,
                 resource = Resource.Manual
             ),
-            RespirationRate(
-                id = "rr1",
-                rate = 16.0,
-                createdAt = baseTime,
-                resource = Resource.Manual
-            )
         )
 
         val result = useCase(
@@ -325,13 +318,12 @@ class GroupMeasurementByPeriodUseCaseTest {
             measurements = measurements
         )
 
-        assertEquals(6, result.size)
+        assertEquals(5, result.size)
         assertTrue(result.containsKey(HeartRate::class))
         assertTrue(result.containsKey(BloodPressure::class))
         assertTrue(result.containsKey(BodyWeight::class))
         assertTrue(result.containsKey(BloodGlucose::class))
         assertTrue(result.containsKey(OxygenSaturation::class))
-        assertTrue(result.containsKey(RespirationRate::class))
 
         println(">>> Grouped 6 different measurement types successfully")
     }

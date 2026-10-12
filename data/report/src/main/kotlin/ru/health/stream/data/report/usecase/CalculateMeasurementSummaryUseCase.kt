@@ -13,7 +13,6 @@ import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import kotlin.reflect.KClass
 
 @Singleton
@@ -85,11 +84,6 @@ class CalculateMeasurementSummaryUseCase @Inject constructor() {
                     is MeasurementGroup.OxygenSaturation -> copy(
                         dateRange = dateRange.changeRange(measurementDateRange),
                         range = range.changeRange((measurement as OxygenSaturation).saturation),
-                    )
-
-                    is MeasurementGroup.RespirationRate -> copy(
-                        dateRange = dateRange.changeRange(measurementDateRange),
-                        range = range.changeRange((measurement as RespirationRate).rate),
                     )
                 }
             },

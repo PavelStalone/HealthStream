@@ -15,7 +15,6 @@ import ru.health.stream.data.vitals.model.measurement.BloodPressure
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import kotlin.time.Duration.Companion.hours
 
 class CalculateMeasurementSummaryUseCaseTest {
@@ -51,9 +50,27 @@ class CalculateMeasurementSummaryUseCaseTest {
     fun `invoke with BloodPressure measurements`() {
         val now = Clock.System.now()
         val measurements = listOf(
-            BloodPressure(id = "1", createdAt = now, resource = Resource.Manual, systolic = 120f, diastolic = 80f),
-            BloodPressure(id = "2", createdAt = now + 1.hours, resource = Resource.Manual, systolic = 140f, diastolic = 90f),
-            BloodPressure(id = "3", createdAt = now + 2.hours, resource = Resource.Manual, systolic = 110f, diastolic = 75f)
+            BloodPressure(
+                id = "1",
+                createdAt = now,
+                resource = Resource.Manual,
+                systolic = 120f,
+                diastolic = 80f
+            ),
+            BloodPressure(
+                id = "2",
+                createdAt = now + 1.hours,
+                resource = Resource.Manual,
+                systolic = 140f,
+                diastolic = 90f
+            ),
+            BloodPressure(
+                id = "3",
+                createdAt = now + 2.hours,
+                resource = Resource.Manual,
+                systolic = 110f,
+                diastolic = 75f
+            )
         )
 
         val result = useCase(measurements)
@@ -72,9 +89,27 @@ class CalculateMeasurementSummaryUseCaseTest {
     fun `BloodPressure min and max BP by difference`() {
         val now = Clock.System.now()
         val measurements = listOf(
-            BloodPressure(id = "1", createdAt = now, resource = Resource.Manual, systolic = 120f, diastolic = 80f), // Diff 40
-            BloodPressure(id = "2", createdAt = now + 1.hours, resource = Resource.Manual, systolic = 150f, diastolic = 80f), // Diff 70
-            BloodPressure(id = "3", createdAt = now + 2.hours, resource = Resource.Manual, systolic = 110f, diastolic = 80f) // Diff 30
+            BloodPressure(
+                id = "1",
+                createdAt = now,
+                resource = Resource.Manual,
+                systolic = 120f,
+                diastolic = 80f
+            ), // Diff 40
+            BloodPressure(
+                id = "2",
+                createdAt = now + 1.hours,
+                resource = Resource.Manual,
+                systolic = 150f,
+                diastolic = 80f
+            ), // Diff 70
+            BloodPressure(
+                id = "3",
+                createdAt = now + 2.hours,
+                resource = Resource.Manual,
+                systolic = 110f,
+                diastolic = 80f
+            ) // Diff 30
         )
 
         val result = useCase(measurements)
@@ -89,7 +124,12 @@ class CalculateMeasurementSummaryUseCaseTest {
         val now = Clock.System.now()
         val measurements = listOf(
             BodyWeight(id = "1", createdAt = now, resource = Resource.Manual, weight = Weight(70f)),
-            BodyWeight(id = "2", createdAt = now + 1.hours, resource = Resource.Manual, weight = Weight(75f))
+            BodyWeight(
+                id = "2",
+                createdAt = now + 1.hours,
+                resource = Resource.Manual,
+                weight = Weight(75f)
+            )
         )
 
         val result = useCase(measurements)
@@ -104,7 +144,12 @@ class CalculateMeasurementSummaryUseCaseTest {
         val now = Clock.System.now()
         val measurements = listOf(
             BloodGlucose(id = "1", createdAt = now, resource = Resource.Manual, level = 5.5),
-            BloodGlucose(id = "2", createdAt = now + 1.hours, resource = Resource.Manual, level = 6.5)
+            BloodGlucose(
+                id = "2",
+                createdAt = now + 1.hours,
+                resource = Resource.Manual,
+                level = 6.5
+            )
         )
 
         val result = useCase(measurements)
@@ -118,8 +163,18 @@ class CalculateMeasurementSummaryUseCaseTest {
     fun `invoke with OxygenSaturation measurements`() {
         val now = Clock.System.now()
         val measurements = listOf(
-            OxygenSaturation(id = "1", createdAt = now, resource = Resource.Manual, saturation = 95f),
-            OxygenSaturation(id = "2", createdAt = now + 1.hours, resource = Resource.Manual, saturation = 98f)
+            OxygenSaturation(
+                id = "1",
+                createdAt = now,
+                resource = Resource.Manual,
+                saturation = 95f
+            ),
+            OxygenSaturation(
+                id = "2",
+                createdAt = now + 1.hours,
+                resource = Resource.Manual,
+                saturation = 98f
+            )
         )
 
         val result = useCase(measurements)
@@ -130,30 +185,33 @@ class CalculateMeasurementSummaryUseCaseTest {
     }
 
     @Test
-    fun `invoke with RespirationRate measurements`() {
-        val now = Clock.System.now()
-        val measurements = listOf(
-            RespirationRate(id = "1", createdAt = now, resource = Resource.Manual, rate = 12.0),
-            RespirationRate(id = "2", createdAt = now + 1.hours, resource = Resource.Manual, rate = 16.0)
-        )
-
-        val result = useCase(measurements)
-
-        val group = result[RespirationRate::class]!!.group as MeasurementGroup.RespirationRate
-        assertEquals(12.0, group.range.start, 0.0)
-        assertEquals(16.0, group.range.endInclusive, 0.0)
-    }
-
-    @Test
     fun `estimationsCount calculation`() {
         val now = Clock.System.now()
         val normalEstimation = Estimation(level = Estimation.Level.NORMAL)
         val highEstimation = Estimation(level = Estimation.Level.HIGH)
 
         val measurements = listOf(
-            HeartRate(id = "1", createdAt = now, resource = Resource.Manual, pulse = 70, metadata = EmptyMetadata + normalEstimation),
-            HeartRate(id = "2", createdAt = now + 1.hours, resource = Resource.Manual, pulse = 100, metadata = EmptyMetadata + highEstimation),
-            HeartRate(id = "3", createdAt = now + 2.hours, resource = Resource.Manual, pulse = 72, metadata = EmptyMetadata + normalEstimation)
+            HeartRate(
+                id = "1",
+                createdAt = now,
+                resource = Resource.Manual,
+                pulse = 70,
+                metadata = EmptyMetadata + normalEstimation
+            ),
+            HeartRate(
+                id = "2",
+                createdAt = now + 1.hours,
+                resource = Resource.Manual,
+                pulse = 100,
+                metadata = EmptyMetadata + highEstimation
+            ),
+            HeartRate(
+                id = "3",
+                createdAt = now + 2.hours,
+                resource = Resource.Manual,
+                pulse = 72,
+                metadata = EmptyMetadata + normalEstimation
+            )
         )
 
         val result = useCase(measurements)

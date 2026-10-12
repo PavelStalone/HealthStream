@@ -8,7 +8,6 @@ import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.check
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import javax.inject.Inject
@@ -28,7 +27,6 @@ class CreateMeasurementUseCase @Inject constructor(
             is BodyWeight -> params.check()
             is BloodGlucose -> params.check()
             is BloodPressure -> params.check()
-            is RespirationRate -> params.check()
             is OxygenSaturation -> params.check()
             else -> {
                 /* Do nothing */

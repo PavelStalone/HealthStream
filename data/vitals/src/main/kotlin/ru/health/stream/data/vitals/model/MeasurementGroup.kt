@@ -10,7 +10,6 @@ import ru.health.stream.data.vitals.model.measurement.DiastolicPressure
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.data.vitals.model.measurement.RespirationRate
 import ru.health.stream.data.vitals.model.measurement.SystolicPressure
 
 sealed interface MeasurementGroup {
@@ -59,18 +58,6 @@ sealed interface MeasurementGroup {
     data class OxygenSaturation(
         val mean: Mean,
         val range: ClosedRange<Float>,
-        override val note: String?,
-        override val estimation: Estimation?,
-        override val dateRange: ClosedRange<Instant>,
-    ) : MeasurementGroup {
-
-        override val aggregateValue: String
-            get() = "${range.start} - ${range.endInclusive}"
-    }
-
-    data class RespirationRate(
-        val mean: Mean,
-        val range: ClosedRange<Double>,
         override val note: String?,
         override val estimation: Estimation?,
         override val dateRange: ClosedRange<Instant>,
@@ -141,14 +128,6 @@ fun Measurement.asMeasurementGroup(
             diastolicMean = Mean(diastolic.toDouble()),
             minBpByDifference = FloatFloatPair(systolic, diastolic),
             maxBpByDifference = FloatFloatPair(systolic, diastolic),
-        )
-
-        is RespirationRate -> MeasurementGroup.RespirationRate(
-            note = mNote,
-            mean = Mean(rate),
-            range = rate..rate,
-            estimation = mEstimation,
-            dateRange = measurementDateRange,
         )
 
         is OxygenSaturation -> MeasurementGroup.OxygenSaturation(

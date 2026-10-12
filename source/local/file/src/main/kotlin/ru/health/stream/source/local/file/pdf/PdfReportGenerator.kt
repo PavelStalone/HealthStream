@@ -34,6 +34,10 @@ import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import ru.health.stream.core.chart.core.drawable.CubicLine
+import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.chart.model.ChartPosition
+import ru.health.stream.core.chart.model.path.DashPathEffect
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.data.personal.model.User
@@ -46,10 +50,6 @@ import ru.health.stream.data.vitals.model.Period
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.usecase.DateTransformerUseCase
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
-import ru.health.stream.core.chart.core.drawable.CubicLine
-import ru.health.stream.core.chart.core.drawable.Scatter
-import ru.health.stream.core.chart.model.ChartPosition
-import ru.health.stream.core.chart.model.path.DashPathEffect
 import ru.health.stream.source.local.file.ReportGenerator
 import ru.health.stream.source.local.file.model.ACCENT
 import ru.health.stream.source.local.file.model.HEADER_BG
@@ -646,30 +646,6 @@ internal class PdfReportGenerator(
 
                     yMin = min(group.range.start, yMin)
                     yMax = max(group.range.endInclusive, yMax)
-                }
-
-                is MeasurementGroup.RespirationRate -> {
-                    val scatterPositions = positionMap.getOrPut(0) { mutableListOf() }
-                    val meanPositions = positionMap.getOrPut(1) { mutableListOf() }
-
-                    meanPositions.add(
-                        ChartPosition.Point(
-                            x = x,
-                            y = group.mean.value.toFloat(),
-                        )
-                    )
-                    scatterPositions.add(
-                        ChartPosition.Range.Vertical(
-                            x = x,
-                            y = FloatFloatPair(
-                                first = group.range.start.toFloat(),
-                                second = group.range.endInclusive.toFloat(),
-                            )
-                        )
-                    )
-
-                    yMin = min(group.range.start.toFloat(), yMin)
-                    yMax = max(group.range.endInclusive.toFloat(), yMax)
                 }
 
                 is MeasurementGroup.BloodPressure -> {

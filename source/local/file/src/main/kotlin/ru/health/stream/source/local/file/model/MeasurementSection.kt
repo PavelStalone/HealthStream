@@ -75,7 +75,6 @@ internal fun MeasurementGroup.asMeasurementSection(
         is MeasurementGroup.BodyWeight -> "Вес тела" to "кг"
         is MeasurementGroup.OxygenSaturation -> "Сатурация (SpO₂)" to "%"
         is MeasurementGroup.BloodGlucose -> "Глюкоза в крови" to "ммоль/л"
-        is MeasurementGroup.RespirationRate -> "Частота дыхания" to "вдох/мин"
         is MeasurementGroup.HeartRate -> "Частота сердечных сокращений" to "уд/мин"
         is MeasurementGroup.BloodPressure -> "Артериальное давление" to "мм рт.ст."
     }
