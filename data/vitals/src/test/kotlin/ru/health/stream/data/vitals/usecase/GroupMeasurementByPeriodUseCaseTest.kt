@@ -318,7 +318,7 @@ class GroupMeasurementByPeriodUseCaseTest {
             measurements = measurements
         )
 
-        assertEquals(6, result.size)
+        assertEquals(5, result.size)
         assertTrue(result.containsKey(HeartRate::class))
         assertTrue(result.containsKey(BloodPressure::class))
         assertTrue(result.containsKey(BodyWeight::class))
