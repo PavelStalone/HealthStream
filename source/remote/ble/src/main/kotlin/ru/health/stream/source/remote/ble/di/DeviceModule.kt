@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
+import ru.health.stream.source.remote.ble.domain.device.BloodGlucoseDevice
 import ru.health.stream.source.remote.ble.domain.device.BloodPressureDevice
 import ru.health.stream.source.remote.ble.domain.device.GBS2012B
 import ru.health.stream.source.remote.ble.domain.device.PC60FDevice
@@ -27,6 +28,7 @@ internal object DeviceModule {
         GBS2012B(measurementSource = measurementSource),
         PC60FDevice(measurementSource = measurementSource),
         WeightScaleDevice(measurementSource = measurementSource),
+        BloodGlucoseDevice(measurementSource = measurementSource),
         BloodPressureDevice(measurementSource = measurementSource),
         PulseOximeterDevice(measurementSource = measurementSource),
     )

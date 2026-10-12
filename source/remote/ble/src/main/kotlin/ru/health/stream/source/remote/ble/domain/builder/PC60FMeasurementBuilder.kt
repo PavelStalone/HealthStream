@@ -7,6 +7,7 @@ import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.source.remote.ble.domain.device.PC60FPacket
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.SpoParameterPacket
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -22,10 +23,10 @@ internal class PC60FMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
         lastMeasured = Clock.System.now(),
     )
 
-    private var lastMeasurePacket: PC60FPacket.Filled.SpoParameterPacket? = null
+    private var lastMeasurePacket: SpoParameterPacket? = null
 
     fun receive(packet: PC60FPacket.Filled) {
-        if (packet is PC60FPacket.Filled.SpoParameterPacket) lastMeasurePacket = packet
+        if (packet is SpoParameterPacket) lastMeasurePacket = packet
     }
 
     fun build(): Pair<HeartRate, OxygenSaturation>? = lastMeasurePacket?.let { measure ->

@@ -6,6 +6,7 @@ import kotlinx.datetime.Clock
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.measurement.BloodPressure
 import ru.health.stream.source.remote.ble.domain.device.BloodPressurePacket
+import ru.health.stream.source.remote.ble.domain.device.BloodPressurePacket.Filled.BloodPressureMeasurement
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -21,11 +22,10 @@ internal class BloodPressureMeasurementBuilder(bluetoothDevice: BluetoothDevice)
         lastMeasured = Clock.System.now(),
     )
 
-    private var lastMeasurePacket: BloodPressurePacket.Filled.BloodPressureMeasurement? = null
+    private var lastMeasurePacket: BloodPressureMeasurement? = null
 
     fun receive(packet: BloodPressurePacket.Filled) {
-        if (packet is BloodPressurePacket.Filled.BloodPressureMeasurement) lastMeasurePacket =
-            packet
+        if (packet is BloodPressureMeasurement) lastMeasurePacket = packet
     }
 
     fun build(): BloodPressure? = lastMeasurePacket?.let { measure ->

@@ -8,6 +8,7 @@ import ru.health.stream.data.vitals.model.kg
 import ru.health.stream.data.vitals.model.lb
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.WeightData
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -23,10 +24,10 @@ internal class GBS2012BMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
         lastMeasured = Clock.System.now(),
     )
 
-    private var lastMeasurePacket: GBS2012BPacket.Filled.WeightData? = null
+    private var lastMeasurePacket: WeightData? = null
 
     fun receive(packet: GBS2012BPacket.Filled) {
-        if (packet is GBS2012BPacket.Filled.WeightData) lastMeasurePacket = packet
+        if (packet is WeightData) lastMeasurePacket = packet
     }
 
     fun build(): BodyWeight? = lastMeasurePacket?.let { measure ->

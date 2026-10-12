@@ -40,6 +40,14 @@ internal class RoomDeviceSource @Inject constructor(
                 lastMeasured = entity.lastMeasured,
             )
 
+            DeviceEntity.DeviceType.GLUCOSE_METER -> Device.GlucoseMeter(
+                id = entity.id,
+                name = entity.name,
+                status = entity.status.asDeviceStatus(),
+                macAddress = entity.macAddress,
+                lastMeasured = entity.lastMeasured,
+            )
+
             else -> error("Not found device type")
         }
     }
