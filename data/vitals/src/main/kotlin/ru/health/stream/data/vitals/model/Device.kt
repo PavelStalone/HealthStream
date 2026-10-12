@@ -4,12 +4,14 @@ import kotlinx.datetime.Instant
 
 sealed interface Device : Resource {
     val id: String
+    val name: String
     val status: Status
     val macAddress: String
     val lastMeasured: Instant
 
     data class WeightScale(
         override val id: String,
+        override val name: String,
         override val status: Status,
         override val macAddress: String,
         override val lastMeasured: Instant
@@ -17,6 +19,7 @@ sealed interface Device : Resource {
 
     data class BloodPressureCuff(
         override val id: String,
+        override val name: String,
         override val status: Status,
         override val macAddress: String,
         override val lastMeasured: Instant
@@ -24,6 +27,7 @@ sealed interface Device : Resource {
 
     data class PulseOximeter(
         override val id: String,
+        override val name: String,
         override val status: Status,
         override val macAddress: String,
         override val lastMeasured: Instant

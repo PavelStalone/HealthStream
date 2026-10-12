@@ -2,21 +2,16 @@ package ru.health.stream.source.remote.ble.domain.device
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.offsetAt
-import kotlinx.datetime.toLocalDateTime
 import ru.health.stream.core.monitor.logE
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.DEVICE_A6_BIND_RESULT
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.DEVICE_A6_MEASURE_SETTING
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.DEVICE_A6_RECEIVER_AUTH
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.DEVICE_A6_RECEIVER_INIT
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.DEVICE_A6_REGISTRATION_RESPONSE
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.DEVICE_A6_SETTING_CALLBACK
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.DEVICE_A6_WEIGHT_DATA
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.PUSH_USER_INFO_TO_WEIGHT_FOR_A6
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.BindResult
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.ReceiverAuth
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.ReceiverInit
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.BINDING_DEVICE
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.INITIALIZATION_DEVICE
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.LOGIN_DEVICE
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.REGISTRATION_DEVICE
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.SETTING_CALLBACK
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Definition.PacketProfile.SYNCHRONIZE_MEASUREMENT
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.BindingResponse
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.InitializationDeviceRequest
+import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.LoginDeviceRequest
 import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.RegistrationResponse
 import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.SettingCallback
 import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket.Filled.WeightData
@@ -25,11 +20,9 @@ import ru.health.stream.source.remote.ble.lib.device.byteArrayOfInts
 import ru.health.stream.source.remote.ble.lib.packet.builder.PacketStructureBuilder
 import ru.health.stream.source.remote.ble.lib.packet.model.FilledPacket
 import ru.health.stream.source.remote.ble.lib.packet.model.PacketStructure
+import ru.health.stream.source.remote.ble.lib.packet.model.ValueSize.Companion.bits
 import ru.health.stream.source.remote.ble.lib.packet.model.ValueSize.Companion.bytes
 import ru.health.stream.source.remote.ble.lib.packet.model.convertToPacket
-import ru.health.stream.source.remote.ble.lib.packet.model.map
-import ru.health.stream.source.remote.ble.lib.packet.validation.base.CRC32Validation
-import java.nio.ByteOrder
 
 internal object GBS2012BPacket {
 
@@ -45,104 +38,32 @@ internal object GBS2012BPacket {
         bytes(value = byteArrayOfInts(0x10, 0x04, 0x00, 0x03, 0x00, 0x01))
     }
 
-    fun loginReply(verifyCode: ByteArray) = BlePacket.filledPacket {
+    fun loginResponse(verificationCode: ByteArray) = BlePacket.filledPacket {
         bytes(value = byteArrayOfInts(0x10, 0x0B, 0x00, 0x08, 0x01))
-        bytes(value = verifyCode)
-        bytes(value = byteArrayOfInts(0x01, 0x02))
+        bytes(value = verificationCode)
+        bytes(value = byteArrayOfInts(0x00, 0x02))
     }
 
-    val timeCommand
+    val synchronizeRequest
         get() = BlePacket.filledPacket {
-            bytes(
-                value = byteArrayOfInts(
-                    0x10, // frame control
-                    0x08, // length
-                    0x10, 0x02, // command
-                    0x03, // flag
-                )
-            )
-            int(value = Clock.System.now().epochSeconds.toInt()) // seconds since epoch
-            byte(value = 0x30.toByte()) // zone offset table, 0x30 is UTC
+            int(value = 0x10, size = 1.bytes) // FrameControl
+            int(value = 0x10, size = 1.bytes) // Length
+            int(value = 0x4801, size = 2.bytes) // Command
+            int(value = 0x00, size = 1.bytes) // UserNumber
+            int(value = 0x01, size = 1.bytes) // Status
         }
 
-    val dateTimeAlt
+    val responseInitializationDevice
         get() = BlePacket.filledPacket {
-            val currentTime = Clock.System.now()
-            val defaultTimeZone = TimeZone.currentSystemDefault()
-            val offset = defaultTimeZone.offsetAt(currentTime).totalSeconds
-            val localDateTime = currentTime.toLocalDateTime(defaultTimeZone)
+            val utc = Clock.System.now().epochSeconds
 
-            val command = int(value = 10, size = 2.bytes)
-            val flags = int(value = 0x38, size = 1.bytes)
-            val utcTime = int(value = currentTime.epochSeconds.toInt())
-            val timeZone = int(value = offset / 60 / 15 + 48, size = 1.bytes)
-
-            val year = int(value = localDateTime.year, order = ByteOrder.BIG_ENDIAN, size = 2.bytes)
-            val monthValue = int(value = localDateTime.monthNumber, size = 1.bytes)
-            val dayOfMonth = int(value = localDateTime.dayOfMonth, size = 1.bytes)
-            val hour = int(value = localDateTime.hour, size = 1.bytes)
-            val minute = int(value = localDateTime.minute, size = 1.bytes)
-            val second = int(value = localDateTime.second, size = 1.bytes)
-
-            if (size.bitSize > 36) {
-                int(
-                    value = CRC32Validation.calculate(
-                        command,
-                        flags,
-                        utcTime,
-                        timeZone,
-                        year,
-                        monthValue,
-                        dayOfMonth,
-                        hour,
-                        minute,
-                        second
-                    )
-                )
-            }
+            int(value = 0x10, size = 1.bytes) // FrameControl
+            int(value = 0x10, size = 1.bytes) // Length
+            int(value = 0x0000A, size = 2.bytes) // Command
+            int(value = 0x18, size = 1.bytes) // Flag
+            int(value = utc.toInt(), size = 4.bytes) // UTC
+            int(value = 0x30, size = 1.bytes) // TimeZone UTC+0
         }
-
-    val requestMeasurement = BlePacket.filledPacket {
-        val command = int(
-            value = DEVICE_A6_MEASURE_SETTING.commandValue,
-            size = 2.bytes,
-        )
-        val userNumber = byte(value = 0)
-        val flag = boolean(value = true, size = 1.bytes)
-
-        if (size.bitSize > 36) {
-            int(value = CRC32Validation.calculate(command, userNumber, flag))
-        }
-    }
-
-    val weightUserInformation = BlePacket.filledPacket {
-        val command = int(
-            value = PUSH_USER_INFO_TO_WEIGHT_FOR_A6.commandValue,
-            size = 2.bytes,
-        )
-        val userNumber = byte(value = 1)
-        val sex = boolean(value = false, size = 1.bytes)
-        val age = byte(value = 20)
-        val height = int(value = 170, size = 2.bytes)
-        val idAthlete = boolean(value = false, size = 1.bytes)
-        val athleteLevel = byte(value = 0)
-        val weight = bytes(byteArrayOf(-1, -1))
-
-        if (size.bitSize > 36) {
-            int(
-                value = CRC32Validation.calculate(
-                    command,
-                    userNumber,
-                    sex,
-                    age,
-                    height,
-                    idAthlete,
-                    athleteLevel,
-                    weight
-                )
-            )
-        }
-    }
 
     object Definition : BlePacket.Definition<Filled>() {
 
@@ -157,51 +78,72 @@ internal object GBS2012BPacket {
             val data = rawPacket.findByName<ByteArray>(DATA_VALUE)
 
             when (packetCommand) {
-                DEVICE_A6_REGISTRATION_RESPONSE -> RegistrationResponse
-                DEVICE_A6_BIND_RESULT -> BindResult
-                DEVICE_A6_RECEIVER_INIT -> ReceiverInit
-                DEVICE_A6_RECEIVER_AUTH -> {
-                    val verifyCode = data.value
+                REGISTRATION_DEVICE -> RegistrationResponse
+                INITIALIZATION_DEVICE -> InitializationDeviceRequest
 
+                BINDING_DEVICE -> {
+                    val result = data.value.first() == 0x01.toByte()
+
+                    BindingResponse(result = result)
+                }
+
+                LOGIN_DEVICE -> {
                     data.convertToPacket {
                         section(name = "Info") {
-                            reserve(size = { 10.bytes })
+                            bytes(name = "verificationCode", size = { 6.bytes })
                             int(name = "userNumber", size = { 1.bytes })
                             int(name = "battery", size = { 1.bytes })
                         }
                     }.run {
-                        ReceiverAuth(
-                            battery = findByNameOrNull<Int>("battery")?.value,
-                            userNumber = findByNameOrNull<Int>("userNumber")?.value ?: 0,
-                            verifyCode = verifyCode.toList(),
+                        LoginDeviceRequest(
+                            battery = findByName<Int>("battery").value,
+                            userNumber = findByName<Int>("userNumber").value,
+                            verificationCode = findByName<ByteArray>("verificationCode").value.toList(),
                         )
                     }
                 }
 
-                DEVICE_A6_SETTING_CALLBACK -> {
-                    val settingAck = data.map { int(name = "settingAck", size = { 2.bytes }) }.value
-
-                    SettingCallback(
-                        settingAck = SettingCallback.SettingAck.fromCode(settingAck)
-                    )
-                }
-
-                DEVICE_A6_WEIGHT_DATA -> {
+                SETTING_CALLBACK -> {
                     data.convertToPacket {
-                        section(name = "Info") {
-                            reserve(size = { 10.bytes })
-                            int(name = "weight", size = { 2.bytes })
-                            int(name = "timestamp", size = { 4.bytes })
+                        section(name = "body") {
+                            int(name = "settingCommand", size = { 1.bytes })
+                            boolean(name = "result", size = { 1.bytes })
                         }
                     }.run {
-                        val takenAt = Instant.fromEpochMilliseconds(
-                            epochMilliseconds = findByName<Int>("timestamp").value * 1000L
+                        SettingCallback(
+                            result = findByName<Boolean>("result").value,
+                            settingCommand = findByName<Int>("settingCommand").value,
                         )
+                    }
+                }
+
+                SYNCHRONIZE_MEASUREMENT -> {
+                    data.convertToPacket {
+                        section(name = "Info") {
+                            int(name = "surplusDataCount", size = { 2.bytes })
+
+                            boolean(name = "unit", size = { 2.bits })
+                            reserve { 1.bits }
+                            boolean(name = "hasUTC", size = { 1.bits })
+                            reserve { 10.bits }
+                            boolean(name = "hasImpedance", size = { 1.bits })
+                            boolean(name = "hasHeartRate", size = { 1.bits })
+                            reserve { 2.bytes }
+
+                            int(name = "weight", size = { 2.bytes })
+                            int(name = "utc", size = { 4.bytes })
+                            int(name = "impedance", size = { 2.bytes })
+                            int(name = "heartRate", size = { 1.bytes })
+                        }
+                    }.run {
+                        val unit = findByName<Boolean>(name = "unit").value
+                        val weight = findByName<Int>(name = "weight").value
+                        val utc = findByName<Int>(name = "utc").value
 
                         WeightData(
-                            unit = 0,
-                            takenAt = takenAt,
-                            weight = findByName<Int>("weight").value.toFloat(),
+                            unit = unit,
+                            takenAt = Instant.fromEpochSeconds(utc.toLong()),
+                            weight = weight,
                         )
                     }
                 }
@@ -235,39 +177,13 @@ internal object GBS2012BPacket {
 
         internal enum class PacketProfile(val commandValue: Int) {
 
-            DEVICE_A6_REGISTRATION_REQUEST(1),
-            DEVICE_A6_REGISTRATION_RESPONSE(2),
+            REGISTRATION_DEVICE(2),
+            BINDING_DEVICE(4),
+            LOGIN_DEVICE(7),
+            INITIALIZATION_DEVICE(9),
 
-            // Bind Request
-            DEVICE_A6_BIND_NOTICE(3),
-            DEVICE_A6_BIND_RESULT(4),
-
-            DEVICE_A6_UNBIND_NOTICE(5),
-
-            // Unbinding response
-            DEVICE_A6_UNBIND_RESULT(6),
-
-            // Login Request, incoming
-            DEVICE_A6_RECEIVER_AUTH(7),
-
-            // Login Response
-            DEVICE_A6_AUTH(8),
-
-            // Initialization request, incoming
-            DEVICE_A6_RECEIVER_INIT(9),
-            DEVICE_A6_RESPONSE_INIT(10),
-            DEVICE_A6_SETTING_CALLBACK(4096),
-            DEVICE_A6_MEASURE_SETTING(18433),
-            DEVICE_A6_WEIGHT_DATA(18434),
-            PUSH_USER_INFO_TO_WEIGHT_FOR_A6(4097),
-            PUSH_TIME_TO_WEIGHT_FOR_A6(4098),
-            PUSH_TARGET_TO_WEIGHT_FOR_A6(4099),
-            PUSH_UNIT_TO_WEIGHT_FOR_A6(4100),
-            PUSH_CLEAR_DATA_TO_WEIGHT_FOR_A6(4101),
-            PUSH_FORMULA_TO_WEIGHT_FOR_A6(4102),
-            RECEIVE_USER_INFO_TO_WEIGHT_FOR_A6(8193),
-            RECEIVE_TARGET_TO_WEIGHT_FOR_A6(8195),
-            RECEIVE_UNIT_TO_WEIGHT_FOR_A6(8196),
+            SYNCHRONIZE_MEASUREMENT(18434), // 0x4802
+            SETTING_CALLBACK(4096), // 0x1000
 
             UNKNOWN(-1)
             ;
@@ -282,48 +198,33 @@ internal object GBS2012BPacket {
     }
 
     /**
-     * Represents parsed blood pressure data from the device
+     * Represents parsed weight scale data from the device
      */
     sealed interface Filled : BlePacket.Data {
 
-        data object RegistrationResponse : Filled
-
-        data class ReceiverAuth(
-            val battery: Int?,
-            val userNumber: Int,
-            val verifyCode: List<Byte>,
+        data class BindingResponse(
+            val result: Boolean,
         ) : Filled
 
         data class SettingCallback(
-            val settingAck: SettingAck,
-        ) : Filled {
+            val result: Boolean,
+            val settingCommand: Int,
+        ) : Filled
 
-            enum class SettingAck(private val code: Int) {
-
-                PUSH_TIME_TO_WEIGHT(code = 4098),
-                PUSH_USER_INFO_TO_WEIGHT(code = 4097),
-                PUSH_UNIT_TO_WEIGHT(code = 4100),
-                UNKNOWN(code = -1),
-                ;
-
-                companion object {
-
-                    fun fromCode(code: Int) = entries
-                        .firstOrNull { entry -> entry.code == code }
-                        ?: UNKNOWN
-                }
-            }
-        }
-
-        data object BindResult : Filled
-
-        data object ReceiverInit : Filled
+        data class LoginDeviceRequest(
+            val battery: Int,
+            val userNumber: Int,
+            val verificationCode: List<Byte>,
+        ) : Filled
 
         data class WeightData(
-            val unit: Int,
-            val weight: Float,
+            val weight: Int,
+            val unit: Boolean,
             val takenAt: Instant,
         ) : Filled
+
+        data object RegistrationResponse : Filled
+        data object InitializationDeviceRequest : Filled
 
         /**
          * Represents an unknown or unrecognized packet type

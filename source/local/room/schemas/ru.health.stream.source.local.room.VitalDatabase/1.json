@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "5c6e94e0dec569b32fb5ee423f7e00e4",
+    "identityHash": "19f9c1782a90c9c27cd9bf63432e34b9",
     "entities": [
       {
         "tableName": "user",
@@ -95,11 +95,17 @@
       },
       {
         "tableName": "device",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `mac_address` TEXT NOT NULL, `last_measured` INTEGER NOT NULL, `status` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `mac_address` TEXT NOT NULL, `last_measured` INTEGER NOT NULL, `status` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -450,7 +456,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5c6e94e0dec569b32fb5ee423f7e00e4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '19f9c1782a90c9c27cd9bf63432e34b9')"
     ]
   }
 }

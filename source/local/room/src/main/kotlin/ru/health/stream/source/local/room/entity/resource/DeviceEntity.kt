@@ -13,6 +13,7 @@ import ru.health.stream.source.local.room.mapper.asDeviceWeightScale
 @Entity(tableName = "device")
 internal data class DeviceEntity(
     @PrimaryKey val id: String,
+    @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "type") val type: DeviceType,
     @ColumnInfo(name = "mac_address") val macAddress: String,
     @ColumnInfo(name = "last_measured") val lastMeasured: Instant,
@@ -51,6 +52,7 @@ internal fun Device.asDeviceEntity(): DeviceEntity {
 
     return DeviceEntity(
         id = id,
+        name = name,
         type = type,
         macAddress = macAddress,
         lastMeasured = lastMeasured,

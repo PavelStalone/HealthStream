@@ -2,22 +2,22 @@ package ru.health.stream.source.remote.ble.domain.device
 
 import ru.health.stream.core.monitor.logD
 import ru.health.stream.core.monitor.logE
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.BatteryPower
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.BatteryPower.BatteryLevel
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.FrequencySpoParameters
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.FrequencySpoWaveform
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.ProductInfo
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.SerialNumber
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.SpoParameterPacket
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.SpoWaveformData
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.StatusData
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.StatusData.SpotCheckMeasurement.Idle
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.StatusData.SpotCheckMeasurement.MeasurementFinishes
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.StatusData.SpotCheckMeasurement.Measuring
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.StatusData.SpotCheckMeasurement.Preparing
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.StatusData.SpotCheckMeasurement.PulseRateAnalysis
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.StatusData.SpotCheckMeasurement.ReportValue
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket.Filled.Unknown
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.BatteryPower
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.BatteryPower.BatteryLevel
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.FrequencySpoParameters
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.FrequencySpoWaveform
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.ProductInfo
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.SerialNumber
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.SpoParameterPacket
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.SpoWaveformData
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.StatusData
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.StatusData.SpotCheckMeasurement.Idle
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.StatusData.SpotCheckMeasurement.MeasurementFinishes
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.StatusData.SpotCheckMeasurement.Measuring
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.StatusData.SpotCheckMeasurement.Preparing
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.StatusData.SpotCheckMeasurement.PulseRateAnalysis
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.StatusData.SpotCheckMeasurement.ReportValue
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.Unknown
 import ru.health.stream.source.remote.ble.lib.device.BlePacket
 import ru.health.stream.source.remote.ble.lib.device.byteArrayOfInts
 import ru.health.stream.source.remote.ble.lib.packet.builder.PacketStructureBuilder
@@ -36,7 +36,7 @@ import java.nio.ByteOrder
 /**
  * Defines packet structures and parsing logic for pulse oximeter devices
  */
-internal object PulsePacket {
+internal object PC60FPacket {
 
     /**
      * Command packet to query device firmware and hardware version information

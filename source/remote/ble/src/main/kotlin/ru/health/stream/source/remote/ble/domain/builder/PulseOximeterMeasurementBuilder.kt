@@ -6,25 +6,26 @@ import kotlinx.datetime.Clock
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket
+import ru.health.stream.source.remote.ble.domain.device.PulseOximeterPacket
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalUuidApi::class)
-internal class PulseOxMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
+internal class PulseOximeterMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
 
     private val device: Device = Device.PulseOximeter(
-        id = bluetoothDevice.name,
+        id = bluetoothDevice.address,
+        name = bluetoothDevice.name,
         status = Device.Status.UNKNOWN,
         macAddress = bluetoothDevice.address,
         lastMeasured = Clock.System.now(),
     )
 
-    private var lastMeasurePacket: PulsePacket.Filled.SpoParameterPacket? = null
+    private var lastMeasurePacket: PulseOximeterPacket.Filled.PulseOximeterData? = null
 
-    fun receive(packet: PulsePacket.Filled) {
-        if (packet is PulsePacket.Filled.SpoParameterPacket) lastMeasurePacket = packet
+    fun receive(packet: PulseOximeterPacket.Filled) {
+        if (packet is PulseOximeterPacket.Filled.PulseOximeterData) lastMeasurePacket = packet
     }
 
     fun build(): Pair<HeartRate, OxygenSaturation>? = lastMeasurePacket?.let { measure ->
@@ -35,13 +36,13 @@ internal class PulseOxMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
                 id = Uuid.random().toString(),
                 createdAt = createdAt,
                 resource = device,
-                pulse = measure.pulse,
+                pulse = measure.pulseRate.toInt(),
             ),
             OxygenSaturation(
                 id = Uuid.random().toString(),
                 createdAt = createdAt,
                 resource = device,
-                saturation = measure.spoData.toFloat()
+                saturation = measure.spo2
             )
         )
     }

@@ -18,6 +18,7 @@ internal class RoomDeviceSource @Inject constructor(
         when (entity.type) {
             DeviceEntity.DeviceType.PULSE_OXIMETER -> Device.PulseOximeter(
                 id = entity.id,
+                name = entity.name,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
@@ -25,6 +26,7 @@ internal class RoomDeviceSource @Inject constructor(
 
             DeviceEntity.DeviceType.WEIGHT_SCALE -> Device.WeightScale(
                 id = entity.id,
+                name = entity.name,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
@@ -32,6 +34,7 @@ internal class RoomDeviceSource @Inject constructor(
 
             DeviceEntity.DeviceType.BLOOD_PRESSURE_CUFF -> Device.BloodPressureCuff(
                 id = entity.id,
+                name = entity.name,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
