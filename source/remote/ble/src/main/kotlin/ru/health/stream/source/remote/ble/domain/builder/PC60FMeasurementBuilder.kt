@@ -6,25 +6,27 @@ import kotlinx.datetime.Clock
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.measurement.HeartRate
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
-import ru.health.stream.source.remote.ble.domain.device.PulsePacket
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket
+import ru.health.stream.source.remote.ble.domain.device.PC60FPacket.Filled.SpoParameterPacket
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalUuidApi::class)
-internal class PulseOxMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
+internal class PC60FMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
 
     private val device: Device = Device.PulseOximeter(
-        id = bluetoothDevice.name,
+        id = bluetoothDevice.address,
+        name = bluetoothDevice.name,
         status = Device.Status.UNKNOWN,
         macAddress = bluetoothDevice.address,
         lastMeasured = Clock.System.now(),
     )
 
-    private var lastMeasurePacket: PulsePacket.Filled.SpoParameterPacket? = null
+    private var lastMeasurePacket: SpoParameterPacket? = null
 
-    fun receive(packet: PulsePacket.Filled) {
-        if (packet is PulsePacket.Filled.SpoParameterPacket) lastMeasurePacket = packet
+    fun receive(packet: PC60FPacket.Filled) {
+        if (packet is SpoParameterPacket) lastMeasurePacket = packet
     }
 
     fun build(): Pair<HeartRate, OxygenSaturation>? = lastMeasurePacket?.let { measure ->

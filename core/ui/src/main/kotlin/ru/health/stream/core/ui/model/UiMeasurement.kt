@@ -145,6 +145,7 @@ fun Measurement.asUi(): UiMeasurement {
         is Device.WeightScale -> UiMeasurement.Resource.WeightScale
         is Device.BloodPressureCuff -> UiMeasurement.Resource.BPCuff
         is Device.PulseOximeter -> UiMeasurement.Resource.PulseOximeter
+        is Device.GlucoseMeter -> UiMeasurement.Resource.Glucose
         is Resource.App -> UiMeasurement.Resource.App(
             text = UiText.App(packageName = resource.packageName),
             icon = UiIcon.App(packageName = resource.packageName),

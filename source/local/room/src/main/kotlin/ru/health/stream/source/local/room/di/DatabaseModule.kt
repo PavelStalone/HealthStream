@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.health.stream.data.vitals.model.measurement.Measurement
+import ru.health.stream.source.local.room.BuildConfig
 import ru.health.stream.source.local.room.MeasurementTable
 import ru.health.stream.source.local.room.SqlCipherKeyManager
 import ru.health.stream.source.local.room.VitalDatabase
@@ -28,6 +29,7 @@ internal object DatabaseModule {
     ) = VitalDatabase.buildDatabase(
         context = context,
         sqlCipherKeyManager = sqlCipherKeyManager,
+        encryptDatabase = BuildConfig.ENCRYPT_DATABASE,
     )
 
     @Provides

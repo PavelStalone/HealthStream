@@ -5,36 +5,49 @@ import android.bluetooth.BluetoothDevice
 import kotlinx.datetime.Clock
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.data.vitals.model.kg
-import ru.health.stream.data.vitals.model.measurement.BloodPressure
+import ru.health.stream.data.vitals.model.lb
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
-import ru.health.stream.source.remote.ble.domain.device.GBS2012BPacket
-import ru.health.stream.source.remote.ble.domain.device.TMB2048Packet
+import ru.health.stream.source.remote.ble.domain.device.WeightScalePacket
+import ru.health.stream.source.remote.ble.domain.device.WeightScalePacket.Filled.WeightScaleData
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalUuidApi::class)
-internal class BodyWeightMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
+internal class WeightScaleMeasurementBuilder(bluetoothDevice: BluetoothDevice) {
 
     private val device: Device = Device.WeightScale(
-        id = bluetoothDevice.name,
+        id = bluetoothDevice.address,
+        name = bluetoothDevice.name,
         status = Device.Status.UNKNOWN,
         macAddress = bluetoothDevice.address,
         lastMeasured = Clock.System.now(),
     )
 
-    private var lastMeasurePacket: GBS2012BPacket.Filled.WeightData? = null
+    private var lastMeasurePacket: WeightScaleData? = null
 
-    fun receive(packet: GBS2012BPacket.Filled) {
-        if (packet is GBS2012BPacket.Filled.WeightData) lastMeasurePacket = packet
+    fun receive(packet: WeightScalePacket.Filled) {
+        if (packet is WeightScaleData) lastMeasurePacket = packet
     }
 
     fun build(): BodyWeight? = lastMeasurePacket?.let { measure ->
+        val weight = if (measure.unit) {
+            (measure.weight * KG_MULTIPLE).kg
+        } else {
+            (measure.weight * LB_MULTIPLE).lb
+        }
+
         BodyWeight(
             id = Uuid.random().toString(),
+            weight = weight,
             resource = device,
-            weight = measure.weight.kg,
             createdAt = Clock.System.now(),
         )
+    }
+
+    companion object {
+
+        private const val LB_MULTIPLE = 0.01
+        private const val KG_MULTIPLE = 0.005
     }
 }

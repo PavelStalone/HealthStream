@@ -35,6 +35,9 @@ internal interface MapperModule {
     @AutoMapper(reversible = false)
     fun bloodPressureCuffMapper(deviceEntity: DeviceEntity): Device.BloodPressureCuff
 
+    @AutoMapper(reversible = false)
+    fun glucoseMeterMapper(deviceEntity: DeviceEntity): Device.GlucoseMeter
+
     @AutoMapper
     fun estimationLevelMapper(estimationEntityLevel: EstimationEntity.Level): Estimation.Level
 

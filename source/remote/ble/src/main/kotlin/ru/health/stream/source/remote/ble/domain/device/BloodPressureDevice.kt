@@ -9,49 +9,45 @@ import no.nordicsemi.android.support.v18.scanner.ScanFilter
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import ru.health.stream.core.monitor.logI
 import ru.health.stream.core.monitor.logV
-import ru.health.stream.source.remote.ble.domain.builder.BPCuffMeasurementBuilder
-import ru.health.stream.source.remote.ble.domain.builder.PulseOxMeasurementBuilder
+import ru.health.stream.source.remote.ble.domain.builder.BloodPressureMeasurementBuilder
 import ru.health.stream.source.remote.ble.lib.device.BleDevice
 import ru.health.stream.source.remote.ble.lib.device.ConfigurationScope
 import ru.health.stream.source.remote.ble.lib.device.buildScanFilter
-import ru.health.stream.source.remote.ble.lib.device.matchesAnyPrefix
+import ru.health.stream.source.remote.ble.lib.device.createUUID
 import ru.health.stream.source.remote.ble.source.BleMeasurementSource
+import java.util.UUID
+import ru.health.stream.source.remote.ble.domain.device.TimeStampPacket.Definition as TimeStampDefinition
 
-/**
- * BLE implementation for TMB2084 blood pressure monitor device
- */
-internal class TMB2084(
+internal class BloodPressureDevice(
     private val measurementSource: BleMeasurementSource,
 ) : BleDevice() {
 
-    private val DEVICE_NAMES = listOf("tmb_2084_a", "tmb-2084-a")
+    private var measurementBuilder: BloodPressureMeasurementBuilder? = null
 
     override val scanFilters: List<ScanFilter> = listOf(
-        buildScanFilter { setServiceUuid(ParcelUuid(Services.BLOOD_PRESSURE.uuid)) }
+        buildScanFilter { setServiceUuid(ParcelUuid(DATA_SERVICE_UUID)) }
     )
-
-    private var measurementBuilder: BPCuffMeasurementBuilder? = null
 
     override fun ConfigurationScope.init() {
         service(uuid = Services.CURRENT_TIME.uuid) {
             characteristic(uuid = Characteristics.CURRENT_TIME.uuid) {
                 notificationCallback(
-                    packet = TMB2048Packet.TimeDefinition,
+                    packet = TimeStampDefinition,
                     callback = { time ->
                         logI("Notification CurrentTime: $time")
                     },
                 )
             }.run {
-                writePacket(packet = TMB2048Packet.currentTime)
-                readPacket(packet = TMB2048Packet.TimeDefinition) { time ->
+                writePacket(packet = BloodPressurePacket.currentTime)
+                readPacket(packet = TimeStampDefinition) { time ->
                     logI("Read packet: $time")
                 }
             }
         }
-        service(uuid = Services.BLOOD_PRESSURE.uuid) {
-            characteristic(Characteristics.BLOOD_PRESSURE_MEASUREMENT.uuid) {
+        service(uuid = DATA_SERVICE_UUID) {
+            characteristic(DATA_UUID) {
                 indicationCallback(
-                    packet = TMB2048Packet.Definition,
+                    packet = BloodPressurePacket.Definition,
                     callback = { packet ->
                         logI("Read packet: $packet")
 
@@ -74,9 +70,17 @@ internal class TMB2084(
     override fun isDeviceSupported(discoveredDevice: DiscoveredBluetoothDevice): Boolean {
         logV("isDeviceSupported called: ${discoveredDevice.device.name}")
 
-        return discoveredDevice.matchesAnyPrefix(prefixList = DEVICE_NAMES)
-            .also { result ->
-                if (result) measurementBuilder = BPCuffMeasurementBuilder(discoveredDevice.device)
-            }
+        val scanRecord = with(discoveredDevice) { (lastScanResult ?: scanResult)?.scanRecord }
+        val hasUUID = scanRecord?.serviceUuids?.contains(ParcelUuid(DATA_SERVICE_UUID))
+        if (hasUUID != true) return false
+
+        measurementBuilder = BloodPressureMeasurementBuilder(discoveredDevice.device)
+        return true
+    }
+
+    companion object {
+
+        private val DATA_UUID = createUUID("2A35")
+        private val DATA_SERVICE_UUID: UUID = createUUID("1810")
     }
 }

@@ -43,12 +43,18 @@ fun DiscoveredBluetoothDevice.matchesAnyPrefix(prefixList: List<String>): Boolea
  */
 @OptIn(ExperimentalUuidApi::class)
 fun createUUID(uuid: String): UUID = runCatching {
-    Uuid.parse(uuidString = uuid)
+    if (uuid.length == 4) {
+        Uuid.fromLongs((uuid.toLong(16) shl 32) or 0x1000L, LEAST_SIG_UUID_BITS)
+    } else {
+        Uuid.parse(uuidString = uuid)
+    }
 }.getOrElse { exception ->
     logE(exception, "Invalid UUID format: $uuid, using fallback UUID")
 
     Uuid.NIL
 }.toJavaUuid()
+
+private const val LEAST_SIG_UUID_BITS = -0x7fffff7fa064cb05L
 
 /**
  * Creates a byte array from a sequence of integers

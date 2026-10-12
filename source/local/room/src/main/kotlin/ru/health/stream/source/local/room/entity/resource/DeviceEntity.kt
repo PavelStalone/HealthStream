@@ -7,12 +7,14 @@ import kotlinx.datetime.Instant
 import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.source.local.room.mapper.asDeviceBloodPressureCuff
 import ru.health.stream.source.local.room.mapper.asDeviceEntityStatus
+import ru.health.stream.source.local.room.mapper.asDeviceGlucoseMeter
 import ru.health.stream.source.local.room.mapper.asDevicePulseOximeter
 import ru.health.stream.source.local.room.mapper.asDeviceWeightScale
 
 @Entity(tableName = "device")
 internal data class DeviceEntity(
     @PrimaryKey val id: String,
+    @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "type") val type: DeviceType,
     @ColumnInfo(name = "mac_address") val macAddress: String,
     @ColumnInfo(name = "last_measured") val lastMeasured: Instant,
@@ -21,6 +23,7 @@ internal data class DeviceEntity(
 
     fun asDevice(): Device = when (type) {
         DeviceType.WEIGHT_SCALE -> asDeviceWeightScale()
+        DeviceType.GLUCOSE_METER -> asDeviceGlucoseMeter()
         DeviceType.PULSE_OXIMETER -> asDevicePulseOximeter()
         DeviceType.BLOOD_PRESSURE_CUFF -> asDeviceBloodPressureCuff()
     }
@@ -36,6 +39,7 @@ internal data class DeviceEntity(
     enum class DeviceType {
 
         WEIGHT_SCALE,
+        GLUCOSE_METER,
         PULSE_OXIMETER,
         BLOOD_PRESSURE_CUFF,
         ;
@@ -46,11 +50,13 @@ internal fun Device.asDeviceEntity(): DeviceEntity {
     val type = when (this) {
         is Device.BloodPressureCuff -> DeviceEntity.DeviceType.BLOOD_PRESSURE_CUFF
         is Device.PulseOximeter -> DeviceEntity.DeviceType.PULSE_OXIMETER
+        is Device.GlucoseMeter -> DeviceEntity.DeviceType.GLUCOSE_METER
         is Device.WeightScale -> DeviceEntity.DeviceType.WEIGHT_SCALE
     }
 
     return DeviceEntity(
         id = id,
+        name = name,
         type = type,
         macAddress = macAddress,
         lastMeasured = lastMeasured,

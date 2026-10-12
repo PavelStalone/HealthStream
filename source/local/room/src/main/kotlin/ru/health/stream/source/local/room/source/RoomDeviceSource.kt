@@ -4,7 +4,7 @@ import ru.health.stream.data.vitals.model.Device
 import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.room.dao.DeviceDao
 import ru.health.stream.source.local.room.entity.resource.DeviceEntity
-import ru.health.stream.source.local.room.mapper.asDeviceEntityStatus
+import ru.health.stream.source.local.room.entity.resource.asDeviceEntity
 import ru.health.stream.source.local.room.mapper.asDeviceStatus
 import javax.inject.Inject
 
@@ -18,6 +18,7 @@ internal class RoomDeviceSource @Inject constructor(
         when (entity.type) {
             DeviceEntity.DeviceType.PULSE_OXIMETER -> Device.PulseOximeter(
                 id = entity.id,
+                name = entity.name,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
@@ -25,6 +26,7 @@ internal class RoomDeviceSource @Inject constructor(
 
             DeviceEntity.DeviceType.WEIGHT_SCALE -> Device.WeightScale(
                 id = entity.id,
+                name = entity.name,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
@@ -32,6 +34,15 @@ internal class RoomDeviceSource @Inject constructor(
 
             DeviceEntity.DeviceType.BLOOD_PRESSURE_CUFF -> Device.BloodPressureCuff(
                 id = entity.id,
+                name = entity.name,
+                status = entity.status.asDeviceStatus(),
+                macAddress = entity.macAddress,
+                lastMeasured = entity.lastMeasured,
+            )
+
+            DeviceEntity.DeviceType.GLUCOSE_METER -> Device.GlucoseMeter(
+                id = entity.id,
+                name = entity.name,
                 status = entity.status.asDeviceStatus(),
                 macAddress = entity.macAddress,
                 lastMeasured = entity.lastMeasured,
@@ -42,15 +53,7 @@ internal class RoomDeviceSource @Inject constructor(
     }
 
     override suspend fun <T : Device> writeDevice(device: T): Result<T> {
-        deviceDao.insert(
-            DeviceEntity(
-                id = device.id,
-                macAddress = device.macAddress,
-                status = device.status.asDeviceEntityStatus(),
-                lastMeasured = device.lastMeasured,
-                type = DeviceEntity.DeviceType.PULSE_OXIMETER, // TODO: Change - shoplikpavel 2026-04-11
-            )
-        )
+        deviceDao.insert(device.asDeviceEntity())
 
         return Result.success(device)
     }
