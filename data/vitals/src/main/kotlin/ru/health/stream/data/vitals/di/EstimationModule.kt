@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import ru.health.stream.data.vitals.domain.estimation.MeasurementAssessor
+import ru.health.stream.data.vitals.domain.estimation.assessor.BloodGlucoseAssessor
 import ru.health.stream.data.vitals.domain.estimation.assessor.BloodPressureAssessor
 import ru.health.stream.data.vitals.domain.estimation.assessor.BodyWeightAssessor
 import ru.health.stream.data.vitals.domain.estimation.assessor.HeartRateAssessor
@@ -20,11 +21,13 @@ internal object EstimationModule {
     fun provideMeasurementAssessors(
         heartRateAssessor: HeartRateAssessor,
         bodyWeightAssessor: BodyWeightAssessor,
+        bloodGlucoseAssessor: BloodGlucoseAssessor,
         bloodPressureAssessor: BloodPressureAssessor,
         oxygenSaturationAssessor: OxygenSaturationAssessor,
     ): List<MeasurementAssessor<Measurement>> = listOf(
         heartRateAssessor as MeasurementAssessor<Measurement>,
         bodyWeightAssessor as MeasurementAssessor<Measurement>,
+        bloodGlucoseAssessor as MeasurementAssessor<Measurement>,
         bloodPressureAssessor as MeasurementAssessor<Measurement>,
         oxygenSaturationAssessor as MeasurementAssessor<Measurement>,
     )

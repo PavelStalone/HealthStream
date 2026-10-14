@@ -10,6 +10,7 @@ import ru.health.stream.source.local.room.converter.EmailConverter
 import ru.health.stream.source.local.room.converter.InstantConverter
 import ru.health.stream.source.local.room.converter.LengthConverter
 import ru.health.stream.source.local.room.converter.LocalDateConverter
+import ru.health.stream.source.local.room.dao.BloodGlucoseDao
 import ru.health.stream.source.local.room.dao.BloodPressureDao
 import ru.health.stream.source.local.room.dao.BodyWeightDao
 import ru.health.stream.source.local.room.dao.DeviceDao
@@ -18,6 +19,7 @@ import ru.health.stream.source.local.room.dao.NoteDao
 import ru.health.stream.source.local.room.dao.OxygenSaturationDao
 import ru.health.stream.source.local.room.dao.ResourceDao
 import ru.health.stream.source.local.room.dao.UserDao
+import ru.health.stream.source.local.room.entity.BloodGlucoseEntity
 import ru.health.stream.source.local.room.entity.BloodPressureEntity
 import ru.health.stream.source.local.room.entity.BodyWeightEntity
 import ru.health.stream.source.local.room.entity.HeartRateEntity
@@ -35,6 +37,7 @@ import ru.health.stream.source.local.room.entity.resource.ResourceEntity
         ResourceEntity::class,
         HeartRateEntity::class,
         BodyWeightEntity::class,
+        BloodGlucoseEntity::class,
         BloodPressureEntity::class,
         OxygenSaturationEntity::class,
     ],
@@ -56,6 +59,7 @@ internal abstract class VitalDatabase : RoomDatabase() {
     abstract fun resourceDao(): ResourceDao
     abstract fun heartRateDao(): HeartRateDao
     abstract fun bodyWeightDao(): BodyWeightDao
+    abstract fun bloodGlucoseDao(): BloodGlucoseDao
     abstract fun bloodPressureDao(): BloodPressureDao
     abstract fun oxygenSaturationDao(): OxygenSaturationDao
 

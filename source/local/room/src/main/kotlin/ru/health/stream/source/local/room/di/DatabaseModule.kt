@@ -11,6 +11,7 @@ import ru.health.stream.source.local.room.BuildConfig
 import ru.health.stream.source.local.room.MeasurementTable
 import ru.health.stream.source.local.room.SqlCipherKeyManager
 import ru.health.stream.source.local.room.VitalDatabase
+import ru.health.stream.source.local.room.table.BloodGlucoseTable
 import ru.health.stream.source.local.room.table.BloodPressureTable
 import ru.health.stream.source.local.room.table.BodyWeightTable
 import ru.health.stream.source.local.room.table.HeartRateTable
@@ -38,11 +39,13 @@ internal object DatabaseModule {
     fun provideTables(
         heartRateTable: HeartRateTable,
         bodyWeightTable: BodyWeightTable,
+        bloodGlucoseTable: BloodGlucoseTable,
         bloodPressureTable: BloodPressureTable,
         oxygenSaturationTable: OxygenSaturationTable,
     ): List<MeasurementTable<Measurement>> = listOf(
         heartRateTable as MeasurementTable<Measurement>,
         bodyWeightTable as MeasurementTable<Measurement>,
+        bloodGlucoseTable as MeasurementTable<Measurement>,
         bloodPressureTable as MeasurementTable<Measurement>,
         oxygenSaturationTable as MeasurementTable<Measurement>,
     )

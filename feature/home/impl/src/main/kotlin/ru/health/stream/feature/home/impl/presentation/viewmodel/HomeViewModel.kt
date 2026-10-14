@@ -5,18 +5,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
+import ru.health.stream.core.chart.model.DrawableData
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Blood
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.icon.default.Spo2
 import ru.health.stream.core.ui.icon.default.Weight
+import ru.health.stream.core.ui.icon.device.Glucose
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiMeasurement
@@ -24,6 +25,7 @@ import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asUi
 import ru.health.stream.data.vitals.model.Estimation
 import ru.health.stream.data.vitals.model.Period
+import ru.health.stream.data.vitals.model.measurement.BloodGlucose
 import ru.health.stream.data.vitals.model.measurement.BloodPressure
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.data.vitals.model.measurement.HeartRate
@@ -31,11 +33,9 @@ import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.data.vitals.repository.MeasurementRepository
 import ru.health.stream.data.vitals.usecase.GroupMeasurementByPeriodUseCase
-import ru.health.stream.core.chart.model.DrawableData
 import ru.health.stream.source.remote.ble.BleSystemManager
 import javax.inject.Inject
 import kotlin.reflect.KClass
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -61,8 +61,8 @@ class HomeViewModel @Inject constructor(
             key = "HeartRate",
             measurementType = HeartRate::class,
             measurementUnit = UiText.NonTranslatable(value = "уд/мин"),
-            measurementValue = heartRates.firstOrNull()?.pulse?.run {
-                UiText.NonTranslatable(toString())
+            measurementValue = heartRates.firstOrNull()?.let { measurement ->
+                UiText.NonTranslatable(measurement.asUi().value)
             },
             measurementTitle = UiMeasurement.Type.HEART_RATE.text,
             measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
@@ -77,7 +77,7 @@ class HomeViewModel @Inject constructor(
         )
     }.shareIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+        started = SharingStarted.Lazily
     )
 
     val bloodPressureFlow = measurementRepository.getMeasurementsFlowByRange(
@@ -89,8 +89,8 @@ class HomeViewModel @Inject constructor(
             key = "BloodPressure",
             measurementType = BloodPressure::class,
             measurementUnit = UiText.NonTranslatable(value = "мм рт. ст."),
-            measurementValue = bloodPressures.firstOrNull()?.let { bloodPressure ->
-                UiText.NonTranslatable(value = bloodPressure.asUi().value)
+            measurementValue = bloodPressures.firstOrNull()?.let { measurement ->
+                UiText.NonTranslatable(measurement.asUi().value)
             },
             measurementTitle = UiMeasurement.Type.BLOOD_PRESSURE.text,
             measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Blood),
@@ -105,7 +105,35 @@ class HomeViewModel @Inject constructor(
         )
     }.shareIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+        started = SharingStarted.Lazily
+    )
+
+    val bloodGlucoseFlow = measurementRepository.getMeasurementsFlowByRange(
+        from = range.start,
+        to = range.endInclusive,
+        type = BloodGlucose::class,
+    ).map { bloodGlucoses ->
+        WeekCardState(
+            key = "BloodGlucose",
+            measurementType = BloodGlucose::class,
+            measurementUnit = UiText.NonTranslatable(value = "ммоль/л"),
+            measurementValue = bloodGlucoses.firstOrNull()?.let { measurement ->
+                UiText.NonTranslatable(measurement.asUi().value)
+            },
+            measurementTitle = UiMeasurement.Type.BLOOD_GLUCOSE.text,
+            measurementIcon = UiIcon.Vector(imageVector = Icons.Device.Glucose),
+            drawableData = DrawableData.create(
+                dateRange = range,
+                timeZone = timeZone,
+                period = Period.SixHour,
+                measurements = bloodGlucoses,
+                groupMeasurementByPeriodUseCase = groupMeasurementByPeriodUseCase,
+            ),
+            estimationLevel = bloodGlucoses.firstOrNull()?.metadata[Estimation]?.asUi(),
+        )
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily
     )
 
     val bodyWeightFlow = measurementRepository.getMeasurementsFlowByRange(
@@ -133,7 +161,7 @@ class HomeViewModel @Inject constructor(
         )
     }.shareIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+        started = SharingStarted.Lazily
     )
 
     val oxygenSaturationFlow = measurementRepository.getMeasurementsFlowByRange(
@@ -161,20 +189,23 @@ class HomeViewModel @Inject constructor(
         )
     }.shareIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds)
+        started = SharingStarted.Lazily
     )
 
     val weekCardStates = combine(
         // TODO: Bind by settings - shoplikpavel 2026-02-24
         heartRateFlow,
         bodyWeightFlow,
+        bloodGlucoseFlow,
         bloodPressureFlow,
         oxygenSaturationFlow,
-        transform = { states -> states.toList() },
+        transform = { states ->
+            states.toList().sortedByDescending { it.measurementValue != null }
+        },
     ).shareIn(
         replay = 1,
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeout = 5.seconds),
+        started = SharingStarted.Lazily,
     )
 
     private fun Estimation.asUi(): UiLevel = when (level) {

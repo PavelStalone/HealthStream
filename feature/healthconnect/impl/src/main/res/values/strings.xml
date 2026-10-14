@@ -21,6 +21,9 @@
     <string name="permissions_rationale_data_oxygen_saturation_title">Сатурация (SpO₂)</string>
     <string name="permissions_rationale_data_oxygen_saturation_body">Процент насыщения крови кислородом, для отслеживания дыхательной функции и своевременного уведомления о тревожных значениях</string>
 
+    <string name="permissions_rationale_data_blood_glucose_title">Глюкоза в крови</string>
+    <string name="permissions_rationale_data_blood_glucose_body">Концентрация глюкозы в крови для мониторинга показателей и формирования отчётов</string>
+
     <string name="permissions_rationale_data_weight_title">Вес и состав тела</string>
     <string name="permissions_rationale_data_weight_body">Масса тела для отслеживания изменений и расчёта производных показателей</string>
 

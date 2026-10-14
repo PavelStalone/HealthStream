@@ -110,8 +110,8 @@ fun Measurement.asUi(): UiMeasurement {
     val (value, unit) = when (this) {
         is HeartRate -> "$pulse" to UiText.NonTranslatable(value = "уд/мин")
         is BodyWeight -> "${weight.kg}" to UiText.NonTranslatable(value = "кг")
+        is BloodGlucose -> "$level" to UiText.NonTranslatable(value = "ммоль/л")
         is OxygenSaturation -> "$saturation" to UiText.NonTranslatable(value = "%")
-        is BloodGlucose -> "${level.toInt()}" to UiText.NonTranslatable(value = "ммоль/л")
         is BloodPressure -> "${systolic.toInt()}/${diastolic.toInt()}" to UiText.NonTranslatable(
             value = "мм рт. ст."
         )
