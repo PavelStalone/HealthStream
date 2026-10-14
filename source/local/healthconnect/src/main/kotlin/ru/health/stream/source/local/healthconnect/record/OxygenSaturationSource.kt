@@ -21,10 +21,8 @@ import ru.health.stream.data.vitals.model.measurement.OxygenSaturation
 import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
 import ru.health.stream.source.local.healthconnect.HealthConnectProvider
 import kotlin.reflect.KClass
-import kotlin.uuid.ExperimentalUuidApi
 import androidx.health.connect.client.records.metadata.Device as DeviceData
 
-@OptIn(ExperimentalUuidApi::class)
 internal class OxygenSaturationSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val localDeviceSource: LocalDeviceSource,

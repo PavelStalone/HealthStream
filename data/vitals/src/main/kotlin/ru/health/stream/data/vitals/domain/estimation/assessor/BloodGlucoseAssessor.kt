@@ -33,7 +33,7 @@ class BloodGlucoseAssessor @Inject constructor(
             localDate = date.toLocalDateTime(TimeZone.currentSystemDefault()).date
         ).years
 
-        val severeHypoglycemia = if (userAge < CHILD_AGE) 2.8f else 3.0f
+        val severeHypoglycemia = if (userAge < CHILD_AGE) 1.5f else 2.5f
         val hypoglycemia = if (userAge < ELDERLY_AGE) 3.3f else 4.6f
         val normalUpperBound = when {
             userAge < CHILD_AGE -> 5.6f
@@ -58,6 +58,7 @@ class BloodGlucoseAssessor @Inject constructor(
     }.getOrElse { emptyMap() }
 
     companion object {
+
         private const val CHILD_AGE = 18
         private const val ELDERLY_AGE = 50
     }

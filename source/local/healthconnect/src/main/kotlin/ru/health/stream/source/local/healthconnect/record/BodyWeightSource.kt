@@ -20,13 +20,10 @@ import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.kg
 import ru.health.stream.data.vitals.model.measurement.BodyWeight
 import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
-import ru.health.stream.source.local.healthconnect.HealthConnectManager
 import ru.health.stream.source.local.healthconnect.HealthConnectProvider
 import kotlin.reflect.KClass
-import kotlin.uuid.ExperimentalUuidApi
 import androidx.health.connect.client.records.metadata.Device as DeviceData
 
-@OptIn(ExperimentalUuidApi::class)
 internal class BodyWeightSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val localDeviceSource: LocalDeviceSource,

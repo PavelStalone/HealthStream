@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
@@ -174,34 +175,38 @@ internal class AndroidPermissionManager(
 
     // @formatter:off
     private fun Permission.asAndroid(): String? = when (this) {
-        Permission.BluetoothConnect -> Manifest.permission.BLUETOOTH_CONNECT
         Permission.BluetoothScan -> Manifest.permission.BLUETOOTH_SCAN
+        Permission.BluetoothConnect -> Manifest.permission.BLUETOOTH_CONNECT
 
+        Permission.ReadWeightScale -> HealthPermission.getReadPermission(WeightRecord::class)
         Permission.ReadHeartRate -> HealthPermission.getReadPermission(HeartRateRecord::class)
+        Permission.ReadBloodGlucose -> HealthPermission.getReadPermission(BloodGlucoseRecord::class)
         Permission.ReadBloodPressure -> HealthPermission.getReadPermission(BloodPressureRecord::class)
         Permission.ReadOxygenSaturation -> HealthPermission.getReadPermission(OxygenSaturationRecord::class)
-        Permission.ReadWeightScale -> HealthPermission.getReadPermission(WeightRecord::class)
 
+        Permission.WriteWeightScale -> HealthPermission.getWritePermission(WeightRecord::class)
         Permission.WriteHeartRate -> HealthPermission.getWritePermission(HeartRateRecord::class)
+        Permission.WriteBloodGlucose -> HealthPermission.getWritePermission(BloodGlucoseRecord::class)
         Permission.WriteBloodPressure -> HealthPermission.getWritePermission(BloodPressureRecord::class)
         Permission.WriteOxygenSaturation -> HealthPermission.getWritePermission(OxygenSaturationRecord::class)
-        Permission.WriteWeightScale -> HealthPermission.getWritePermission(WeightRecord::class)
     }
     // @formatter:on
 
     private fun String.asCommon(): Permission? = when (this) {
-        Manifest.permission.BLUETOOTH_CONNECT -> Permission.BluetoothConnect
         Manifest.permission.BLUETOOTH_SCAN -> Permission.BluetoothScan
+        Manifest.permission.BLUETOOTH_CONNECT -> Permission.BluetoothConnect
 
+        HealthPermission.getReadPermission(WeightRecord::class) -> Permission.ReadWeightScale
         HealthPermission.getReadPermission(HeartRateRecord::class) -> Permission.ReadHeartRate
+        HealthPermission.getReadPermission(BloodGlucoseRecord::class) -> Permission.ReadBloodGlucose
         HealthPermission.getReadPermission(BloodPressureRecord::class) -> Permission.ReadBloodPressure
         HealthPermission.getReadPermission(OxygenSaturationRecord::class) -> Permission.ReadOxygenSaturation
-        HealthPermission.getReadPermission(WeightRecord::class) -> Permission.ReadWeightScale
 
+        HealthPermission.getWritePermission(WeightRecord::class) -> Permission.WriteWeightScale
         HealthPermission.getWritePermission(HeartRateRecord::class) -> Permission.WriteHeartRate
+        HealthPermission.getWritePermission(BloodGlucoseRecord::class) -> Permission.WriteBloodGlucose
         HealthPermission.getWritePermission(BloodPressureRecord::class) -> Permission.WriteBloodPressure
         HealthPermission.getWritePermission(OxygenSaturationRecord::class) -> Permission.WriteOxygenSaturation
-        HealthPermission.getWritePermission(WeightRecord::class) -> Permission.WriteWeightScale
 
         else -> null
     }

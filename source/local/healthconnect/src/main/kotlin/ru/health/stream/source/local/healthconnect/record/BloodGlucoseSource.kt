@@ -1,0 +1,145 @@
+package ru.health.stream.source.local.healthconnect.record
+
+import android.content.Context
+import android.health.connect.datatypes.Metadata.RECORDING_METHOD_MANUAL_ENTRY
+import androidx.health.connect.client.records.BloodGlucoseRecord
+import androidx.health.connect.client.records.metadata.Metadata
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
+import dagger.hilt.android.qualifiers.ApplicationContext
+import jakarta.inject.Inject
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toKotlinInstant
+import ru.health.stream.core.common.permission.Permission
+import ru.health.stream.core.monitor.logV
+import ru.health.stream.core.monitor.logW
+import ru.health.stream.data.vitals.model.Device
+import ru.health.stream.data.vitals.model.Resource
+import ru.health.stream.data.vitals.model.measurement.BloodGlucose
+import ru.health.stream.source.infrastructure.source.local.LocalDeviceSource
+import ru.health.stream.source.local.healthconnect.HealthConnectProvider
+import kotlin.reflect.KClass
+import androidx.health.connect.client.records.metadata.Device as DeviceData
+import androidx.health.connect.client.units.BloodGlucose as HealthConnectBloodGlucose
+
+internal class BloodGlucoseSource @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val localDeviceSource: LocalDeviceSource,
+    private val healthConnectProvider: HealthConnectProvider,
+) : MeasurementSource<BloodGlucose>() {
+
+    override val type: KClass<BloodGlucose> = BloodGlucose::class
+    override val readPermission: Permission = Permission.ReadBloodGlucose
+    override val writePermission: Permission = Permission.WriteBloodGlucose
+
+    override suspend fun getMeasurementByRange(
+        start: Instant,
+        end: Instant,
+    ): List<BloodGlucose> = runCatching {
+        logV("getMeasurementByRange called: start=$start, end=$end")
+
+        val response = healthConnectProvider.value.readRecords(
+            ReadRecordsRequest(
+                BloodGlucoseRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    start.toJavaInstant(),
+                    end.toJavaInstant()
+                )
+            )
+        )
+
+        logV("Founded blood glucose records: ${response.records}")
+
+        response.records.map { record -> record.metadata to record }
+            .map { (metadata, record) ->
+                val packageName = metadata.dataOrigin.packageName
+                val resource = if (packageName.equals(context.packageName, ignoreCase = true)) {
+                    runCatching {
+                        require(metadata.recordingMethod != RECORDING_METHOD_MANUAL_ENTRY)
+
+                        val device = requireNotNull(metadata.device)
+                        val model = requireNotNull(device.model)
+
+                        localDeviceSource.getDeviceById(model).getOrThrow()
+                    }.getOrElse { Resource.Manual }
+                } else {
+                    Resource.App(packageName = packageName)
+                }
+
+                BloodGlucose(
+                    id = metadata.clientRecordId ?: metadata.id,
+                    createdAt = record.time.toKotlinInstant(),
+                    level = record.level.inMillimolesPerLiter,
+                    resource = resource,
+                )
+            }
+    }.onFailure { exception ->
+        logW("Error while getBloodGlucoseByRange running", exception)
+    }.getOrElse { emptyList() }
+
+    override suspend fun deleteMeasurement(measurement: BloodGlucose): Result<BloodGlucose> =
+        runCatching {
+            logV("deleteMeasurement called: measurement=$measurement")
+
+            healthConnectProvider.value.deleteRecords(
+                recordType = BloodGlucoseRecord::class,
+                recordIdsList = emptyList(),
+                clientRecordIdsList = listOf(measurement.id)
+            )
+
+            measurement
+        }.onFailure { exception ->
+            logW("Error while deleteMeasurement running", exception)
+        }
+
+    override suspend fun writeMeasurement(
+        measurement: BloodGlucose,
+    ): Result<BloodGlucose> = runCatching {
+        logV("writeBloodGlucose called: measurement=$measurement")
+
+        writeMeasurements(listOf(measurement)).getOrThrow()
+        measurement
+    }.onFailure { exception ->
+        logW("Error while writeBloodGlucose running", exception)
+    }
+
+    override suspend fun writeMeasurements(measurements: List<BloodGlucose>): Result<List<BloodGlucose>> =
+        runCatching {
+            logV("writeBloodGlucose called: measurements=$measurements")
+
+            val bloodGlucoseRecords = measurements.map { measurement ->
+                val metadata = when (val res = measurement.resource) {
+                    is Resource.Manual -> Metadata.manualEntry(
+                        clientRecordId = measurement.id,
+                        device = DeviceData(type = DeviceData.TYPE_PHONE)
+                    )
+
+                    is Device -> Metadata.autoRecorded(
+                        clientRecordId = measurement.id,
+                        device = DeviceData(
+                            type = DeviceData.TYPE_UNKNOWN,
+                            model = res.id,
+                        ),
+                    )
+
+                    is Resource.App -> throw IllegalArgumentException("Write data from other app not supported")
+                }
+                val instant = measurement.createdAt.toJavaInstant()
+
+                BloodGlucoseRecord(
+                    time = instant,
+                    zoneOffset = null,
+                    level = HealthConnectBloodGlucose.millimolesPerLiter(
+                        measurement.level
+                    ),
+                    metadata = metadata,
+                )
+            }
+
+            healthConnectProvider.value.insertRecords(records = bloodGlucoseRecords)
+            measurements
+        }.onFailure { exception ->
+            logW("Error while writeBloodGlucose running", exception)
+        }
+}

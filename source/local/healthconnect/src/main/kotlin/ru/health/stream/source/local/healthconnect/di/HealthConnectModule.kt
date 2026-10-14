@@ -9,6 +9,7 @@ import dagger.multibindings.IntoSet
 import jakarta.inject.Singleton
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.source.local.ExternalMeasurementSource
+import ru.health.stream.source.local.healthconnect.record.BloodGlucoseSource
 import ru.health.stream.source.local.healthconnect.record.BloodPressureSource
 import ru.health.stream.source.local.healthconnect.record.BodyWeightSource
 import ru.health.stream.source.local.healthconnect.record.HeartRateSource
@@ -26,11 +27,13 @@ internal object HealthConnectModule {
     fun provideMeasurementSources(
         heartRateSource: HeartRateSource,
         bodyWeightSource: BodyWeightSource,
+        bloodGlucoseSource: BloodGlucoseSource,
         bloodPressureSource: BloodPressureSource,
         oxygenSaturationSource: OxygenSaturationSource,
     ): List<MeasurementSource<Measurement>> = listOf(
         heartRateSource as MeasurementSource<Measurement>,
         bodyWeightSource as MeasurementSource<Measurement>,
+        bloodGlucoseSource as MeasurementSource<Measurement>,
         bloodPressureSource as MeasurementSource<Measurement>,
         oxygenSaturationSource as MeasurementSource<Measurement>,
     )
