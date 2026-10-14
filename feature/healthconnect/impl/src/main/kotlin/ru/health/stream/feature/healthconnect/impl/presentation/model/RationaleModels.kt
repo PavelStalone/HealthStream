@@ -8,6 +8,7 @@ import ru.health.stream.core.ui.icon.default.Blood
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.icon.default.Spo2
 import ru.health.stream.core.ui.icon.default.Weight
+import ru.health.stream.core.ui.icon.device.Glucose
 import ru.health.stream.feature.healthconnect.impl.R
 
 @Immutable
@@ -38,6 +39,13 @@ val DefaultDataTypeRationales: List<DataTypeRationale> = listOf(
         titleRes = R.string.permissions_rationale_data_oxygen_saturation_title,
         bodyRes = R.string.permissions_rationale_data_oxygen_saturation_body,
         icon = Icons.Default.Spo2,
+        hasRead = true,
+        hasWrite = true,
+    ),
+    DataTypeRationale(
+        titleRes = R.string.permissions_rationale_data_blood_glucose_title,
+        bodyRes = R.string.permissions_rationale_data_blood_glucose_body,
+        icon = Icons.Device.Glucose,
         hasRead = true,
         hasWrite = true,
     ),
