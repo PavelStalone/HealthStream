@@ -29,10 +29,6 @@ data class User(
     fun datePeriodAfterBirthday(localDate: LocalDate): DatePeriod = localDate - birthday
 }
 
-/**
- * Typed validation failures for [User]. Presentation layers should map
- * [reason] to localized messages.
- */
 class UserValidationException(val reason: Reason) : Exception() {
 
     enum class Reason {

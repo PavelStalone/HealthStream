@@ -26,12 +26,6 @@ import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowDropDown
 import ru.health.stream.presentation.viewmodel.LanguageViewModel
 
-/**
- * Settings field for choosing the application language.
- *
- * The selection is stored in [AppLocale]; activities pick it up in
- * `attachBaseContext` and are recreated to re-resolve resources.
- */
 @Composable
 fun LanguageSettingsField(
     modifier: Modifier = Modifier,
