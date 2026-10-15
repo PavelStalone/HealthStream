@@ -16,11 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.model.UiIcon
@@ -171,7 +173,7 @@ internal fun MeasurementsCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Нет данных за этот период",
+                        text = stringResource(R.string.no_data_for_period),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.outline,

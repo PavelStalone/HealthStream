@@ -32,11 +32,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
 import ru.health.stream.core.ui.component.SectionHeader
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
@@ -69,7 +71,7 @@ internal fun OnboardingReportScreen(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable("Отчет"),
+                title = UiText.Translatable(R.string.nav_report),
                 navigationIcon = {
                     IconButton(onClick = {}) {
                         Icon(
@@ -101,12 +103,12 @@ internal fun OnboardingReportScreen(
                     modifier = Modifier
                         .padding(bottom = 4.dp)
                         .padding(horizontal = 8.dp),
-                    text = "Конфигурация",
+                    text = stringResource(R.string.report_configuration),
                 )
                 Column {
                     Text(
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        text = "Период",
+                        text = stringResource(R.string.report_period),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     DateRangePlaceholder(
@@ -117,8 +119,8 @@ internal fun OnboardingReportScreen(
                                 scope = onboardingScope
                             )
                             .padding(all = 8.dp),
-                        startDate = "1 мая 2026",
-                        endDate = "7 мая 2026"
+                        startDate = stringResource(R.string.onboarding_demo_date_start),
+                        endDate = stringResource(R.string.onboarding_demo_date_end)
                     )
                 }
 
@@ -126,7 +128,7 @@ internal fun OnboardingReportScreen(
                     modifier = Modifier
                         .padding(top = 4.dp)
                         .padding(horizontal = 8.dp),
-                    text = "Формат",
+                    text = stringResource(R.string.report_format),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 FlowRow(
@@ -153,7 +155,7 @@ internal fun OnboardingReportScreen(
                     modifier = Modifier
                         .padding(top = 4.dp)
                         .padding(horizontal = 8.dp),
-                    text = "Типы данных",
+                    text = stringResource(R.string.report_data_types),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 FlowRow(
@@ -188,7 +190,7 @@ internal fun OnboardingReportScreen(
                     onClick = { },
                 ) {
                     Text(
-                        text = "Сгенерировать отчет",
+                        text = stringResource(R.string.action_generate_report),
                         fontWeight = FontWeight.ExtraBold,
                         style = MaterialTheme.typography.bodyLarge,
                     )
@@ -198,7 +200,7 @@ internal fun OnboardingReportScreen(
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .padding(horizontal = 8.dp),
-                    text = "Данные",
+                    text = stringResource(R.string.report_data_section),
                 )
             }
         }
@@ -210,7 +212,7 @@ internal fun OnboardingReportScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 isExpanded = isExpanded,
-                title = "Сегодня",
+                title = stringResource(R.string.period_today),
                 onClick = { },
                 actions = {
                     TextButton(
@@ -221,7 +223,7 @@ internal fun OnboardingReportScreen(
                         onClick = {}
                     ) {
                         Text(
-                            text = "Исключить все".uppercase(),
+                            text = stringResource(R.string.action_exclude_all).uppercase(),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.labelSmall,
                         )
@@ -238,12 +240,12 @@ internal fun OnboardingReportScreen(
                         .padding(horizontal = 16.dp)
                         .onboardingTarget(key = "report_card", scope = onboardingScope),
                     enabled = true,
-                    type = "Пульс",
-                    unit = "уд/мин",
+                    type = stringResource(R.string.measurement_type_heart_rate),
+                    unit = stringResource(R.string.unit_bpm),
                     time = "12:00",
                     value = "82",
                     sourceIcon = UiMeasurement.Resource.Manual.icon,
-                    sourceName = "Ручная запись",
+                    sourceName = stringResource(R.string.resource_manual),
                     measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
                     estimation = UiLevel.NORMAL,
                     onEditClick = {},

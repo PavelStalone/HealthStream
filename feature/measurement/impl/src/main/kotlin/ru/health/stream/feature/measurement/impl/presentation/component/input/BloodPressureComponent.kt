@@ -1,5 +1,6 @@
 package ru.health.stream.feature.measurement.impl.presentation.component.input
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -15,12 +16,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.vitals.model.EmptyMetadata
 import ru.health.stream.data.vitals.model.Resource
@@ -38,14 +41,12 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
 
     override fun build(): Result<BloodPressure> = runCatching {
         val uiState = bloodPressureState.value
-        val systolic =
-            requireNotNull(uiState.systolic.toFloatOrNull()) { "Systolic pressure is not correct" }
-        val diastolic =
-            requireNotNull(uiState.diastolic.toFloatOrNull()) { "Diastolic pressure is not correct" }
+        val systolic = uiState.systolic.toFloatOrNull() ?: throw ValidationError.InvalidNumber
+        val diastolic = uiState.diastolic.toFloatOrNull() ?: throw ValidationError.InvalidNumber
 
-        require(systolic > 0) { "Systolic pressure must be positive" }
-        require(diastolic > 0) { "Diastolic pressure must be positive" }
-        require(systolic > diastolic) { "Systolic must be greater than diastolic" }
+        if (systolic <= 0) throw ValidationError.PositiveRequired
+        if (diastolic <= 0) throw ValidationError.PositiveRequired
+        if (systolic <= diastolic) throw ValidationError.GreaterThanDiastolic
 
         BloodPressure(
             id = measurement?.id ?: Uuid.random().toString(),
@@ -56,7 +57,7 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
             diastolic = diastolic,
         )
     }.onFailure { throwable ->
-        bloodPressureState.value = bloodPressureState.value.copy(error = throwable.message)
+        bloodPressureState.value = bloodPressureState.value.copy(error = (throwable as? ValidationError)?.messageRes)
     }
 
     fun changeSystolic(value: String) {
@@ -88,7 +89,7 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
                 onValueChange = { value -> changeSystolic(value) },
                 label = {
                     Text(
-                        text = "Систолическое",
+                        text = stringResource(R.string.systolic_pressure_label),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -96,7 +97,7 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
                 isError = state.error != null,
                 suffix = {
                     Text(
-                        text = "мм рт. ст.",
+                        text = stringResource(R.string.unit_mm_hg),
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalContentColor.current.copy(alpha = 0.6f)
                     )
@@ -113,7 +114,7 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
                 onValueChange = { value -> changeDiastolic(value) },
                 label = {
                     Text(
-                        text = "Диастолическое",
+                        text = stringResource(R.string.diastolic_pressure_label),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -121,7 +122,7 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
                 isError = state.error != null,
                 suffix = {
                     Text(
-                        text = "мм рт. ст.",
+                        text = stringResource(R.string.unit_mm_hg),
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalContentColor.current.copy(alpha = 0.6f)
                     )
@@ -132,9 +133,9 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
             )
         }
 
-        state.error?.let { error ->
+        state.error?.let { errorRes ->
             Text(
-                text = error,
+                text = stringResource(errorRes),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -145,7 +146,7 @@ class BloodPressureComponent(private val measurement: BloodPressure? = null) : I
     private data class BloodPressureUi(
         val systolic: String = "",
         val diastolic: String = "",
-        val error: String? = null,
+        @StringRes val error: Int? = null,
     )
 }
 

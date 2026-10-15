@@ -32,11 +32,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Delete
 import ru.health.stream.core.ui.icon.default.Edit
@@ -128,7 +130,7 @@ internal fun MeasurementSwipeableCard(
                                     scaleY = 0.8f + 0.2f * progress
                                 },
                                 softWrap = false,
-                                text = "Изменить".uppercase(),
+                                text = stringResource(R.string.action_edit).uppercase(),
                                 color = editColor,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelSmall
@@ -160,7 +162,7 @@ internal fun MeasurementSwipeableCard(
                                     scaleY = 0.8f + 0.2f * progress
                                 },
                                 softWrap = false,
-                                text = "Удалить".uppercase(),
+                                text = stringResource(R.string.action_delete).uppercase(),
                                 color = deleteColor,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelSmall

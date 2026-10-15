@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.health.stream.core.chart.core.drawable.CubicLine
@@ -38,6 +39,7 @@ import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Favorite
@@ -69,16 +71,16 @@ internal fun OnboardingMeasurementScreen(
     val isEdit by remember { derivedStateOf { currentStep.id == "measurement_expand_edit" } }
 
     val options = listOf(
-        UiText.NonTranslatable(value = "Сегодня"),
-        UiText.NonTranslatable(value = "Неделя"),
-        UiText.NonTranslatable(value = "Месяц"),
-        UiText.NonTranslatable(value = "Год"),
+        UiText.Translatable(R.string.period_today),
+        UiText.Translatable(R.string.period_week),
+        UiText.Translatable(R.string.period_month),
+        UiText.Translatable(R.string.period_year),
     )
 
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable("Пульс"),
+                title = UiText.Translatable(R.string.measurement_type_heart_rate),
                 navigationIcon = {
                     IconButton(onClick = {}) {
                         Icon(
@@ -152,7 +154,7 @@ internal fun OnboardingMeasurementScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SectionHeader(text = "Динамика показателей")
+                SectionHeader(text = stringResource(R.string.section_vitals_trends))
                 Card(
                     modifier = Modifier.onboardingTarget(
                         key = "measurement_chart",
@@ -198,7 +200,7 @@ internal fun OnboardingMeasurementScreen(
                         scope = onboardingScope,
                     )
                     .padding(all = 8.dp),
-                text = "История измерений",
+                text = stringResource(R.string.section_measurement_history),
             )
         }
 
@@ -211,7 +213,7 @@ internal fun OnboardingMeasurementScreen(
                     .onboardingTarget(key = "measurement_data_title", scope = onboardingScope)
                     .padding(all = 8.dp),
                 isExpanded = isExpanded,
-                title = "Сегодня",
+                title = stringResource(R.string.period_today),
                 onClick = {},
             )
         }
@@ -230,13 +232,13 @@ internal fun OnboardingMeasurementScreen(
                         ),
                     isEdit = isEdit,
                     value = "82",
-                    unit = "уд/мин",
-                    note = "После пробежки",
+                    unit = stringResource(R.string.unit_bpm),
+                    note = stringResource(R.string.onboarding_demo_note),
                     estimation = UiLevel.NORMAL,
-                    type = "Пульс",
+                    type = stringResource(R.string.measurement_type_heart_rate),
                     sourceIcon = UiMeasurement.Resource.Manual.icon,
                     measurementIcon = UiIcon.Vector(Icons.Default.Favorite),
-                    sourceName = "Ручная запись",
+                    sourceName = stringResource(R.string.resource_manual),
                     time = "10:30",
                 )
             }
@@ -249,7 +251,7 @@ internal fun OnboardingMeasurementScreen(
                     .animateItem()
                     .padding(horizontal = 16.dp),
                 isExpanded = false,
-                title = "Вчера",
+                title = stringResource(R.string.period_yesterday),
                 onClick = {},
             )
         }

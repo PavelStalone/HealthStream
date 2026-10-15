@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +54,7 @@ import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.drawIcon
+import ru.health.stream.core.ui.R
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.measurement.impl.presentation.viewmodel.AddMeasurementViewModel
 import kotlin.reflect.KClass
@@ -72,7 +74,7 @@ internal fun AddMeasurementContent(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable(value = "Измерение"),
+                title = UiText.Translatable(R.string.measurement_title_generic),
                 navigationIcon = {
                     IconButton(
                         onClick = onClose
@@ -101,12 +103,12 @@ internal fun AddMeasurementContent(
     ) {
         Text(
             modifier = Modifier.padding(top = 8.dp),
-            text = "Заполните данные вручную",
+            text = stringResource(R.string.add_measurement_subtitle),
             color = MaterialTheme.colorScheme.outline,
             style = MaterialTheme.typography.bodyMedium,
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(text = "Категория измерения")
+            SectionHeader(text = stringResource(R.string.add_measurement_category))
             MeasurementTypeSelector(
                 modifier = Modifier.fillMaxWidth(),
                 selectedType = uiState.selectedType,
@@ -114,11 +116,11 @@ internal fun AddMeasurementContent(
             )
         }
         Column(modifier = Modifier.animateContentSize()) {
-            SectionHeader(text = "Показатели и значения")
+            SectionHeader(text = stringResource(R.string.add_measurement_indicators))
             uiState.inputTypeComponent.Content(modifier = Modifier.fillMaxWidth())
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(text = "Дополнительные данные")
+            SectionHeader(text = stringResource(R.string.add_measurement_additional_data))
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -127,7 +129,7 @@ internal fun AddMeasurementContent(
                 onValueChange = { note -> viewModel.onNoteChange(note) },
                 placeholder = {
                     Text(
-                        text = "Любые полезные заметки...",
+                        text = stringResource(R.string.add_measurement_note_placeholder),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
@@ -162,7 +164,7 @@ internal fun AddMeasurementContent(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
             ) {
-                Text(text = "Отменить", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = stringResource(R.string.action_cancel), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
             Button(
                 modifier = Modifier
@@ -176,7 +178,7 @@ internal fun AddMeasurementContent(
                 ),
             ) {
                 Text(
-                    text = "Сохранить",
+                    text = stringResource(R.string.action_save),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.ExtraBold,
                 )

@@ -67,17 +67,11 @@ private val timeFormatter = LocalDateTime.Format {
 }
 
 internal fun MeasurementGroup.asMeasurementSection(
+    typeName: String,
+    unit: String,
     timeZone: TimeZone,
 ): MeasurementSection {
     val reportEstimation = estimation?.level?.asReportEstimation()
-
-    val (typeName, unit) = when (this) {
-        is MeasurementGroup.BodyWeight -> "Вес тела" to "кг"
-        is MeasurementGroup.OxygenSaturation -> "Сатурация (SpO₂)" to "%"
-        is MeasurementGroup.BloodGlucose -> "Глюкоза в крови" to "ммоль/л"
-        is MeasurementGroup.HeartRate -> "Частота сердечных сокращений" to "уд/мин"
-        is MeasurementGroup.BloodPressure -> "Артериальное давление" to "мм рт.ст."
-    }
 
     return MeasurementSection(
         unit = unit,

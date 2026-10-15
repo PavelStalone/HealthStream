@@ -25,7 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Add
 import ru.health.stream.core.ui.model.UiMeasurement
@@ -50,7 +52,7 @@ fun <T> ExpandableFloatingActionButton(
     mainFabIcon: @Composable (rotation: Float) -> Unit = { rotation ->
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = "Large floating action button",
+            contentDescription = stringResource(R.string.cd_add_measurement_fab),
             modifier = Modifier.rotate(rotation),
         )
     },

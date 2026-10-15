@@ -21,17 +21,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.health.stream.core.chart.core.drawable.CubicLine
 import ru.health.stream.core.chart.core.drawable.Scatter
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.AddMeasurementFab
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Bluetooth
-import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.icon.default.Settings
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asDomain
@@ -59,7 +60,7 @@ internal fun HomeScreen(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable(value = "Измерения"),
+                title = UiText.Translatable(R.string.nav_vitals),
                 navigationIcon = {
                     IconButton(
                         onClick = onSettingsIconClick
@@ -149,7 +150,7 @@ internal fun HomeScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
                 modifier = Modifier.padding(all = 24.dp),
-                text = "Пока нет ни одного измерения. Добавьте первое!",
+                text = stringResource(R.string.no_measurements_yet),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.outline,
                 ),

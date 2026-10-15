@@ -17,14 +17,23 @@ data class User(
 ) {
 
     init {
-        require(firstName.isNotBlank()) { "Имя не может быть пустым" }
-        require(lastName.isNotBlank()) { "Фамилия не может быть пустой" }
+        if (firstName.isBlank()) throw UserValidationException(UserValidationException.Reason.FIRST_NAME_EMPTY)
+        if (lastName.isBlank()) throw UserValidationException(UserValidationException.Reason.LAST_NAME_EMPTY)
 
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        require(birthday <= today) { "День рождения не может быть в будущем" }
+        if (birthday > today) throw UserValidationException(UserValidationException.Reason.BIRTHDAY_FUTURE)
     }
 
     val fullName: String get() = "$lastName $firstName"
 
     fun datePeriodAfterBirthday(localDate: LocalDate): DatePeriod = localDate - birthday
+}
+
+class UserValidationException(val reason: Reason) : Exception() {
+
+    enum class Reason {
+        FIRST_NAME_EMPTY,
+        LAST_NAME_EMPTY,
+        BIRTHDAY_FUTURE,
+    }
 }

@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="permissions_rationale_title">Конфиденциальность и разрешения</string>
-    <string name="permissions_rationale_intro">HealthStream — приложение для отслеживания показателей здоровья. Чтобы отображать полную историю и динамику состояний, оно может читать и записывать данные в Health Connect — защищённое системное хранилище медицинских данных Android.</string>
+    <string name="permissions_rationale_title">Privacy and permissions</string>
+    <string name="permissions_rationale_intro">HealthStream is a health-tracking app. To display the full history and trends of your conditions, it can read and write data in Health Connect — the secure system storage for medical data on Android.</string>
 
-    <string name="permissions_rationale_section_disclaimer">Медицинская оговорка и статус ПО</string>
-    <string name="permissions_rationale_disclaimer_body">HealthStream выполняет функции исключительно сбора, хранения и визуализации физиологических показателей пользователя. Приложение не дает медицинских рекомендаций, не осуществляет интерпретацию данных для постановки диагнозов и не назначает лечение. Все представленные графики, статистики и отчёты носят информационно-ознакомительный характер. При любых недомоганиях или вопросах о здоровье обязательно проконсультируйтесь с врачом.</string>
+    <string name="permissions_rationale_section_disclaimer">Medical disclaimer and software status</string>
+    <string name="permissions_rationale_disclaimer_body">HealthStream solely performs collecting, storing and visualizing the user\'s physiological indicators. The app does not provide medical advice, does not interpret data for diagnosis purposes and does not prescribe treatment. All charts, statistics and reports are purely informational. If you feel unwell or have any health-related questions, always consult a doctor.</string>
 
-    <string name="permissions_rationale_section_reports_disclaimer">Отправка и экспорт отчётов</string>
-    <string name="permissions_rationale_reports_disclaimer_body">При экспорте или отправке сгенерированных отчётов (PDF/CSV) вы делаете это по собственному усмотрению. Приложение и разработчик не несут ответственности за их дальнейшее распространение, передачу третьим лицам, сохранность или использование вне приложения.</string>
+    <string name="permissions_rationale_section_reports_disclaimer">Sending and exporting reports</string>
+    <string name="permissions_rationale_reports_disclaimer_body">When you export or send generated reports (PDF/CSV), you do so at your own discretion. The app and the developer bear no responsibility for their further distribution, transfer to third parties, preservation or use outside the app.</string>
 
-    <string name="permissions_rationale_section_data_types">Какие данные мы запрашиваем</string>
+    <string name="permissions_rationale_section_data_types">What data we request</string>
 
-    <string name="permissions_rationale_data_heart_rate_title">Пульс</string>
-    <string name="permissions_rationale_data_heart_rate_body">Значения частоты сердечных сокращений, полученные с носимых устройств и датчиков, для отображения динамики пульса и построения графиков</string>
+    <string name="permissions_rationale_data_heart_rate_title">Heart rate</string>
+    <string name="permissions_rationale_data_heart_rate_body">Heart-rate values obtained from wearable devices and sensors, to display pulse dynamics and build charts</string>
 
-    <string name="permissions_rationale_data_blood_pressure_title">Артериальное давление</string>
-    <string name="permissions_rationale_data_blood_pressure_body">Систолическое и диастолическое давление для контроля показателей и формирования отчётов</string>
+    <string name="permissions_rationale_data_blood_pressure_title">Blood pressure</string>
+    <string name="permissions_rationale_data_blood_pressure_body">Systolic and diastolic pressure for indicator control and report generation</string>
 
-    <string name="permissions_rationale_data_oxygen_saturation_title">Сатурация (SpO₂)</string>
-    <string name="permissions_rationale_data_oxygen_saturation_body">Процент насыщения крови кислородом, для отслеживания дыхательной функции и своевременного уведомления о тревожных значениях</string>
+    <string name="permissions_rationale_data_oxygen_saturation_title">Oxygen saturation (SpO₂)</string>
+    <string name="permissions_rationale_data_oxygen_saturation_body">Percentage of blood oxygen saturation, to track respiratory function and promptly alert about concerning values</string>
 
-    <string name="permissions_rationale_data_blood_glucose_title">Глюкоза в крови</string>
-    <string name="permissions_rationale_data_blood_glucose_body">Концентрация глюкозы в крови для мониторинга показателей и формирования отчётов</string>
+    <string name="permissions_rationale_data_blood_glucose_title">Blood glucose</string>
+    <string name="permissions_rationale_data_blood_glucose_body">Blood glucose concentration for indicator monitoring and report generation</string>
 
-    <string name="permissions_rationale_data_weight_title">Вес и состав тела</string>
-    <string name="permissions_rationale_data_weight_body">Масса тела для отслеживания изменений и расчёта производных показателей</string>
+    <string name="permissions_rationale_data_weight_title">Weight and body composition</string>
+    <string name="permissions_rationale_data_weight_body">Body mass for tracking changes and calculating derived indicators</string>
 
-    <string name="permissions_rationale_permission_read">Чтение</string>
-    <string name="permissions_rationale_permission_write">Запись</string>
+    <string name="permissions_rationale_permission_read">Read</string>
+    <string name="permissions_rationale_permission_write">Write</string>
 
-    <string name="permissions_rationale_section_purpose">Зачем нужны разрешения</string>
-    <string name="permissions_rationale_purpose_body">Чтение используется только для отображения ваших измерений в интерфейсе приложения: списка истории, графиков и сводных отчётов. Запись нужна для того, чтобы измерения, выполненные прямо в HealthStream, сохранялись обратно в Health Connect и были доступны другим приложениям по вашему выбору.</string>
+    <string name="permissions_rationale_section_purpose">Why permissions are needed</string>
+    <string name="permissions_rationale_purpose_body">Reading is used only to display your measurements in the app interface: history list, charts and summary reports. Writing is needed so that measurements taken directly in HealthStream are saved back to Health Connect and become available to other apps at your choice.</string>
 
-    <string name="permissions_rationale_section_processing">Как обрабатываются данные</string>
-    <string name="permissions_rationale_processing_body">Все данные обрабатываются исключительно на вашем устройстве. Данные могут поступать от ручного ввода, из системного хранилища Health Connect, а также с подключенных по Bluetooth (BLE) портативных медицинских приборов. Они хранятся в защищённом хранилище Health Connect и в локальной базе данных приложения. HealthStream не отправляет медицинские данные на внешние серверы и не использует их для обучения ИИ-моделей.</string>
+    <string name="permissions_rationale_section_processing">How data is processed</string>
+    <string name="permissions_rationale_processing_body">All data is processed exclusively on your device. Data may come from manual input, from the system Health Connect storage, and from portable medical devices connected via Bluetooth (BLE). It is stored in the protected Health Connect storage and in the app\'s local database. HealthStream does not send medical data to external servers and does not use it for training AI models.</string>
 
-    <string name="permissions_rationale_section_sharing">Кому передаются данные</string>
-    <string name="permissions_rationale_sharing_body">Ваши данные не передаются третьим лицам, рекламным сетям, кредитным органам и аналитическим сервисам. Приложение не выполняет облачную синхронизацию и не требует подключения к интернету. Данные попадают в Health Connect и распространяются только среди тех приложений, которым вы сами предоставите доступ.</string>
+    <string name="permissions_rationale_section_sharing">Who receives the data</string>
+    <string name="permissions_rationale_sharing_body">Your data is not shared with third parties, advertising networks, credit bureaus or analytics services. The app does not perform cloud synchronization and does not require an internet connection. Data goes into Health Connect and spreads only among the apps you grant access to yourself.</string>
 
-    <string name="permissions_rationale_section_storage">Хранение и удаление данных</string>
-    <string name="permissions_rationale_storage_body">При удалении записи пользователем внутри HealthStream она маркируется флагом мягкого удаления (is_removed = true) в локальной базе данных приложения и полностью (физически) удаляется из системного хранилища Health Connect, если эта запись была создана самим приложением HealthStream. Если удаляются данные, созданные сторонними приложениями и ранее загруженные из Health Connect, они скрываются только локально внутри HealthStream (мягкое удаление), а в Health Connect и сторонних приложениях сохраняются. Для полного физического удаления всех локальных данных приложения очистите хранилище в настройках Android («Настройки» → «Приложения» → «HealthStream» → «Хранилище» → «Очистить данные») или удалите приложение.</string>
+    <string name="permissions_rationale_section_storage">Storage and deletion of data</string>
+    <string name="permissions_rationale_storage_body">When a record is deleted by the user inside HealthStream, it is flagged with a soft-delete marker (is_removed = true) in the app\'s local database and is physically removed from the system Health Connect storage if that record was created by the HealthStream app itself. If data created by third-party apps and previously loaded from Health Connect is deleted, it is hidden locally inside HealthStream only (soft delete) and remains in Health Connect and in third-party apps. To physically delete all local app data, clear the storage in Android settings (\u201cSettings\u201d → \u201cApps\u201d → \u201cHealthStream\u201d → \u201cStorage\u201d → \u201cClear data\u201d) or uninstall the app.</string>
 
-    <string name="permissions_rationale_section_rights">Ваши права</string>
-    <string name="permissions_rationale_rights_body">Вы можете в любой момент отозвать разрешения: откройте «Настройки» → «Приложения» → «HealthStream» → «Разрешения» или управление разрешениями Health Connect.</string>
+    <string name="permissions_rationale_section_rights">Your rights</string>
+    <string name="permissions_rationale_rights_body">You can revoke permissions at any time: open \u201cSettings\u201d → \u201cApps\u201d → \u201cHealthStream\u201d → \u201cPermissions\u201d or the Health Connect permission management.</string>
 
-    <string name="permissions_rationale_section_contact">Контакты</string>
-    <string name="permissions_rationale_contact_body">По всем вопросам, связанным с обработкой персональных и медицинских данных, вы можете обратиться по адресу pavel.shoplik@yandex.ru.</string>
+    <string name="permissions_rationale_section_contact">Contacts</string>
+    <string name="permissions_rationale_contact_body">For any questions related to processing of personal and medical data, contact pavel.shoplik@yandex.ru.</string>
 
-    <string name="permissions_rationale_last_updated">Последнее обновление: октябрь 2026 г.</string>
+    <string name="permissions_rationale_last_updated">Last updated: October 2026</string>
 
 </resources>

@@ -60,7 +60,7 @@ class HomeViewModel @Inject constructor(
         WeekCardState(
             key = "HeartRate",
             measurementType = HeartRate::class,
-            measurementUnit = UiText.NonTranslatable(value = "уд/мин"),
+            measurementUnit = UiMeasurement.Type.HEART_RATE.unit,
             measurementValue = heartRates.firstOrNull()?.let { measurement ->
                 UiText.NonTranslatable(measurement.asUi().value)
             },
@@ -88,7 +88,7 @@ class HomeViewModel @Inject constructor(
         WeekCardState(
             key = "BloodPressure",
             measurementType = BloodPressure::class,
-            measurementUnit = UiText.NonTranslatable(value = "мм рт. ст."),
+            measurementUnit = UiMeasurement.Type.BLOOD_PRESSURE.unit,
             measurementValue = bloodPressures.firstOrNull()?.let { measurement ->
                 UiText.NonTranslatable(measurement.asUi().value)
             },
@@ -116,7 +116,7 @@ class HomeViewModel @Inject constructor(
         WeekCardState(
             key = "BloodGlucose",
             measurementType = BloodGlucose::class,
-            measurementUnit = UiText.NonTranslatable(value = "ммоль/л"),
+            measurementUnit = UiMeasurement.Type.BLOOD_GLUCOSE.unit,
             measurementValue = bloodGlucoses.firstOrNull()?.let { measurement ->
                 UiText.NonTranslatable(measurement.asUi().value)
             },
@@ -144,7 +144,7 @@ class HomeViewModel @Inject constructor(
         WeekCardState(
             key = "BodyWeight",
             measurementType = BodyWeight::class,
-            measurementUnit = UiText.NonTranslatable(value = "кг"),
+            measurementUnit = UiMeasurement.Type.WEIGHT.unit,
             measurementValue = bodyWeights.firstOrNull()?.let { measurement ->
                 UiText.NonTranslatable(value = measurement.asUi().value)
             },
@@ -172,7 +172,7 @@ class HomeViewModel @Inject constructor(
         WeekCardState(
             key = "OxygenSaturation",
             measurementType = OxygenSaturation::class,
-            measurementUnit = UiText.NonTranslatable(value = "%"),
+            measurementUnit = UiMeasurement.Type.OXYGEN_SATURATION.unit,
             measurementValue = oxygenSaturations.firstOrNull()?.let { measurement ->
                 UiText.NonTranslatable(value = measurement.asUi().value)
             },
