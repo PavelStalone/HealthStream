@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.health.stream.core.chart.core.Drawable
 import ru.health.stream.core.chart.core.drawable.CubicLine
@@ -30,6 +31,7 @@ import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.icon.default.Report
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiText
@@ -54,7 +56,7 @@ internal fun OnboardingHomeScreen(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable(value = "Измерения"),
+                title = UiText.Translatable(R.string.nav_vitals),
                 navigationIcon = {
                     IconButton(onClick = {}) {
                         Icon(
@@ -106,8 +108,8 @@ internal fun OnboardingHomeScreen(
                     .onboardingTarget("vitals_card", onboardingScope),
                 onClick = {},
                 measurementIcon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
-                measurementUnit = "уд/мин",
-                measurementTitle = "Пульс",
+                measurementUnit = stringResource(R.string.unit_bpm),
+                measurementTitle = stringResource(R.string.measurement_type_heart_rate),
                 measurementValue = if (drawableData.isNotEmpty()) "82" else null,
                 yRange = 50f..120f,
                 estimationLevel = UiLevel.NORMAL,

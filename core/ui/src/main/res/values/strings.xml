@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Navigation Tabs -->
+    <string name="nav_vitals">Vitals</string>
+    <string name="nav_report">Report</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Common Actions / Buttons -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_select_all">Select all</string>
+    <string name="action_exclude_all">Exclude all</string>
+    <string name="action_generate_report">Generate report</string>
+    <string name="action_share_report">Share report</string>
+
+    <!-- Measurement Types -->
+    <string name="measurement_type_weight">Weight</string>
+    <string name="measurement_type_glucose">Glucose</string>
+    <string name="measurement_type_heart_rate">Heart Rate</string>
+    <string name="measurement_type_oxygen_saturation">Oxygen Saturation</string>
+    <string name="measurement_type_blood_pressure">Blood Pressure</string>
+    <string name="measurement_type_blood_glucose_full">Blood Glucose</string>
+    <string name="measurement_type_body_weight_full">Body Weight</string>
+    <string name="measurement_title_generic">Measurement</string>
+
+    <!-- Measurement Sources / Resources -->
+    <string name="resource_manual">Manual entry</string>
+    <string name="resource_pulse_oximeter">Pulse oximeter</string>
+    <string name="resource_weight_scale">Weight scale</string>
+    <string name="resource_bp_cuff">Blood pressure monitor</string>
+    <string name="resource_glucose_meter">Glucose meter</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">bpm</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_mmol_l">mmol/L</string>
+    <string name="unit_percent">%%</string>
+    <string name="unit_mm_hg">mmHg</string>
+
+    <!-- Estimation Levels -->
+    <string name="level_low">Low</string>
+    <string name="level_normal">Normal</string>
+    <string name="level_high">High</string>
+    <string name="level_critical">Critical</string>
+
+    <!-- Periods -->
+    <string name="period_today">Today</string>
+    <string name="period_yesterday">Yesterday</string>
+    <string name="period_week">Week</string>
+    <string name="period_month">Month</string>
+    <string name="period_year">Year</string>
+
+    <!-- Messages and Headers -->
+    <string name="no_data_for_period">No data for this period</string>
+    <string name="no_measurements_yet">No measurements yet. Add your first one!</string>
+    <string name="section_vitals_trends">Vitals trends</string>
+    <string name="section_measurement_history">Measurement history</string>
+
+    <!-- Add Measurement Screen -->
+    <string name="add_measurement_subtitle">Fill in data manually</string>
+    <string name="add_measurement_category">Measurement category</string>
+    <string name="add_measurement_indicators">Indicators and values</string>
+    <string name="add_measurement_additional_data">Additional data</string>
+    <string name="add_measurement_note_placeholder">Any useful notes…</string>
+    <string name="systolic_pressure_label">Systolic</string>
+    <string name="diastolic_pressure_label">Diastolic</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_intro">Please specify information about yourself so algorithms can account for your individual characteristics</string>
+    <string name="profile_basic_info">Basic information</string>
+    <string name="profile_first_name">First name</string>
+    <string name="profile_first_name_placeholder">Enter your first name</string>
+    <string name="profile_last_name">Last name</string>
+    <string name="profile_last_name_placeholder">Enter your last name</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_birthday">Date of birth</string>
+    <string name="profile_physical_data">Physical data</string>
+    <string name="profile_height">Height (cm)</string>
+    <string name="profile_gender">Gender</string>
+    <string name="profile_gender_male">Male</string>
+    <string name="profile_gender_female">Female</string>
+
+    <!-- Report Screen -->
+    <string name="report_configuration">Configuration</string>
+    <string name="report_period">Period</string>
+    <string name="report_format">Format</string>
+    <string name="report_data_types">Data types</string>
+    <string name="report_data_section">Data</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_general_header">General</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_data_sync_header">Data synchronization</string>
+    <string name="settings_health_connect_subtitle">Data synchronization in Android system</string>
+
+    <!-- Validation Errors -->
+    <string name="validation_error_invalid_number">Invalid number</string>
+    <string name="validation_error_positive_required">Value must be positive</string>
+    <string name="validation_error_greater_than_diastolic">Systolic must be greater than diastolic</string>
+    <string name="validation_error_pulse_too_high">Pulse cannot exceed 220 bpm</string>
+    <string name="validation_error_glucose_negative">Glucose level cannot be negative</string>
+    <string name="validation_error_saturation_range">Oxygen saturation must be between 0 and 100</string>
+    <string name="validation_error_weight_positive">Weight must be positive</string>
+    <string name="validation_error_first_name_empty">First name cannot be empty</string>
+    <string name="validation_error_last_name_empty">Last name cannot be empty</string>
+    <string name="validation_error_birthday_future">Date of birth cannot be in the future</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_home_welcome">Welcome! Let\u2019s explore the app\u2019s features</string>
+    <string name="onboarding_home_empty">Your weekly measurements will appear here. Until there is no data, you see this message</string>
+    <string name="onboarding_home_filled_example">This is how the data will look. The line shows the arithmetic average, and the ranges show minimum and maximum values</string>
+    <string name="onboarding_estimation_badge">Here the condition assessment for the latest measurement is shown (Normal, High, etc.)</string>
+    <string name="onboarding_estimation_delay">Assessments may not appear immediately. Within 15 minutes the app will calculate and add new assessments</string>
+    <string name="onboarding_week_card">This card gives an overview of the week. Tap it to study the data in detail</string>
+    <string name="onboarding_measurement_chart">This graph lets you quickly assess the dynamics of your measurements</string>
+    <string name="onboarding_measurement_details">Here you can examine the values and their assessments in detail</string>
+    <string name="onboarding_expand_group">Tap the date heading to expand the list of measurements</string>
+    <string name="onboarding_measurement_card">This is a measurement card: it shows the value, note and assessment</string>
+    <string name="onboarding_swipe_actions">To edit or delete a measurement, swipe the card to the left</string>
+    <string name="onboarding_add_button">To add measurements manually, tap this button</string>
+    <string name="onboarding_report_intro">In this section you can configure and generate a report for analysis</string>
+    <string name="onboarding_report_date_range">Choose the required date range for generating the report</string>
+    <string name="onboarding_report_format">Here you can change the file format</string>
+    <string name="onboarding_report_types">Select the measurement types that should be included in the report</string>
+    <string name="onboarding_report_exclude_block">You can exclude whole record blocks from the report</string>
+    <string name="onboarding_report_exclude_item">Tapping a card excludes a specific record from the report</string>
+    <string name="onboarding_report_generate">Tap the generate button to get the ready report</string>
+    <string name="onboarding_profile_intro">Specify your personal data in the profile so that the assessment algorithms work more accurately</string>
+    <string name="onboarding_profile_incomplete">If the profile is left incomplete, some assessments will be unavailable</string>
+    <string name="onboarding_profile_save">Don\u2019t forget to tap the save button to apply the changes</string>
+    <string name="onboarding_finish">Monitoring your health regularly matters, and HealthStream helps you do it simply and effectively. We wish you great wellbeing!</string>
+    <string name="onboarding_demo_note">After a jog</string>
+    <string name="onboarding_demo_date_start">May 1, 2026</string>
+    <string name="onboarding_demo_date_end">May 7, 2026</string>
+    <string name="onboarding_demo_birthday">January 1, 1990</string>
+
+    <!-- PDF Report -->
+    <string name="report_pdf_title">Health Report</string>
+    <string name="report_pdf_created_by">Generated by the HealthStream app</string>
+    <string name="report_pdf_period_caption">Report generated for the period</string>
+    <string name="report_pdf_user">User</string>
+    <string name="report_pdf_birth_day">Birth date</string>
+    <string name="report_pdf_age_years">Years</string>
+    <string name="report_pdf_gender">Gender</string>
+    <string name="report_pdf_gender_male">male</string>
+    <string name="report_pdf_gender_female">female</string>
+    <string name="report_pdf_height_cm">Height</string>
+    <string name="report_pdf_summary_title">Overview of all measurements</string>
+    <string name="report_pdf_summary_description">Total deviation counts calculated by the algorithm are shown here</string>
+    <string name="report_pdf_col_indicator">Indicator</string>
+    <string name="report_pdf_col_total">Total</string>
+    <string name="report_pdf_col_values">Values</string>
+    <string name="report_pdf_row_grand_total">TOTAL</string>
+    <string name="report_pdf_table_title">Measurements table: %1$s</string>
+    <string name="report_pdf_table_description">Table with all measurements sorted chronologically. The row assessment takes priority into account: measurements with the highest priority for the given period are shown first</string>
+    <string name="report_pdf_col_time">Time</string>
+    <string name="report_pdf_col_value">Value</string>
+    <string name="report_pdf_col_assessment">Assessment</string>
+    <string name="report_pdf_col_note">Note</string>
+    <string name="report_pdf_chart_title">Readings chart: %1$s</string>
+    <string name="report_pdf_chart_description">Data is presented in a grouped form. Ranges show minimum and maximum values, and the line shows their arithmetic mean</string>
+    <string name="report_pdf_medical_disclaimer">Assessments may be inaccurate for your body. We recommend consulting a doctor if you experience any difficulties</string>
+    <string name="report_estimation_low">Decreased</string>
+    <string name="report_estimation_normal">Normal</string>
+    <string name="report_estimation_high">Increased</string>
+    <string name="report_estimation_critical">Critical</string>
+    <string name="report_type_heart_rate_long">Heart rate</string>
+    <string name="report_type_blood_pressure_long">Blood pressure</string>
+    <string name="report_type_oxygen_saturation_long">Oxygen saturation (SpO₂)</string>
+
+    <!-- Accessibility -->
+    <string name="cd_add_measurement_fab">Add measurement</string>
+</resources>

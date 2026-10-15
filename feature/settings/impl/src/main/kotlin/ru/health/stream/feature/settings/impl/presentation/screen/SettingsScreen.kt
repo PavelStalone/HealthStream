@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
@@ -27,7 +28,7 @@ internal fun SettingsScreen(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable(value = "Настройки"),
+                title = UiText.Translatable(R.string.nav_settings),
                 navigationIcon = {
                     IconButton(
                         onClick = onBackClick

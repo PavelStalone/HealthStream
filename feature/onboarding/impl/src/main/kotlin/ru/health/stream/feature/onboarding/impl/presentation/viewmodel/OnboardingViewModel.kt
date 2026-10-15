@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.data.setting.model.AppParam
 import ru.health.stream.data.setting.repository.AppParamRepository
@@ -24,138 +25,138 @@ internal class OnboardingViewModel @Inject constructor(
         OnboardingStep(
             id = "home",
             screen = LocalOnboardingNavKey.Home,
-            text = UiText.NonTranslatable("Добро пожаловать! Давайте познакомимся с функциями приложения")
+            text = UiText.Translatable(R.string.onboarding_home_welcome)
         ),
         OnboardingStep(
             id = "home",
             screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
-            text = UiText.NonTranslatable("Здесь будут появляться ваши измерения за неделю. Пока данных нет, вы видите это сообщение")
+            text = UiText.Translatable(R.string.onboarding_home_empty)
         ),
         OnboardingStep(
             id = "home_filled",
             screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
-            text = UiText.NonTranslatable("А вот так будут выглядеть данные. Линия на графике показывает среднее арифметическое, а диапазоны - минимальные и максимальные значения")
+            text = UiText.Translatable(R.string.onboarding_home_filled_example)
         ),
         OnboardingStep(
             id = "home_filled",
             screen = LocalOnboardingNavKey.Home,
             targetKey = "estimation",
-            text = UiText.NonTranslatable("Здесь отображается оценка состояния для последнего измерения (Норма, Высоко и др.)")
+            text = UiText.Translatable(R.string.onboarding_estimation_badge)
         ),
         OnboardingStep(
             id = "home_filled",
             screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
-            text = UiText.NonTranslatable("Оценка ваших измерений может появиться не сразу. В течение 15 минут приложение произведёт расчёт и добавит новые оценки")
+            text = UiText.Translatable(R.string.onboarding_estimation_delay)
         ),
         OnboardingStep(
             id = "home_filled",
             screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
-            text = UiText.NonTranslatable("Эта карточка отображает общую картину за неделю. Чтобы изучить данные подробнее, нажмите на неё")
+            text = UiText.Translatable(R.string.onboarding_week_card)
         ),
         // Measurement Screen Steps
         OnboardingStep(
             id = "measurement",
             screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_chart",
-            text = UiText.NonTranslatable("На этом графике можно быстро оценить динамику ваших измерений")
+            text = UiText.Translatable(R.string.onboarding_measurement_chart)
         ),
         OnboardingStep(
             id = "measurement",
             screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_data",
-            text = UiText.NonTranslatable("Здесь можно подробнее изучить значения и их оценку")
+            text = UiText.Translatable(R.string.onboarding_measurement_details)
         ),
         OnboardingStep(
             id = "measurement",
             screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_data_title",
-            text = UiText.NonTranslatable("Нажмите на заголовок даты, чтобы развернуть список измерений")
+            text = UiText.Translatable(R.string.onboarding_expand_group)
         ),
         OnboardingStep(
             id = "measurement_expand",
             screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_card",
-            text = UiText.NonTranslatable("Это карточка измерения: здесь отображаются значение, заметка и оценка")
+            text = UiText.Translatable(R.string.onboarding_measurement_card)
         ),
         OnboardingStep(
             id = "measurement_expand_edit",
             screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_card",
-            text = UiText.NonTranslatable("Чтобы отредактировать или удалить измерение, смахните карточку влево")
+            text = UiText.Translatable(R.string.onboarding_swipe_actions)
         ),
         OnboardingStep(
             id = "measurement_expand",
             screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_add_button",
-            text = UiText.NonTranslatable("Чтобы внести измерения вручную, нажмите на эту кнопку")
+            text = UiText.Translatable(R.string.onboarding_add_button)
         ),
         // Report Screen Steps
         OnboardingStep(
             id = "report",
             screen = LocalOnboardingNavKey.Report,
-            text = UiText.NonTranslatable("В этом разделе можно настроить и сформировать отчёт для анализа")
+            text = UiText.Translatable(R.string.onboarding_report_intro)
         ),
         OnboardingStep(
             id = "report_expand",
             screen = LocalOnboardingNavKey.Report,
             targetKey = "report_date_range",
-            text = UiText.NonTranslatable("Выберите нужный диапазон дат для формирования отчёта")
+            text = UiText.Translatable(R.string.onboarding_report_date_range)
         ),
         OnboardingStep(
             id = "report_expand",
             screen = LocalOnboardingNavKey.Report,
             targetKey = "report_type_selection",
-            text = UiText.NonTranslatable("Здесь можно изменить формат файла")
+            text = UiText.Translatable(R.string.onboarding_report_format)
         ),
         OnboardingStep(
             id = "report_expand",
             screen = LocalOnboardingNavKey.Report,
             targetKey = "report_measurement_selection",
-            text = UiText.NonTranslatable("Выберите типы измерений, которые должны войти в отчёт")
+            text = UiText.Translatable(R.string.onboarding_report_types)
         ),
         OnboardingStep(
             id = "report_expand",
             screen = LocalOnboardingNavKey.Report,
             targetKey = "report_title_exclude",
-            text = UiText.NonTranslatable("Вы можете убирать целые блоки записей из отчёта")
+            text = UiText.Translatable(R.string.onboarding_report_exclude_block)
         ),
         OnboardingStep(
             id = "report_expand",
             screen = LocalOnboardingNavKey.Report,
             targetKey = "report_card",
-            text = UiText.NonTranslatable("Нажав на карточку, можно исключить конкретную запись из отчёта")
+            text = UiText.Translatable(R.string.onboarding_report_exclude_item)
         ),
         OnboardingStep(
             id = "report_expand",
             screen = LocalOnboardingNavKey.Report,
             targetKey = "report_generate_button",
-            text = UiText.NonTranslatable("Нажмите кнопку генерации, чтобы получить готовый отчёт")
+            text = UiText.Translatable(R.string.onboarding_report_generate)
         ),
         // Profile Screen Steps
         OnboardingStep(
             id = "profile",
             screen = LocalOnboardingNavKey.Profile,
-            text = UiText.NonTranslatable("В профиле нужно указать свои данные, чтобы алгоритмы оценки показателей работали точнее")
+            text = UiText.Translatable(R.string.onboarding_profile_intro)
         ),
         OnboardingStep(
             id = "profile",
             screen = LocalOnboardingNavKey.Profile,
-            text = UiText.NonTranslatable("Если оставить профиль незаполненным, некоторые оценки будут недоступны")
+            text = UiText.Translatable(R.string.onboarding_profile_incomplete)
         ),
         OnboardingStep(
             id = "profile",
             screen = LocalOnboardingNavKey.Profile,
             targetKey = "profile_save_button",
-            text = UiText.NonTranslatable("Не забудьте нажать кнопку сохранения, чтобы применить изменения")
+            text = UiText.Translatable(R.string.onboarding_profile_save)
         ),
         OnboardingStep(
             id = "profile",
             screen = LocalOnboardingNavKey.Profile,
-            text = UiText.NonTranslatable("За здоровьем важно следить регулярно, а HealthStream поможет вам делать это просто и эффективно. Желаем отличного самочувствия!")
+            text = UiText.Translatable(R.string.onboarding_finish)
         )
     ).iterator()
 

@@ -39,7 +39,8 @@ import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.core.chart.model.ChartPosition
 import ru.health.stream.core.chart.model.path.DashPathEffect
 import ru.health.stream.core.monitor.logV
-import ru.health.stream.core.ui.model.RUSSIAN_FULL
+import ru.health.stream.core.ui.R
+import ru.health.stream.core.ui.model.localized
 import ru.health.stream.data.personal.model.User
 import ru.health.stream.data.report.model.MeasurementSummary
 import ru.health.stream.data.report.usecase.CalculateMeasurementSummaryUseCase
@@ -60,6 +61,7 @@ import ru.health.stream.source.local.file.model.TEXT_MUTED
 import ru.health.stream.source.local.file.model.asMeasurementSection
 import ru.health.stream.source.local.file.model.asReportEstimation
 import java.io.OutputStream
+import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -201,14 +203,14 @@ internal class PdfReportGenerator(
         c.setFontAndSize(fontBold, 36f)
         c.setFillColor(DeviceRgb(255, 255, 255))
         c.moveText(60.0, h - 160.0)
-        c.showText("Отчет здоровья")
+        c.showText(context.getString(R.string.report_pdf_title))
         c.endText()
 
         c.beginText()
         c.setFontAndSize(font, 18f)
         c.setFillColor(DeviceRgb(200, 210, 220))
         c.moveText(60.0, h - 200.0)
-        c.showText("Создан приложением HealthStream")
+        c.showText(context.getString(R.string.report_pdf_created_by))
         c.endText()
 
         c.setFillColor(DeviceRgb(230, 235, 240))
@@ -231,7 +233,7 @@ internal class PdfReportGenerator(
         c.setFontAndSize(font, 11f)
         c.setFillColor(HEADER_BG)
         c.moveText(75.0, h * 0.60 + 28.0)
-        c.showText("Отчет создан за период")
+        c.showText(context.getString(R.string.report_pdf_period_caption))
         c.moveText(0.0, -15.0)
         c.showText(
             "${
@@ -257,19 +259,31 @@ internal class PdfReportGenerator(
             c.moveText(60.0, 100.0)
             c.showText(
                 buildString {
-                    append("Пользователь: ${user.fullName}.")
+                    append(context.getString(R.string.report_pdf_user))
+                    append(": ${user.fullName}.")
                     append(" ")
-                    append("День рождения: ${user.birthday.format(dateFormatter)}")
+                    append(context.getString(R.string.report_pdf_birth_day))
+                    append(": ${user.birthday.format(dateFormatter)}")
                 }
             )
             c.moveText(0.0, -20.0)
             c.showText(
                 buildString {
-                    append("Полных лет: ${user.datePeriodAfterBirthday(dateNow).years}.")
+                    append(context.getString(R.string.report_pdf_age_years))
+                    append(": ${user.datePeriodAfterBirthday(dateNow).years}.")
                     append(" ")
-                    append("Пол: ")
-                    append(if (user.gender) "мужской" else "женский")
-                    append(". Рост: ${user.height.cm} сантиметров")
+                    append(context.getString(R.string.report_pdf_gender))
+                    append(": ")
+                    append(
+                        if (user.gender) {
+                            context.getString(R.string.report_pdf_gender_male)
+                        } else {
+                            context.getString(R.string.report_pdf_gender_female)
+                        }
+                    )
+                    append(". ")
+                    append(context.getString(R.string.report_pdf_height_cm))
+                    append(": ${user.height.cm} см")
                 }
             )
             c.endText()
@@ -286,14 +300,14 @@ internal class PdfReportGenerator(
         summaries: List<MeasurementSummary>,
     ) {
         doc.add(
-            Paragraph("Сводка всех измерений")
+            Paragraph(context.getString(R.string.report_pdf_summary_title))
                 .setFont(fontBold).setFontSize(22f).setFontColor(HEADER_BG)
                 .setMarginTop(20f).setMarginBottom(6f)
         )
 
         doc.add(
             Paragraph(
-                "Здесь отображается общее количество отклонений, рассчитанное алгоритмом"
+                context.getString(R.string.report_pdf_summary_description)
             ).setFont(font).setFontSize(10f).setFontColor(TEXT_MUTED).setMarginBottom(12f)
         )
 
@@ -304,8 +318,13 @@ internal class PdfReportGenerator(
             setWidth(UnitValue.createPercentValue(100f))
         }
 
-        val entriesName = ReportEstimation.entries.map(ReportEstimation::text).toTypedArray()
-        for (h in listOf("Показатель", "Всего", *entriesName, "Значения")) {
+        val entriesName = ReportEstimation.entries.map { it.localizedText(context) }.toTypedArray()
+        for (h in listOf(
+            context.getString(R.string.report_pdf_col_indicator),
+            context.getString(R.string.report_pdf_col_total),
+            *entriesName,
+            context.getString(R.string.report_pdf_col_values),
+        )) {
             table.addHeaderCell(
                 Cell().add(
                     Paragraph(h).setFont(fontBold).setFontSize(9f)
@@ -319,7 +338,8 @@ internal class PdfReportGenerator(
         summaries.forEachIndexed { i, summary ->
             val backgroundColor = if (i % 2 == 0) STRIPE_BG else null
 
-            val section = summary.group.asMeasurementSection(timeZone)
+            val (typeName, unit) = summary.group.resolveStrings()
+            val section = summary.group.asMeasurementSection(typeName, unit, timeZone)
             val group = section.measurementGroup
 
             val cs = listOf(
@@ -358,7 +378,7 @@ internal class PdfReportGenerator(
 
         val cs = listOf(
             Cell().add(
-                Paragraph("ИТОГО")
+                Paragraph(context.getString(R.string.report_pdf_row_grand_total))
                     .setFont(fontBold)
                     .setFontSize(9f)
             ).defaultCell(backgroundColor = backgroundColor),
@@ -400,7 +420,7 @@ internal class PdfReportGenerator(
         val firstSection = sections.first()
 
         doc.add(
-            Paragraph("Таблица измерений: ${firstSection.typeName}")
+            Paragraph(context.getString(R.string.report_pdf_table_title, firstSection.typeName))
                 .setFontSize(22f)
                 .setFont(fontBold)
                 .setMarginTop(20f)
@@ -408,7 +428,7 @@ internal class PdfReportGenerator(
                 .setFontColor(HEADER_BG)
         )
         doc.add(
-            Paragraph("Таблица со всеми измерениями, отсортированными по порядку. Оценка в строке отображается с учётом приоритета: сначала показываются измерения с самым высоким приоритетом за заданный период")
+            Paragraph(context.getString(R.string.report_pdf_table_description))
                 .setFont(font)
                 .setFontSize(10f)
                 .setMarginBottom(12f)
@@ -424,7 +444,13 @@ internal class PdfReportGenerator(
                 setWidth(UnitValue.createPercentValue(100f))
             }
 
-            listOf("#", "Время", "Значение", "Оценка", "Заметка").forEach { header ->
+            listOf(
+                "#",
+                context.getString(R.string.report_pdf_col_time),
+                context.getString(R.string.report_pdf_col_value),
+                context.getString(R.string.report_pdf_col_assessment),
+                context.getString(R.string.report_pdf_col_note),
+            ).forEach { header ->
                 table.addHeaderCell(
                     Cell().add(
                         Paragraph(header)
@@ -474,7 +500,7 @@ internal class PdfReportGenerator(
                         .setTextAlignment(TextAlignment.CENTER),
 
                     Cell().add(
-                        Paragraph(section.reportEstimation?.text ?: "")
+                        Paragraph(section.reportEstimation?.localizedText(context) ?: "")
                             .setFontSize(9f)
                             .setFont(fontBold)
                             .setFontColor(section.reportEstimation?.color)
@@ -529,7 +555,7 @@ internal class PdfReportGenerator(
         val positionMap: MutableMap<Int, MutableList<ChartPosition>> = mutableMapOf()
 
         doc.add(
-            Paragraph("График показаний: ${section.typeName}")
+            Paragraph(context.getString(R.string.report_pdf_chart_title, section.typeName))
                 .setFontSize(22f)
                 .setMarginTop(20f)
                 .setFont(fontBold)
@@ -537,7 +563,7 @@ internal class PdfReportGenerator(
                 .setFontColor(HEADER_BG)
         )
         doc.add(
-            Paragraph("Данные представлены в сгруппированном виде. Диапазоны показывают минимальные и максимальные значения, а линия их среднее арифметическое")
+            Paragraph(context.getString(R.string.report_pdf_chart_description))
                 .setFont(font)
                 .setFontSize(10f)
                 .setMarginBottom(16f)
@@ -740,11 +766,11 @@ internal class PdfReportGenerator(
             }
 
             is Period.Week -> LocalDateTime.Format {
-                dayOfWeek(names = RUSSIAN_ABBREVIATED)
+                dayOfWeek(names = DayOfWeekNames.localized(Locale.getDefault()))
             }
 
             Period.Month -> LocalDateTime.Format {
-                monthName(names = MonthNames.RUSSIAN_FULL)
+                monthName(names = MonthNames.localized(Locale.getDefault()))
             }
 
             Period.Year -> LocalDateTime.Format {
@@ -893,7 +919,7 @@ internal class PdfReportGenerator(
 
         doc.add(Paragraph("").setMarginTop(pH + 70f))
         doc.add(
-            Paragraph("Оценки измерений могут быть неточными для вашего организма. Рекомендуем обратиться к врачу, если у вас возникают затруднения")
+            Paragraph(context.getString(R.string.report_pdf_medical_disclaimer))
                 .setFont(font)
                 .setFontSize(15f)
                 .setFontColor(TEXT_MUTED)
@@ -931,7 +957,8 @@ internal class PdfReportGenerator(
 
         val measurementSections = measurementGroupsWithType.mapValues { (_, measurementGroups) ->
             measurementGroups.map { measurementGroup ->
-                measurementGroup.asMeasurementSection(timeZone = timeZone)
+                val (typeName, unit) = measurementGroup.resolveStrings()
+                measurementGroup.asMeasurementSection(typeName, unit, timeZone)
             }
         }
 
@@ -955,10 +982,21 @@ internal class PdfReportGenerator(
         .setFontSize(fontSize)
         .run { fontColor?.let { color -> setFontColor(color) } ?: this }
         .run { if (count <= 0) setFontColor(TEXT_MUTED) else this }
-}
 
-private val RUSSIAN_ABBREVIATED: DayOfWeekNames = DayOfWeekNames(
-    listOf(
-        "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"
-    )
-)
+    private fun MeasurementGroup.resolveStrings(): Pair<String, String> = when (this) {
+        is MeasurementGroup.BodyWeight ->
+            context.getString(R.string.measurement_type_body_weight_full) to context.getString(R.string.unit_kg)
+
+        is MeasurementGroup.OxygenSaturation ->
+            context.getString(R.string.report_type_oxygen_saturation_long) to context.getString(R.string.unit_percent)
+
+        is MeasurementGroup.BloodGlucose ->
+            context.getString(R.string.measurement_type_blood_glucose_full) to context.getString(R.string.unit_mmol_l)
+
+        is MeasurementGroup.HeartRate ->
+            context.getString(R.string.report_type_heart_rate_long) to context.getString(R.string.unit_bpm)
+
+        is MeasurementGroup.BloodPressure ->
+            context.getString(R.string.report_type_blood_pressure_long) to context.getString(R.string.unit_mm_hg)
+    }
+}

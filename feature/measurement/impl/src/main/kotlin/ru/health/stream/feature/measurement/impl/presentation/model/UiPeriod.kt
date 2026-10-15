@@ -2,6 +2,7 @@ package ru.health.stream.feature.measurement.impl.presentation.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.datetime.DayOfWeek
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.data.vitals.model.Period
 
@@ -11,19 +12,19 @@ internal sealed class UiPeriod(
 ) {
 
     data object Today : UiPeriod(
-        label = UiText.NonTranslatable(value = "Сегодня")
+        label = UiText.Translatable(R.string.period_today)
     )
 
     data object Week : UiPeriod(
-        label = UiText.NonTranslatable(value = "Неделя")
+        label = UiText.Translatable(R.string.period_week)
     )
 
     data object Month : UiPeriod(
-        label = UiText.NonTranslatable(value = "Месяц")
+        label = UiText.Translatable(R.string.period_month)
     )
 
     data object Year : UiPeriod(
-        label = UiText.NonTranslatable(value = "Год")
+        label = UiText.Translatable(R.string.period_year)
     )
 }
 

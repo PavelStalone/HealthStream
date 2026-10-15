@@ -16,10 +16,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import ru.health.stream.core.ui.R as CoreUiR
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.drawIcon
 import ru.health.stream.feature.healthconnect.impl.R
@@ -51,7 +53,7 @@ fun HealthConnectSettingsField(
             Column {
                 Text("HealthConnect")
                 Text(
-                    text = "Синхронизация данных в системе Android",
+                    text = stringResource(CoreUiR.string.settings_health_connect_subtitle),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodySmall,

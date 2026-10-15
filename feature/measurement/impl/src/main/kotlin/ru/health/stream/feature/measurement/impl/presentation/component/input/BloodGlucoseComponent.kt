@@ -1,5 +1,6 @@
 package ru.health.stream.feature.measurement.impl.presentation.component.input
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -11,10 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.datetime.Clock
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.vitals.model.EmptyMetadata
 import ru.health.stream.data.vitals.model.Resource
@@ -23,16 +26,17 @@ import kotlin.uuid.Uuid
 
 class BloodGlucoseComponent(private val measurement: BloodGlucose? = null) : InputTypeComponent {
 
-    private val glucoseState = mutableStateOf(BloodGlucoseUi(
-        level = measurement?.level?.toString() ?: ""
-    ))
+    private val glucoseState = mutableStateOf(
+        BloodGlucoseUi(
+            level = measurement?.level?.toString() ?: ""
+        )
+    )
 
     override fun build(): Result<BloodGlucose> = runCatching {
         val uiState = glucoseState.value
-        val level =
-            requireNotNull(uiState.level.toDoubleOrNull()) { "Glucose level is not correct" }
+        val level = uiState.level.toDoubleOrNull() ?: throw ValidationError.InvalidNumber
 
-        require(level >= 0) { "Glucose level cannot be negative" }
+        if (level < 0) throw ValidationError.GlucoseNegative
 
         BloodGlucose(
             id = measurement?.id ?: Uuid.random().toString(),
@@ -42,7 +46,8 @@ class BloodGlucoseComponent(private val measurement: BloodGlucose? = null) : Inp
             level = level,
         )
     }.onFailure { throwable ->
-        glucoseState.value = glucoseState.value.copy(error = throwable.message)
+        glucoseState.value =
+            glucoseState.value.copy(error = (throwable as? ValidationError)?.messageRes)
     }
 
     fun changeLevel(value: String) {
@@ -61,14 +66,14 @@ class BloodGlucoseComponent(private val measurement: BloodGlucose? = null) : Inp
             value = state.level,
             shape = MaterialTheme.shapes.large,
             onValueChange = { value -> changeLevel(value) },
-            label = { Text(text = "Глюкоза в крови") },
+            label = { Text(text = stringResource(R.string.measurement_type_blood_glucose_full)) },
             isError = state.error != null,
-            supportingText = state.error?.let { error ->
-                { Text(text = error) }
+            supportingText = state.error?.let { errorRes ->
+                { Text(text = stringResource(errorRes)) }
             },
             suffix = {
                 Text(
-                    text = "ммоль/л",
+                    text = stringResource(R.string.unit_mmol_l),
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalContentColor.current.copy(alpha = 0.6f)
                 )
@@ -82,7 +87,7 @@ class BloodGlucoseComponent(private val measurement: BloodGlucose? = null) : Inp
     @Immutable
     private data class BloodGlucoseUi(
         val level: String = "",
-        val error: String? = null,
+        @StringRes val error: Int? = null,
     )
 }
 

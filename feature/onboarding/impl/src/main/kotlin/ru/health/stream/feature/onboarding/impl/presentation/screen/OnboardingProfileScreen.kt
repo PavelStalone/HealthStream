@@ -25,9 +25,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
@@ -52,7 +54,7 @@ internal fun OnboardingProfileScreen(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable(value = "Профиль"),
+                title = UiText.Translatable(R.string.nav_profile),
                 navigationIcon = {
                     IconButton(onClick = {}) {
                         Icon(
@@ -81,7 +83,7 @@ internal fun OnboardingProfileScreen(
             modifier = Modifier
                 .padding(top = 16.dp)
                 .padding(horizontal = 16.dp),
-            text = "Пожалуйста, укажите информацию о себе, чтобы алгоритмы могли учитывать ваши индивидуальные характеристики",
+            text = stringResource(R.string.profile_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.outline
         )
@@ -89,33 +91,33 @@ internal fun OnboardingProfileScreen(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SectionHeader(text = "Основная информация")
+            SectionHeader(text = stringResource(R.string.profile_basic_info))
             OnboardingInputField(
                 value = "Иван",
-                label = "Имя",
-                placeholder = "Введите ваше имя"
+                label = stringResource(R.string.profile_first_name),
+                placeholder = stringResource(R.string.profile_first_name_placeholder)
             )
             OnboardingInputField(
                 value = "Иванов",
-                label = "Фамилия",
-                placeholder = "Введите вашу фамилию"
+                label = stringResource(R.string.profile_last_name),
+                placeholder = stringResource(R.string.profile_last_name_placeholder)
             )
             OnboardingInputField(
                 value = "ivan@example.com",
-                label = "Почта",
+                label = stringResource(R.string.profile_email),
                 placeholder = "example@mail.com",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Дата рождения",
+                    text = stringResource(R.string.profile_birthday),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "1 января 1990",
+                    value = stringResource(R.string.onboarding_demo_birthday),
                     onValueChange = {},
                     readOnly = true,
                     enabled = false,
@@ -134,16 +136,16 @@ internal fun OnboardingProfileScreen(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SectionHeader(text = "Физические данные")
+            SectionHeader(text = stringResource(R.string.profile_physical_data))
             OnboardingInputField(
                 value = "180",
-                label = "Рост (см)",
+                label = stringResource(R.string.profile_height),
                 placeholder = "175",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             Column {
                 Text(
-                    text = "Пол",
+                    text = stringResource(R.string.profile_gender),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -151,12 +153,12 @@ internal fun OnboardingProfileScreen(
                     FilterChip(
                         selected = true,
                         onClick = { },
-                        label = { Text(text = "Мужской") }
+                        label = { Text(text = stringResource(R.string.profile_gender_male)) }
                     )
                     FilterChip(
                         selected = false,
                         onClick = { },
-                        label = { Text(text = "Женский") }
+                        label = { Text(text = stringResource(R.string.profile_gender_female)) }
                     )
                 }
             }
@@ -177,7 +179,7 @@ internal fun OnboardingProfileScreen(
             ),
         ) {
             Text(
-                text = "Сохранить",
+                text = stringResource(R.string.action_save),
                 fontWeight = FontWeight.ExtraBold,
                 style = MaterialTheme.typography.bodyLarge,
             )

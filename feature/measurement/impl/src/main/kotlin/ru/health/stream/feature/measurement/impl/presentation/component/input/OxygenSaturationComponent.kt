@@ -1,5 +1,6 @@
 package ru.health.stream.feature.measurement.impl.presentation.component.input
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -11,10 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.datetime.Clock
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.vitals.model.EmptyMetadata
 import ru.health.stream.data.vitals.model.Resource
@@ -33,10 +36,9 @@ class OxygenSaturationComponent(
 
     override fun build(): Result<OxygenSaturation> = runCatching {
         val uiState = saturationState.value
-        val saturation =
-            requireNotNull(uiState.saturation.toFloatOrNull()) { "Saturation is not correct" }
+        val saturation = uiState.saturation.toFloatOrNull() ?: throw ValidationError.InvalidNumber
 
-        require(saturation in 0f..100f) { "Oxygen saturation must be between 0 and 100" }
+        if (saturation !in 0f..100f) throw ValidationError.SaturationRange
 
         OxygenSaturation(
             id = measurement?.id ?: Uuid.random().toString(),
@@ -46,7 +48,7 @@ class OxygenSaturationComponent(
             saturation = saturation,
         )
     }.onFailure { throwable ->
-        saturationState.value = saturationState.value.copy(error = throwable.message)
+        saturationState.value = saturationState.value.copy(error = (throwable as? ValidationError)?.messageRes)
     }
 
     fun changeSaturation(value: String) {
@@ -67,12 +69,12 @@ class OxygenSaturationComponent(
             onValueChange = { value -> changeSaturation(value) },
             label = { Text(text = "SpO₂") },
             isError = state.error != null,
-            supportingText = state.error?.let { error ->
-                { Text(text = error) }
+            supportingText = state.error?.let { errorRes ->
+                { Text(text = stringResource(errorRes)) }
             },
             suffix = {
                 Text(
-                    text = "%",
+                    text = stringResource(R.string.unit_percent),
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalContentColor.current.copy(alpha = 0.6f)
                 )
@@ -86,7 +88,7 @@ class OxygenSaturationComponent(
     @Immutable
     private data class OxygenSaturationUi(
         val saturation: String = "",
-        val error: String? = null,
+        @StringRes val error: Int? = null,
     )
 }
 

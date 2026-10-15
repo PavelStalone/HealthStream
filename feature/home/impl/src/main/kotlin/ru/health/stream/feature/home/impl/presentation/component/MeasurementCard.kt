@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
@@ -34,6 +35,7 @@ import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.content
 import ru.health.stream.core.ui.model.drawIcon
+import ru.health.stream.core.ui.R
 import ru.health.stream.data.vitals.model.Period
 import ru.health.stream.core.chart.api.LineChart
 import ru.health.stream.core.chart.core.ChartScope
@@ -175,7 +177,7 @@ internal fun MeasurementCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Нет данных за этот период",
+                        text = stringResource(R.string.no_data_for_period),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.outline,

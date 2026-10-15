@@ -2,6 +2,7 @@ package ru.health.stream.core.ui.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.datetime.Instant
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Blood
 import ru.health.stream.core.ui.icon.default.Favorite
@@ -52,27 +53,27 @@ data class UiMeasurement(
         )
 
         data object Manual : Resource(
-            text = UiText.NonTranslatable("Ручная запись"),
+            text = UiText.Translatable(R.string.resource_manual),
             icon = UiIcon.Vector(imageVector = Icons.Device.Pencil),
         )
 
         data object PulseOximeter : Resource(
-            text = UiText.NonTranslatable("Пульсоксиметр"),
+            text = UiText.Translatable(R.string.resource_pulse_oximeter),
             icon = UiIcon.Vector(imageVector = Icons.Device.PulseOximeter),
         )
 
         data object WeightScale : Resource(
-            text = UiText.NonTranslatable("Весы"),
+            text = UiText.Translatable(R.string.resource_weight_scale),
             icon = UiIcon.Vector(imageVector = Icons.Device.WeightScale),
         )
 
         data object BPCuff : Resource(
-            text = UiText.NonTranslatable("Тонометр"),
+            text = UiText.Translatable(R.string.resource_bp_cuff),
             icon = UiIcon.Vector(imageVector = Icons.Device.BPCuff),
         )
 
         data object Glucose : Resource(
-            text = UiText.NonTranslatable("Глюкометр"),
+            text = UiText.Translatable(R.string.resource_glucose_meter),
             icon = UiIcon.Vector(imageVector = Icons.Device.Glucose),
         )
     }
@@ -80,46 +81,39 @@ data class UiMeasurement(
     enum class Type(
         val text: UiText,
         val icon: UiIcon,
+        val unit: UiText,
     ) {
 
         WEIGHT(
-            text = UiText.NonTranslatable("Вес"),
+            text = UiText.Translatable(R.string.measurement_type_weight),
             icon = UiIcon.Vector(imageVector = Icons.Default.Weight),
+            unit = UiText.Translatable(R.string.unit_kg),
         ),
         BLOOD_GLUCOSE(
-            text = UiText.NonTranslatable("Глюкоза"),
+            text = UiText.Translatable(R.string.measurement_type_glucose),
             icon = UiIcon.Vector(imageVector = Icons.Device.Glucose),
+            unit = UiText.Translatable(R.string.unit_mmol_l),
         ),
         HEART_RATE(
-            text = UiText.NonTranslatable("Пульс"),
+            text = UiText.Translatable(R.string.measurement_type_heart_rate),
             icon = UiIcon.Vector(imageVector = Icons.Default.Favorite),
+            unit = UiText.Translatable(R.string.unit_bpm),
         ),
         OXYGEN_SATURATION(
-            text = UiText.NonTranslatable("Сатурация"),
+            text = UiText.Translatable(R.string.measurement_type_oxygen_saturation),
             icon = UiIcon.Vector(imageVector = Icons.Default.Spo2),
+            unit = UiText.Translatable(R.string.unit_percent),
         ),
         BLOOD_PRESSURE(
-            text = UiText.NonTranslatable("Давление"),
+            text = UiText.Translatable(R.string.measurement_type_blood_pressure),
             icon = UiIcon.Vector(imageVector = Icons.Default.Blood),
+            unit = UiText.Translatable(R.string.unit_mm_hg),
         ),
         ;
     }
 }
 
 fun Measurement.asUi(): UiMeasurement {
-    val (value, unit) = when (this) {
-        is HeartRate -> "$pulse" to UiText.NonTranslatable(value = "уд/мин")
-        is BodyWeight -> "${weight.kg}" to UiText.NonTranslatable(value = "кг")
-        is BloodGlucose -> "$level" to UiText.NonTranslatable(value = "ммоль/л")
-        is OxygenSaturation -> "$saturation" to UiText.NonTranslatable(value = "%")
-        is BloodPressure -> "${systolic.toInt()}/${diastolic.toInt()}" to UiText.NonTranslatable(
-            value = "мм рт. ст."
-        )
-
-        is SystolicPressure -> "$systolic" to UiText.NonTranslatable(value = "мм рт. ст.")
-        is DiastolicPressure -> "$diastolic" to UiText.NonTranslatable(value = "мм рт. ст.")
-    }
-
     val type = when (this) {
         is BodyWeight -> UiMeasurement.Type.WEIGHT
         is HeartRate -> UiMeasurement.Type.HEART_RATE
@@ -129,6 +123,16 @@ fun Measurement.asUi(): UiMeasurement {
         is BloodPressure,
         is SystolicPressure,
         is DiastolicPressure -> UiMeasurement.Type.BLOOD_PRESSURE
+    }
+
+    val value = when (this) {
+        is HeartRate -> "$pulse"
+        is BodyWeight -> "${weight.kg}"
+        is BloodGlucose -> "$level"
+        is OxygenSaturation -> "$saturation"
+        is BloodPressure -> "${systolic.toInt()}/${diastolic.toInt()}"
+        is SystolicPressure -> "$systolic"
+        is DiastolicPressure -> "$diastolic"
     }
 
     val resource = when (val resource = resource) {
@@ -146,7 +150,7 @@ fun Measurement.asUi(): UiMeasurement {
     return UiMeasurement(
         id = id,
         type = type,
-        unit = unit,
+        unit = type.unit,
         time = createdAt,
         value = value,
         resource = resource,

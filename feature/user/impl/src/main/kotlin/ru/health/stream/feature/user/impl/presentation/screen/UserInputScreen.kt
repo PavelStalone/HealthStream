@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -47,13 +48,15 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
-import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.UiText
+import ru.health.stream.core.ui.model.localized
 import ru.health.stream.feature.user.impl.presentation.component.UserInputField
 import ru.health.stream.feature.user.impl.presentation.viewmodel.UserInputViewModel
 
@@ -65,6 +68,8 @@ internal fun UserInputScreen(
     modifier: Modifier = Modifier,
     viewModel: UserInputViewModel = hiltViewModel(),
 ) {
+    val locale = LocalLocale.current
+
     var showDatePicker by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -74,7 +79,7 @@ internal fun UserInputScreen(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable(value = "Профиль"),
+                title = UiText.Translatable(R.string.nav_profile),
                 navigationIcon = {
                     IconButton(
                         onClick = onBackClick
@@ -119,7 +124,7 @@ internal fun UserInputScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text(text = "Отмена")
+                    Text(text = stringResource(R.string.action_cancel))
                 }
             }
         ) {
@@ -135,44 +140,44 @@ internal fun UserInputScreen(
     ) {
         Text(
             modifier = Modifier.padding(top = 16.dp),
-            text = "Пожалуйста, укажите информацию о себе, чтобы алгоритмы могли учитывать ваши индивидуальные характеристики",
+            text = stringResource(R.string.profile_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.outline
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(text = "Основная информация")
+            SectionHeader(text = stringResource(R.string.profile_basic_info))
             UserInputField(
                 value = uiState.firstName,
                 onValueChange = viewModel::onFirstNameChange,
-                label = "Имя",
-                placeholder = "Введите ваше имя"
+                label = stringResource(R.string.profile_first_name),
+                placeholder = stringResource(R.string.profile_first_name_placeholder)
             )
             UserInputField(
                 value = uiState.lastName,
                 onValueChange = viewModel::onLastNameChange,
-                label = "Фамилия",
-                placeholder = "Введите вашу фамилию"
+                label = stringResource(R.string.profile_last_name),
+                placeholder = stringResource(R.string.profile_last_name_placeholder)
             )
             UserInputField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
-                label = "Почта",
+                label = stringResource(R.string.profile_email),
                 placeholder = "example@mail.com",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
-            val birthdayFormatter = remember {
+            val birthdayFormatter = remember(locale) {
                 LocalDate.Format {
                     dayOfMonth(Padding.NONE)
                     char(' ')
-                    monthName(MonthNames.RUSSIAN_FULL)
+                    monthName(MonthNames.localized(locale))
                     char(' ')
                     year()
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Дата рождения",
+                    text = stringResource(R.string.profile_birthday),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -200,17 +205,17 @@ internal fun UserInputScreen(
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(text = "Физические данные")
+            SectionHeader(text = stringResource(R.string.profile_physical_data))
             UserInputField(
                 value = uiState.heightCm,
                 onValueChange = viewModel::onHeightChange,
-                label = "Рост (см)",
+                label = stringResource(R.string.profile_height),
                 placeholder = "175",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             Column {
                 Text(
-                    text = "Пол",
+                    text = stringResource(R.string.profile_gender),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -218,12 +223,12 @@ internal fun UserInputScreen(
                     FilterChip(
                         selected = uiState.gender,
                         onClick = { viewModel.onGenderChange(true) },
-                        label = { Text(text = "Мужской") }
+                        label = { Text(text = stringResource(R.string.profile_gender_male)) }
                     )
                     FilterChip(
                         selected = !uiState.gender,
                         onClick = { viewModel.onGenderChange(false) },
-                        label = { Text(text = "Женский") }
+                        label = { Text(text = stringResource(R.string.profile_gender_female)) }
                     )
                 }
             }
@@ -250,7 +255,7 @@ internal fun UserInputScreen(
             ),
         ) {
             Text(
-                text = "Сохранить",
+                text = stringResource(R.string.action_save),
                 fontWeight = FontWeight.ExtraBold,
                 style = MaterialTheme.typography.bodyLarge,
             )

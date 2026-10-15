@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,9 +27,10 @@ import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.KeyboardArrowDown
-import ru.health.stream.core.ui.model.RUSSIAN_FULL
+import ru.health.stream.core.ui.model.localized
 import ru.health.stream.core.ui.theme.DeviceThemePreviews
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 
@@ -100,8 +100,9 @@ fun ExpandableHeader(
 @Composable
 @DeviceThemePreviews
 private fun ExpandableHeaderPreview() {
+    val locale = LocalLocale.current
     val formatter = DateTimeComponents.Format {
-        monthName(names = MonthNames.RUSSIAN_FULL)
+        monthName(names = MonthNames.localized(locale))
         char(value = ' ')
         dayOfMonth(Padding.NONE)
         chars(value = ", ")

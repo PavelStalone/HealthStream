@@ -26,6 +26,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
@@ -38,6 +40,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import ru.health.stream.core.monitor.logD
 import ru.health.stream.core.navigation.NavHost
 import ru.health.stream.core.starter.StarterActivity
+import ru.health.stream.core.ui.R
+import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.AccountCircle
@@ -51,6 +55,8 @@ import ru.health.stream.feature.report.api.navigation.ReportNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
 import ru.health.stream.permission.AndroidPermissionManager
 import ru.health.stream.permission.AndroidPermissionManagerProxy
+import ru.health.stream.presentation.viewmodel.LanguageViewModel
+import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -80,6 +86,9 @@ class MainActivity : StarterActivity() {
         enableEdgeToEdge()
         setContent {
             HealthStreamTheme {
+                val viewModel = hiltViewModel<LanguageViewModel>()
+
+                val selectedTag by viewModel.selectedTag.collectAsStateWithLifecycle()
                 val appParam by appParamRepository.appParamFlow.collectAsStateWithLifecycle(
                     initialValue = null
                 )
@@ -94,6 +103,7 @@ class MainActivity : StarterActivity() {
                     val customizer = remember(snackBarHostState) {
                         ScaffoldCustomizerImpl(snackBarHostState)
                     }
+                    val locale = selectedTag?.let(Locale::forLanguageTag) ?: LocalLocale.current
 
                     val isBottomBarVisible by remember(backStack) {
                         derivedStateOf {
@@ -105,7 +115,10 @@ class MainActivity : StarterActivity() {
                         customizer.clearAll()
                     }
 
-                    CompositionLocalProvider(LocalScaffoldCustomizer provides customizer) {
+                    CompositionLocalProvider(
+                        LocalLocale provides locale,
+                        LocalScaffoldCustomizer provides customizer,
+                    ) {
                         Scaffold(
                             modifier = Modifier.fillMaxSize(),
                             topBar = { customizer.topBarContent() },
@@ -193,11 +206,11 @@ private fun AppBottomBar(
                 icon = {
                     Icon(
                         imageVector = tab.icon,
-                        contentDescription = tab.title,
+                        contentDescription = stringResource(tab.titleRes),
                     )
                 },
                 label = {
-                    Text(text = tab.title)
+                    Text(text = stringResource(tab.titleRes))
                 },
             )
         }
@@ -205,25 +218,25 @@ private fun AppBottomBar(
 }
 
 private sealed class BottomTab(
-    val title: String,
+    val titleRes: Int,
     val screen: NavKey,
     val icon: ImageVector,
 ) {
 
     data object Vitals : BottomTab(
-        title = "Измерения",
+        titleRes = R.string.nav_vitals,
         screen = HomeNavKey,
         icon = Icons.Fill.Favorite,
     )
 
     data object Report : BottomTab(
-        title = "Отчет",
+        titleRes = R.string.nav_report,
         screen = ReportNavKey,
         icon = Icons.Default.Report,
     )
 
     data object Profile : BottomTab(
-        title = "Профиль",
+        titleRes = R.string.nav_profile,
         screen = UserNavKey,
         icon = Icons.Default.AccountCircle,
     )

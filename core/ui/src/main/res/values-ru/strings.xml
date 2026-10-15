@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Navigation Tabs -->
+    <string name="nav_vitals">Измерения</string>
+    <string name="nav_report">Отчет</string>
+    <string name="nav_profile">Профиль</string>
+    <string name="nav_settings">Настройки</string>
+
+    <!-- Common Actions / Buttons -->
+    <string name="action_save">Сохранить</string>
+    <string name="action_cancel">Отменить</string>
+    <string name="action_ok">ОК</string>
+    <string name="action_edit">Изменить</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_select_all">Выбрать все</string>
+    <string name="action_exclude_all">Исключить все</string>
+    <string name="action_generate_report">Сгенерировать отчет</string>
+    <string name="action_share_report">Отправить отчет</string>
+
+    <!-- Measurement Types -->
+    <string name="measurement_type_weight">Вес</string>
+    <string name="measurement_type_glucose">Глюкоза</string>
+    <string name="measurement_type_heart_rate">Пульс</string>
+    <string name="measurement_type_oxygen_saturation">Сатурация</string>
+    <string name="measurement_type_blood_pressure">Давление</string>
+    <string name="measurement_type_blood_glucose_full">Глюкоза в крови</string>
+    <string name="measurement_type_body_weight_full">Вес тела</string>
+    <string name="measurement_title_generic">Измерение</string>
+
+    <!-- Measurement Sources / Resources -->
+    <string name="resource_manual">Ручная запись</string>
+    <string name="resource_pulse_oximeter">Пульсоксиметр</string>
+    <string name="resource_weight_scale">Весы</string>
+    <string name="resource_bp_cuff">Тонометр</string>
+    <string name="resource_glucose_meter">Глюкометр</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">уд/мин</string>
+    <string name="unit_kg">кг</string>
+    <string name="unit_mmol_l">ммоль/л</string>
+    <string name="unit_percent">%%</string>
+    <string name="unit_mm_hg">мм рт. ст.</string>
+
+    <!-- Estimation Levels -->
+    <string name="level_low">Низко</string>
+    <string name="level_normal">Норма</string>
+    <string name="level_high">Высоко</string>
+    <string name="level_critical">Критично</string>
+
+    <!-- Periods -->
+    <string name="period_today">Сегодня</string>
+    <string name="period_yesterday">Вчера</string>
+    <string name="period_week">Неделя</string>
+    <string name="period_month">Месяц</string>
+    <string name="period_year">Год</string>
+
+    <!-- Messages and Headers -->
+    <string name="no_data_for_period">Нет данных за этот период</string>
+    <string name="no_measurements_yet">Пока нет ни одного измерения. Добавьте первое!</string>
+    <string name="section_vitals_trends">Динамика показателей</string>
+    <string name="section_measurement_history">История измерений</string>
+
+    <!-- Add Measurement Screen -->
+    <string name="add_measurement_subtitle">Заполните данные вручную</string>
+    <string name="add_measurement_category">Категория измерения</string>
+    <string name="add_measurement_indicators">Показатели и значения</string>
+    <string name="add_measurement_additional_data">Дополнительные данные</string>
+    <string name="add_measurement_note_placeholder">Любые полезные заметки…</string>
+    <string name="systolic_pressure_label">Систолическое</string>
+    <string name="diastolic_pressure_label">Диастолическое</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_intro">Пожалуйста, укажите информацию о себе, чтобы алгоритмы могли учитывать ваши индивидуальные характеристики</string>
+    <string name="profile_basic_info">Основная информация</string>
+    <string name="profile_first_name">Имя</string>
+    <string name="profile_first_name_placeholder">Введите ваше имя</string>
+    <string name="profile_last_name">Фамилия</string>
+    <string name="profile_last_name_placeholder">Введите вашу фамилию</string>
+    <string name="profile_email">Почта</string>
+    <string name="profile_birthday">Дата рождения</string>
+    <string name="profile_physical_data">Физические данные</string>
+    <string name="profile_height">Рост (см)</string>
+    <string name="profile_gender">Пол</string>
+    <string name="profile_gender_male">Мужской</string>
+    <string name="profile_gender_female">Женский</string>
+
+    <!-- Report Screen -->
+    <string name="report_configuration">Конфигурация</string>
+    <string name="report_period">Период</string>
+    <string name="report_format">Формат</string>
+    <string name="report_data_types">Типы данных</string>
+    <string name="report_data_section">Данные</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_general_header">Общие</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_data_sync_header">Синхронизация данных</string>
+    <string name="settings_health_connect_subtitle">Синхронизация данных в системе Android</string>
+
+    <!-- Validation Errors -->
+    <string name="validation_error_invalid_number">Некорректное число</string>
+    <string name="validation_error_positive_required">Значение должно быть положительным</string>
+    <string name="validation_error_greater_than_diastolic">Систолическое должно быть больше диастолического</string>
+    <string name="validation_error_pulse_too_high">Пульс не может превышать 220 уд/мин</string>
+    <string name="validation_error_glucose_negative">Уровень глюкозы не может быть отрицательным</string>
+    <string name="validation_error_saturation_range">Сатурация должна быть между 0 и 100</string>
+    <string name="validation_error_weight_positive">Вес должен быть положительным</string>
+    <string name="validation_error_first_name_empty">Имя не может быть пустым</string>
+    <string name="validation_error_last_name_empty">Фамилия не может быть пустой</string>
+    <string name="validation_error_birthday_future">Дата рождения не может быть в будущем</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_home_welcome">Добро пожаловать! Давайте познакомимся с функциями приложения</string>
+    <string name="onboarding_home_empty">Здесь будут появляться ваши измерения за неделю. Пока данных нет, вы видите это сообщение</string>
+    <string name="onboarding_home_filled_example">А вот так будут выглядеть данные. Линия на графике показывает среднее арифметическое, а диапазоны — минимальные и максимальные значения</string>
+    <string name="onboarding_estimation_badge">Здесь отображается оценка состояния для последнего измерения (Норма, Высоко и др.)</string>
+    <string name="onboarding_estimation_delay">Оценка ваших измерений может появиться не сразу. В течение 15 минут приложение произведёт расчёт и добавит новые оценки</string>
+    <string name="onboarding_week_card">Эта карточка отображает общую картину за неделю. Чтобы изучить данные подробнее, нажмите на неё</string>
+    <string name="onboarding_measurement_chart">На этом графике можно быстро оценить динамику ваших измерений</string>
+    <string name="onboarding_measurement_details">Здесь можно подробнее изучить значения и их оценку</string>
+    <string name="onboarding_expand_group">Нажмите на заголовок даты, чтобы развернуть список измерений</string>
+    <string name="onboarding_measurement_card">Это карточка измерения: здесь отображаются значение, заметка и оценка</string>
+    <string name="onboarding_swipe_actions">Чтобы отредактировать или удалить измерение, смахните карточку влево</string>
+    <string name="onboarding_add_button">Чтобы внести измерения вручную, нажмите на эту кнопку</string>
+    <string name="onboarding_report_intro">В этом разделе можно настроить и сформировать отчёт для анализа</string>
+    <string name="onboarding_report_date_range">Выберите нужный диапазон дат для формирования отчёта</string>
+    <string name="onboarding_report_format">Здесь можно изменить формат файла</string>
+    <string name="onboarding_report_types">Выберите типы измерений, которые должны войти в отчёт</string>
+    <string name="onboarding_report_exclude_block">Вы можете убирать целые блоки записей из отчёта</string>
+    <string name="onboarding_report_exclude_item">Нажав на карточку, можно исключить конкретную запись из отчёта</string>
+    <string name="onboarding_report_generate">Нажмите кнопку генерации, чтобы получить готовый отчёт</string>
+    <string name="onboarding_profile_intro">В профиле нужно указать свои данные, чтобы алгоритмы оценки показателей работали точнее</string>
+    <string name="onboarding_profile_incomplete">Если оставить профиль незаполненным, некоторые оценки будут недоступны</string>
+    <string name="onboarding_profile_save">Не забудьте нажать кнопку сохранения, чтобы применить изменения</string>
+    <string name="onboarding_finish">За здоровьем важно следить регулярно, а HealthStream поможет вам делать это просто и эффективно. Желаем отличного самочувствия!</string>
+    <string name="onboarding_demo_note">После пробежки</string>
+    <string name="onboarding_demo_date_start">1 мая 2026</string>
+    <string name="onboarding_demo_date_end">7 мая 2026</string>
+    <string name="onboarding_demo_birthday">1 января 1990</string>
+
+    <!-- PDF Report -->
+    <string name="report_pdf_title">Отчет здоровья</string>
+    <string name="report_pdf_created_by">Создан приложением HealthStream</string>
+    <string name="report_pdf_period_caption">Отчет создан за период</string>
+    <string name="report_pdf_user">Пользователь</string>
+    <string name="report_pdf_birth_day">День рождения</string>
+    <string name="report_pdf_age_years">Полных лет</string>
+    <string name="report_pdf_gender">Пол</string>
+    <string name="report_pdf_gender_male">мужской</string>
+    <string name="report_pdf_gender_female">женский</string>
+    <string name="report_pdf_height_cm">Рост</string>
+    <string name="report_pdf_summary_title">Сводка всех измерений</string>
+    <string name="report_pdf_summary_description">Здесь отображается общее количество отклонений, рассчитанное алгоритмом</string>
+    <string name="report_pdf_col_indicator">Показатель</string>
+    <string name="report_pdf_col_total">Всего</string>
+    <string name="report_pdf_col_values">Значения</string>
+    <string name="report_pdf_row_grand_total">ИТОГО</string>
+    <string name="report_pdf_table_title">Таблица измерений: %1$s</string>
+    <string name="report_pdf_table_description">Таблица со всеми измерениями, отсортированными по порядку. Оценка в строке отображается с учётом приоритета: сначала показываются измерения с самым высоким приоритетом за заданный период</string>
+    <string name="report_pdf_col_time">Время</string>
+    <string name="report_pdf_col_value">Значение</string>
+    <string name="report_pdf_col_assessment">Оценка</string>
+    <string name="report_pdf_col_note">Заметка</string>
+    <string name="report_pdf_chart_title">График показаний: %1$s</string>
+    <string name="report_pdf_chart_description">Данные представлены в сгруппированном виде. Диапазоны показывают минимальные и максимальные значения, а линия их среднее арифметическое</string>
+    <string name="report_pdf_medical_disclaimer">Оценки измерений могут быть неточными для вашего организма. Рекомендуем обратиться к врачу, если у вас возникают затруднения</string>
+    <string name="report_estimation_low">Понижено</string>
+    <string name="report_estimation_normal">Нормально</string>
+    <string name="report_estimation_high">Повышено</string>
+    <string name="report_estimation_critical">Критично</string>
+    <string name="report_type_heart_rate_long">Частота сердечных сокращений</string>
+    <string name="report_type_blood_pressure_long">Артериальное давление</string>
+    <string name="report_type_oxygen_saturation_long">Сатурация (SpO₂)</string>
+
+    <!-- Accessibility -->
+    <string name="cd_add_measurement_fab">Добавить измерение</string>
+</resources>

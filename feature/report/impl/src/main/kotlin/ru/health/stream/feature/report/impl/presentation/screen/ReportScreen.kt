@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
@@ -72,22 +73,24 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Calendar
 import ru.health.stream.core.ui.icon.default.KeyboardArrowDown
-import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiMeasurement
 import ru.health.stream.core.ui.model.UiText
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.drawIcon
+import ru.health.stream.core.ui.model.localized
 import ru.health.stream.core.ui.modifier.shimmer
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.report.model.ReportFormat
@@ -96,6 +99,7 @@ import ru.health.stream.feature.report.impl.presentation.viewmodel.MeasurementUi
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportEffect
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportUiState
 import ru.health.stream.feature.report.impl.presentation.viewmodel.ReportViewModel
+import java.util.Locale
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -105,6 +109,7 @@ internal fun ReportScreen(
     modifier: Modifier = Modifier,
     viewModel: ReportViewModel = hiltViewModel(),
 ) {
+    val locale = LocalLocale.current
     val context = LocalContext.current
     val timeZone = LocalTimeZone.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -123,6 +128,7 @@ internal fun ReportScreen(
         initialSelectedStartDateMillis = dateRange.start.toEpochMilliseconds(),
         initialSelectedEndDateMillis = dateRange.endInclusive.toEpochMilliseconds(),
     )
+    val dateFormatter = dateFormatter(locale)
 
     var showDatePicker by remember { mutableStateOf(false) }
     val reportButtonEnabled by remember {
@@ -136,7 +142,7 @@ internal fun ReportScreen(
     LaunchedEffect(Unit) {
         scaffoldCustomizer.setTopBar {
             TopBar(
-                title = UiText.NonTranslatable("Отчет"),
+                title = UiText.Translatable(R.string.nav_report),
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -175,10 +181,10 @@ internal fun ReportScreen(
             ) {
                 SectionHeader(
                     modifier = Modifier.padding(bottom = 4.dp),
-                    text = "Конфигурация",
+                    text = stringResource(R.string.report_configuration),
                 )
                 Text(
-                    text = "Период",
+                    text = stringResource(R.string.report_period),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 DateRange(
@@ -196,7 +202,7 @@ internal fun ReportScreen(
 
                 Text(
                     modifier = Modifier.padding(top = 4.dp),
-                    text = "Формат",
+                    text = stringResource(R.string.report_format),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 FlowRow(
@@ -215,7 +221,7 @@ internal fun ReportScreen(
 
                 Text(
                     modifier = Modifier.padding(top = 4.dp),
-                    text = "Типы данных",
+                    text = stringResource(R.string.report_data_types),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 FlowRow(
@@ -254,7 +260,7 @@ internal fun ReportScreen(
 
                             else -> {
                                 Text(
-                                    text = "Сгенерировать отчет",
+                                    text = stringResource(R.string.action_generate_report),
                                     fontWeight = FontWeight.ExtraBold,
                                     style = MaterialTheme.typography.bodyLarge,
                                 )
@@ -265,7 +271,7 @@ internal fun ReportScreen(
 
                 SectionHeader(
                     modifier = Modifier.padding(top = 8.dp),
-                    text = "Данные",
+                    text = stringResource(R.string.report_data_section),
                 )
             }
         }
@@ -287,7 +293,7 @@ internal fun ReportScreen(
                 if (state.measurementGroups.isEmpty()) {
                     item {
                         Text(
-                            text = "Нет данных за этот период",
+                            text = stringResource(R.string.no_data_for_period),
                             color = MaterialTheme.colorScheme.outline,
                             style = MaterialTheme.typography.bodyLarge,
                         )
@@ -329,13 +335,13 @@ internal fun ReportScreen(
                                         ) { isBanned ->
                                             if (isBanned) {
                                                 Text(
-                                                    text = "Выбрать все".uppercase(),
+                                                    text = stringResource(R.string.action_select_all).uppercase(),
                                                     fontWeight = FontWeight.Bold,
                                                     style = MaterialTheme.typography.labelSmall,
                                                 )
                                             } else {
                                                 Text(
-                                                    text = "Исключить все".uppercase(),
+                                                    text = stringResource(R.string.action_exclude_all).uppercase(),
                                                     fontWeight = FontWeight.Bold,
                                                     style = MaterialTheme.typography.labelSmall,
                                                 )
@@ -419,12 +425,12 @@ internal fun ReportScreen(
                         showDatePicker = false
                     }
                 ) {
-                    Text(text = "ОК")
+                    Text(text = stringResource(R.string.action_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text(text = "Отмена")
+                    Text(text = stringResource(R.string.action_cancel))
                 }
             }
         ) {
@@ -443,7 +449,7 @@ private fun shareFile(context: Context, uri: Uri, format: ReportFormat) {
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    context.startActivity(Intent.createChooser(intent, "Отправить отчет"))
+    context.startActivity(Intent.createChooser(intent, context.getString(R.string.action_share_report)))
 }
 
 @Composable
@@ -502,10 +508,10 @@ fun DateRange(
     }
 }
 
-private val dateFormatter = LocalDate.Format {
+private fun dateFormatter(locale: Locale) = LocalDate.Format {
     dayOfMonth(Padding.NONE)
     char(value = ' ')
-    monthName(names = MonthNames.RUSSIAN_FULL)
+    monthName(names = MonthNames.localized(locale))
     char(value = ' ')
     year()
 }

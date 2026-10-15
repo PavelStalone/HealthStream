@@ -3,6 +3,7 @@ package ru.health.stream.core.ui.model
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.EstimationLevel
 import ru.health.stream.core.ui.theme.ExtraHighLevelContainerColor
 import ru.health.stream.core.ui.theme.ExtraHighLevelContentColor
@@ -21,22 +22,22 @@ enum class UiLevel(
 ) {
 
     LOW(
-        text = UiText.NonTranslatable("Низко"),
+        text = UiText.Translatable(R.string.level_low),
         contentColor = LowLevelContentColor,
         containerColor = LowLevelContainerColor,
     ),
     NORMAL(
-        text = UiText.NonTranslatable("Норма"),
+        text = UiText.Translatable(R.string.level_normal),
         contentColor = NormalLevelContentColor,
         containerColor = NormalLevelContainerColor,
     ),
     HIGH(
-        text = UiText.NonTranslatable("Высоко"),
+        text = UiText.Translatable(R.string.level_high),
         contentColor = HighLevelContentColor,
         containerColor = HighLevelContainerColor,
     ),
     CRITICAL(
-        text = UiText.NonTranslatable("Критично"),
+        text = UiText.Translatable(R.string.level_critical),
         contentColor = ExtraHighLevelContentColor,
         containerColor = ExtraHighLevelContainerColor,
     ),

@@ -1,5 +1,6 @@
 package ru.health.stream.feature.measurement.impl.presentation.component.input
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -11,15 +12,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.datetime.Clock
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.vitals.model.EmptyMetadata
 import ru.health.stream.data.vitals.model.Resource
 import ru.health.stream.data.vitals.model.measurement.HeartRate
-import ru.health.stream.data.vitals.model.measurement.Measurement
 import kotlin.uuid.Uuid
 
 class HeartRateComponent(private val measurement: HeartRate? = null) : InputTypeComponent {
@@ -30,10 +32,10 @@ class HeartRateComponent(private val measurement: HeartRate? = null) : InputType
 
     override fun build(): Result<HeartRate> = runCatching {
         val heartRateUi = heartRateState.value
-        val pulse = requireNotNull(heartRateUi.pulse.toIntOrNull()) { "Input type is not correct" }
+        val pulse = heartRateUi.pulse.toIntOrNull() ?: throw ValidationError.InvalidNumber
 
-        require(pulse > 0) { "Pulse cannot be negative" }
-        require(pulse < 220) { "Pulse cannot be greater than 220" }
+        if (pulse <= 0) throw ValidationError.PositiveRequired
+        if (pulse >= 220) throw ValidationError.PulseTooHigh
 
         HeartRate(
             id = measurement?.id ?: Uuid.random().toString(),
@@ -43,7 +45,8 @@ class HeartRateComponent(private val measurement: HeartRate? = null) : InputType
             pulse = pulse,
         )
     }.onFailure { throwable ->
-        heartRateState.value = heartRateState.value.copy(error = throwable.message)
+        heartRateState.value =
+            heartRateState.value.copy(error = (throwable as? ValidationError)?.messageRes)
     }
 
     fun changePulse(value: String) {
@@ -62,14 +65,14 @@ class HeartRateComponent(private val measurement: HeartRate? = null) : InputType
             value = heartRate.pulse,
             shape = MaterialTheme.shapes.large,
             onValueChange = { value -> changePulse(value) },
-            label = { Text(text = "Пульс") },
+            label = { Text(text = stringResource(R.string.measurement_type_heart_rate)) },
             isError = heartRate.error != null,
-            supportingText = heartRate.error?.let { error ->
-                { Text(text = error) }
+            supportingText = heartRate.error?.let { errorRes ->
+                { Text(text = stringResource(errorRes)) }
             },
             suffix = {
                 Text(
-                    text = "уд/мин",
+                    text = stringResource(R.string.unit_bpm),
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalContentColor.current.copy(alpha = 0.6f)
                 )
@@ -83,7 +86,7 @@ class HeartRateComponent(private val measurement: HeartRate? = null) : InputType
     @Immutable
     private data class HeartRateUi(
         val pulse: String = "",
-        val error: String? = null,
+        @StringRes val error: Int? = null,
     )
 }
 

@@ -1,34 +1,38 @@
 package ru.health.stream.source.local.file.model
 
+import android.content.Context
 import com.itextpdf.kernel.colors.DeviceRgb
+import ru.health.stream.core.ui.R
 import ru.health.stream.data.vitals.model.Estimation
 
 internal enum class ReportEstimation(
-    val text: String,
     val color: DeviceRgb,
     val backgroundColor: DeviceRgb? = null,
 ) {
 
     LOW(
         color = ACCENT,
-        text = "Понижено",
         backgroundColor = LOW_LEVEL_CONTAINER,
     ),
     NORMAL(
         color = GREEN,
-        text = "Нормально",
     ),
     HIGH(
         color = YELLOW,
-        text = "Повышено",
         backgroundColor = HIGH_LEVEL_CONTAINER,
     ),
     CRITICAL(
         color = RED,
-        text = "Критично",
         backgroundColor = EXTRA_HIGH_LEVEL_CONTAINER,
     ),
     ;
+
+    fun localizedText(context: Context): String = when (this) {
+        LOW -> context.getString(R.string.report_estimation_low)
+        NORMAL -> context.getString(R.string.report_estimation_normal)
+        HIGH -> context.getString(R.string.report_estimation_high)
+        CRITICAL -> context.getString(R.string.report_estimation_critical)
+    }
 }
 
 internal fun Estimation.Level.asReportEstimation(): ReportEstimation = when (this) {

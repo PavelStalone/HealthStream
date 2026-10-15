@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,14 +59,15 @@ import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.MeasurementCard
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
+import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
 import ru.health.stream.core.ui.composition.LocalTimeZone
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
 import ru.health.stream.core.ui.icon.default.Bluetooth
-import ru.health.stream.core.ui.model.RUSSIAN_FULL
 import ru.health.stream.core.ui.model.asText
 import ru.health.stream.core.ui.model.asUi
+import ru.health.stream.core.ui.model.localized
 import ru.health.stream.core.ui.modifier.shimmer
 import ru.health.stream.data.vitals.model.measurement.Measurement
 import ru.health.stream.feature.measurement.impl.R
@@ -75,7 +77,9 @@ import ru.health.stream.feature.measurement.impl.presentation.model.asPeriod
 import ru.health.stream.feature.measurement.impl.presentation.viewmodel.MeasurementViewModel
 import ru.health.stream.feature.measurement.impl.presentation.viewmodel.MeasurementsState
 import ru.health.stream.source.remote.ble.BluetoothStatus
+import java.util.Locale
 import kotlin.reflect.KClass
+import ru.health.stream.core.ui.R as CoreUiR
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +91,7 @@ internal fun MeasurementScreen(
     modifier: Modifier = Modifier,
     startPeriod: UiPeriod = UiPeriod.Week,
 ) {
+    val locale = LocalLocale.current
     val context = LocalContext.current
     val timeZone = LocalTimeZone.current
     val scaffoldCustomizer = LocalScaffoldCustomizer.current
@@ -188,7 +193,7 @@ internal fun MeasurementScreen(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SectionHeader(text = "Динамика показателей")
+                SectionHeader(text = stringResource(CoreUiR.string.section_vitals_trends))
                 Card(
                     shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -205,7 +210,7 @@ internal fun MeasurementScreen(
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Text(
-                                            text = "Нет данных за этот период",
+                                            text = stringResource(CoreUiR.string.no_data_for_period),
                                             textAlign = TextAlign.Center,
                                             color = MaterialTheme.colorScheme.outline,
                                             style = MaterialTheme.typography.bodyLarge,
@@ -275,7 +280,7 @@ internal fun MeasurementScreen(
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        item { SectionHeader(text = "История измерений") }
+        item { SectionHeader(text = stringResource(CoreUiR.string.section_measurement_history)) }
 
         when (val state = measurementState) {
             MeasurementsState.Empty -> {
@@ -307,7 +312,7 @@ internal fun MeasurementScreen(
                                 .animateItem()
                                 .padding(top = 8.dp),
                             isExpanded = isExpanded,
-                            title = group.date.format(dateFormatter),
+                            title = group.date.format(dateFormatter(locale)),
                             onClick = { viewModel.expandMeasurement(group.id) },
                         )
                     }
@@ -351,13 +356,14 @@ internal fun MeasurementScreen(
     }
 }
 
-private val dateFormatter = LocalDate.Format {
+private fun dateFormatter(locale: Locale) = LocalDate.Format {
     dayOfMonth(Padding.NONE)
     char(value = ' ')
-    monthName(names = MonthNames.RUSSIAN_FULL)
+    monthName(names = MonthNames.localized(locale))
     char(value = ' ')
     year()
 }
+
 private val timeFormatter = LocalDateTime.Format {
     hour()
     char(value = ':')
