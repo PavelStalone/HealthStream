@@ -33,9 +33,7 @@ fun LanguageSettingsField(
     val viewModel = hiltViewModel<LanguageViewModel>()
     val languages = viewModel.supportedLanguages
 
-    val selectedTag by viewModel.selectedTag.collectAsStateWithLifecycle()
-    val currentLanguage = languages.firstOrNull { it.tag == selectedTag }
-        ?: languages.first()
+    val currentLanguage by viewModel.currentLanguage.collectAsStateWithLifecycle()
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -46,7 +44,7 @@ fun LanguageSettingsField(
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .clickable(
                     indication = null,
@@ -73,7 +71,7 @@ fun LanguageSettingsField(
         languages.forEach { language ->
             AnimatedVisibility(expanded) {
                 Column(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .clickable(
                             indication = null,

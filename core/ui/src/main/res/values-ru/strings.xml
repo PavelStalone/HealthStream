@@ -112,6 +112,10 @@
     <!-- Onboarding -->
     <string name="onboarding_home_welcome">Добро пожаловать! Давайте познакомимся с функциями приложения</string>
     <string name="onboarding_home_empty">Здесь будут появляться ваши измерения за неделю. Пока данных нет, вы видите это сообщение</string>
+    <string name="onboarding_home_ble_button">Чтобы включить автоматический сбор данных с ваших устройств, нажмите на эту кнопку</string>
+    <string name="onboarding_home_ble_button_active">Когда кнопка выглядит так, автоматический сбор данных с устройств включен. Повторное нажатие отключит его</string>
+    <string name="onboarding_home_fab_button">Чтобы внести измерения вручную, нажмите на эту кнопку</string>
+    <string name="onboarding_home_fab_button_active">Затем выберите нужный тип измерения</string>
     <string name="onboarding_home_filled_example">А вот так будут выглядеть данные. Линия на графике показывает среднее арифметическое, а диапазоны — минимальные и максимальные значения</string>
     <string name="onboarding_estimation_badge">Здесь отображается оценка состояния для последнего измерения (Норма, Высоко и др.)</string>
     <string name="onboarding_estimation_delay">Оценка ваших измерений может появиться не сразу. В течение 15 минут приложение произведёт расчёт и добавит новые оценки</string>
@@ -121,7 +125,6 @@
     <string name="onboarding_expand_group">Нажмите на заголовок даты, чтобы развернуть список измерений</string>
     <string name="onboarding_measurement_card">Это карточка измерения: здесь отображаются значение, заметка и оценка</string>
     <string name="onboarding_swipe_actions">Чтобы отредактировать или удалить измерение, смахните карточку влево</string>
-    <string name="onboarding_add_button">Чтобы внести измерения вручную, нажмите на эту кнопку</string>
     <string name="onboarding_report_intro">В этом разделе можно настроить и сформировать отчёт для анализа</string>
     <string name="onboarding_report_date_range">Выберите нужный диапазон дат для формирования отчёта</string>
     <string name="onboarding_report_format">Здесь можно изменить формат файла</string>

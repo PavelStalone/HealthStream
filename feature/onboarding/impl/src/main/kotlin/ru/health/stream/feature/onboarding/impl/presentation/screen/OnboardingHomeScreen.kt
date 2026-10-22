@@ -5,13 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +24,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.health.stream.core.chart.core.Drawable
 import ru.health.stream.core.chart.core.drawable.CubicLine
 import ru.health.stream.core.chart.core.drawable.Scatter
@@ -32,6 +36,8 @@ import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.icon.default.Report
 import ru.health.stream.core.ui.R
+import ru.health.stream.core.ui.icon.default.Bluetooth
+import ru.health.stream.core.ui.icon.default.Settings
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
 import ru.health.stream.core.ui.model.UiText
@@ -61,17 +67,40 @@ internal fun OnboardingHomeScreen(
                     IconButton(onClick = {}) {
                         Icon(
                             contentDescription = null,
-                            imageVector = Icons.Default.Report,
+                            imageVector = Icons.Default.Settings,
                         )
                     }
                 },
+                actions = {
+                    val isBleActive by remember(currentStep.id) {
+                        derivedStateOf { currentStep.id == "home_ble_active" }
+                    }
+
+                    FilledIconToggleButton(
+                        modifier = Modifier.onboardingTarget(
+                            "ble_button",
+                            onboardingScope
+                        ),
+                        checked = isBleActive,
+                        onCheckedChange = {}
+                    ) {
+                        Icon(Icons.Default.Bluetooth, null)
+                    }
+                }
             )
         }
 
         scaffoldCustomizer.setFab {
+            val isExpandedFab by remember(currentStep.id) {
+                derivedStateOf { currentStep.id == "home_fab_active" }
+            }
+
             AddMeasurementFab(
-                isExpanded = false,
-                measurementTypes = emptyList(),
+                modifier = Modifier.onboardingTarget(
+                    "add_measurement_fab",
+                    onboardingScope
+                ),
+                isExpanded = isExpandedFab,
                 onExpandedChange = {},
                 onMeasurementTypeClick = {},
             )

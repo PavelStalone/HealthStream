@@ -23,11 +23,17 @@ class LanguageViewModel @Inject constructor(
         Language("ru", "Русский"),
     )
 
-    private val _selectedTag = MutableStateFlow(LocaleHelper.getCurrentLanguageTag(context))
-    val selectedTag: StateFlow<String?> = _selectedTag.asStateFlow()
+    private val _currentLanguage = MutableStateFlow(
+        value = getLanguageByTag(tag = LocaleHelper.getCurrentLanguageTag(context))
+    )
+    val currentLanguage: StateFlow<Language> = _currentLanguage.asStateFlow()
 
     fun changeLanguage(tag: String?) {
         LocaleHelper.setAppLocale(context, tag)
-        _selectedTag.value = tag
+        _currentLanguage.value = getLanguageByTag(tag = tag)
     }
+
+    private fun getLanguageByTag(tag: String?): Language = supportedLanguages
+        .firstOrNull { it.tag == tag }
+        ?: supportedLanguages.first()
 }

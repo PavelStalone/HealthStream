@@ -1,8 +1,8 @@
 package ru.health.stream.data.report.model
 
-enum class ReportFormat {
+enum class ReportFormat(val enabled: Boolean = true) {
 
     PDF,
-    CSV,
+    CSV(false),
     ;
 }

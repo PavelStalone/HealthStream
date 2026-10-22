@@ -211,6 +211,7 @@ internal fun ReportScreen(
                 ) {
                     ReportFormat.entries.forEach { format ->
                         FilterChip(
+                            enabled = format.enabled,
                             selected = reportFormat == format,
                             onClick = { viewModel.onFormatChange(format) },
                             label = { Text(text = format.name) },
@@ -449,7 +450,12 @@ private fun shareFile(context: Context, uri: Uri, format: ReportFormat) {
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    context.startActivity(Intent.createChooser(intent, context.getString(R.string.action_share_report)))
+    context.startActivity(
+        Intent.createChooser(
+            intent,
+            context.getString(R.string.action_share_report)
+        )
+    )
 }
 
 @Composable
@@ -515,6 +521,7 @@ private fun dateFormatter(locale: Locale) = LocalDate.Format {
     char(value = ' ')
     year()
 }
+
 private val timeFormatter = LocalDateTime.Format {
     hour()
     char(value = ':')

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,14 +35,15 @@ import androidx.compose.ui.unit.dp
 import ru.health.stream.core.chart.core.drawable.CubicLine
 import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.core.chart.model.ChartPosition
+import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.component.AddMeasurementFab
 import ru.health.stream.core.ui.component.ExpandableHeader
 import ru.health.stream.core.ui.component.SectionHeader
 import ru.health.stream.core.ui.component.TopBar
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
-import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.ArrowBack
+import ru.health.stream.core.ui.icon.default.Bluetooth
 import ru.health.stream.core.ui.icon.default.Favorite
 import ru.health.stream.core.ui.model.UiIcon
 import ru.health.stream.core.ui.model.UiLevel
@@ -89,20 +91,21 @@ internal fun OnboardingMeasurementScreen(
                         )
                     }
                 },
+                actions = {
+                    FilledIconToggleButton(
+                        checked = false,
+                        onCheckedChange = {}
+                    ) {
+                        Icon(Icons.Default.Bluetooth, null)
+                    }
+                }
             )
         }
 
         scaffoldCustomizer.setFab {
-            val isOpenSection by remember(currentStep.id) {
-                derivedStateOf { currentStep.targetKey == "measurement_add_button" }
-            }
-
             AddMeasurementFab(
-                mainFabModifier = Modifier.onboardingTarget(
-                    "measurement_add_button",
-                    onboardingScope
-                ),
-                isExpanded = isOpenSection,
+                isExpanded = false,
+                measurementTypes = emptyList(),
                 onExpandedChange = {},
                 onMeasurementTypeClick = {},
             )

@@ -34,6 +34,30 @@ internal class OnboardingViewModel @Inject constructor(
             text = UiText.Translatable(R.string.onboarding_home_empty)
         ),
         OnboardingStep(
+            id = "home",
+            screen = LocalOnboardingNavKey.Home,
+            targetKey = "ble_button",
+            text = UiText.Translatable(R.string.onboarding_home_ble_button)
+        ),
+        OnboardingStep(
+            id = "home_ble_active",
+            screen = LocalOnboardingNavKey.Home,
+            targetKey = "ble_button",
+            text = UiText.Translatable(R.string.onboarding_home_ble_button_active)
+        ),
+        OnboardingStep(
+            id = "home",
+            screen = LocalOnboardingNavKey.Home,
+            targetKey = "add_measurement_fab",
+            text = UiText.Translatable(R.string.onboarding_home_fab_button)
+        ),
+        OnboardingStep(
+            id = "home_fab_active",
+            screen = LocalOnboardingNavKey.Home,
+            targetKey = "add_measurement_fab",
+            text = UiText.Translatable(R.string.onboarding_home_fab_button_active)
+        ),
+        OnboardingStep(
             id = "home_filled",
             screen = LocalOnboardingNavKey.Home,
             targetKey = "vitals_card",
@@ -87,12 +111,6 @@ internal class OnboardingViewModel @Inject constructor(
             screen = LocalOnboardingNavKey.Measurement,
             targetKey = "measurement_card",
             text = UiText.Translatable(R.string.onboarding_swipe_actions)
-        ),
-        OnboardingStep(
-            id = "measurement_expand",
-            screen = LocalOnboardingNavKey.Measurement,
-            targetKey = "measurement_add_button",
-            text = UiText.Translatable(R.string.onboarding_add_button)
         ),
         // Report Screen Steps
         OnboardingStep(

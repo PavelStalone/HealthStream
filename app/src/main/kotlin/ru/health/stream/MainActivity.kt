@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,6 +16,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -43,6 +43,7 @@ import ru.health.stream.core.starter.StarterActivity
 import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.composition.LocalLocale
 import ru.health.stream.core.ui.composition.LocalScaffoldCustomizer
+import ru.health.stream.core.ui.composition.ScaffoldCustomizerImpl
 import ru.health.stream.core.ui.icon.Icons
 import ru.health.stream.core.ui.icon.default.AccountCircle
 import ru.health.stream.core.ui.icon.default.Report
@@ -50,7 +51,7 @@ import ru.health.stream.core.ui.icon.fill.Favorite
 import ru.health.stream.core.ui.theme.HealthStreamTheme
 import ru.health.stream.data.setting.repository.AppParamRepository
 import ru.health.stream.feature.home.api.navigation.HomeNavKey
-import ru.health.stream.feature.onboarding.api.OnboardingNavKey
+import ru.health.stream.feature.onboarding.impl.presentation.screen.OnboardingScreen
 import ru.health.stream.feature.report.api.navigation.ReportNavKey
 import ru.health.stream.feature.user.api.navigation.UserNavKey
 import ru.health.stream.permission.AndroidPermissionManager
@@ -88,80 +89,85 @@ class MainActivity : StarterActivity() {
             HealthStreamTheme {
                 val viewModel = hiltViewModel<LanguageViewModel>()
 
-                val selectedTag by viewModel.selectedTag.collectAsStateWithLifecycle()
+                val language by viewModel.currentLanguage.collectAsStateWithLifecycle()
                 val appParam by appParamRepository.appParamFlow.collectAsStateWithLifecycle(
                     initialValue = null
                 )
 
-                if (appParam != null) {
-                    val startDestination = remember {
-                        if (appParam?.isFirstStart == true) OnboardingNavKey else HomeNavKey
-                    }
-
-                    val backStack = rememberNavBackStack(startDestination)
-                    val snackBarHostState = remember { SnackbarHostState() }
-                    val customizer = remember(snackBarHostState) {
-                        ScaffoldCustomizerImpl(snackBarHostState)
-                    }
-                    val locale = selectedTag?.let(Locale::forLanguageTag) ?: LocalLocale.current
-
-                    val isBottomBarVisible by remember(backStack) {
-                        derivedStateOf {
-                            backStack.none { it == OnboardingNavKey }
-                        }
-                    }
-
-                    LaunchedEffect(backStack.last()) {
-                        customizer.clearAll()
-                    }
-
-                    CompositionLocalProvider(
-                        LocalLocale provides locale,
-                        LocalScaffoldCustomizer provides customizer,
-                    ) {
-                        Scaffold(
-                            modifier = Modifier.fillMaxSize(),
-                            topBar = { customizer.topBarContent() },
-                            floatingActionButton = {
-                                AnimatedContent(
-                                    targetState = customizer.fabContent,
-                                    transitionSpec = {
-                                        fadeIn(animationSpec = tween(100)).togetherWith(
-                                            fadeOut(animationSpec = tween(90))
-                                        )
-                                    }
-                                ) { it() }
-                            },
-                            snackbarHost = {
-                                SnackbarHost(customizer.snackBarHostState) { data ->
-                                    customizer.snackBarContent(data)
-                                }
-                            },
-                            bottomBar = {
-                                AnimatedVisibility(visible = isBottomBarVisible) {
-                                    AppBottomBar(
-                                        backStack = backStack,
-                                        onTabClick = { screen ->
-                                            navigationRouter.popTo(HomeNavKey)
-                                            navigationRouter.push(screen)
-                                        }
-                                    )
-                                }
-                            }
-                        ) { innerPadding ->
-                            NavHost(
-                                backStack = backStack,
-                                router = navigationRouter,
-                            ) { backStack, onBack, router ->
-                                NavDisplay(
-                                    modifier = Modifier.padding(paddingValues = innerPadding),
-                                    onBack = onBack,
-                                    backStack = backStack,
-                                    sceneStrategy = DialogSceneStrategy(),
-                                    entryProvider = entryProvider {
-                                        entryProviders.forEach { provider -> provider(router) }
-                                    },
+                Surface(Modifier.fillMaxSize()) {
+                    AnimatedContent(targetState = appParam) { appParam ->
+                        if (appParam != null) {
+                            if (appParam.isFirstStart) {
+                                OnboardingScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    onFinish = { },
                                 )
+                            } else {
+                                val backStack = rememberNavBackStack(HomeNavKey)
+                                val snackBarHostState = remember { SnackbarHostState() }
+                                val customizer = remember(snackBarHostState) {
+                                    ScaffoldCustomizerImpl(snackBarHostState)
+                                }
+                                val locale =
+                                    language.tag?.let(Locale::forLanguageTag)
+                                        ?: LocalLocale.current
+
+                                LaunchedEffect(backStack.last()) {
+                                    customizer.clearAll()
+                                }
+
+                                CompositionLocalProvider(
+                                    LocalLocale provides locale,
+                                    LocalScaffoldCustomizer provides customizer,
+                                ) {
+                                    Scaffold(
+                                        modifier = Modifier.fillMaxSize(),
+                                        topBar = { customizer.topBarContent() },
+                                        floatingActionButton = {
+                                            AnimatedContent(
+                                                targetState = customizer.fabContent,
+                                                transitionSpec = {
+                                                    fadeIn(animationSpec = tween(100)).togetherWith(
+                                                        fadeOut(animationSpec = tween(90))
+                                                    )
+                                                }
+                                            ) { it() }
+                                        },
+                                        snackbarHost = {
+                                            SnackbarHost(customizer.snackBarHostState) { data ->
+                                                customizer.snackBarContent(data)
+                                            }
+                                        },
+                                        bottomBar = {
+                                            AppBottomBar(
+                                                backStack = backStack,
+                                                onTabClick = { screen ->
+                                                    navigationRouter.popTo(HomeNavKey)
+                                                    navigationRouter.push(screen)
+                                                }
+                                            )
+                                        }
+                                    ) { innerPadding ->
+                                        NavHost(
+                                            backStack = backStack,
+                                            router = navigationRouter,
+                                        ) { backStack, onBack, router ->
+                                            NavDisplay(
+                                                modifier = Modifier.padding(paddingValues = innerPadding),
+                                                onBack = onBack,
+                                                backStack = backStack,
+                                                sceneStrategy = DialogSceneStrategy(),
+                                                entryProvider = entryProvider {
+                                                    entryProviders.forEach { provider ->
+                                                        provider(
+                                                            router
+                                                        )
+                                                    }
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

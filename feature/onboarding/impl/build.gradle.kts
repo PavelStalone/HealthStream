@@ -9,8 +9,6 @@ android {
 }
 
 dependencies {
-    api(projects.feature.onboarding.api)
-
     implementation(projects.data.vitals)
     implementation(projects.data.report)
     implementation(projects.data.setting)
