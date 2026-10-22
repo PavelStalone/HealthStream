@@ -12,6 +12,8 @@ android {
 
         versionCode = 1
         versionName = "1.0"
+
+        manifestPlaceholders["appName"] = "HealthStream"
     }
 
     buildTypes {
@@ -21,6 +23,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        debug {
+            applicationIdSuffix = ".debug"
+            manifestPlaceholders["appName"] = "DebugHealthStream"
         }
     }
 }

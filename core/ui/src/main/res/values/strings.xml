@@ -112,6 +112,10 @@
     <!-- Onboarding -->
     <string name="onboarding_home_welcome">Welcome! Let\u2019s explore the app\u2019s features</string>
     <string name="onboarding_home_empty">Your weekly measurements will appear here. Until there is no data, you see this message</string>
+    <string name="onboarding_home_ble_button">To enable automatic data collection from your devices, tap this button</string>
+    <string name="onboarding_home_ble_button_active">When the button looks like this, automatic data collection from devices is enabled. Tapping it again will turn it off</string>
+    <string name="onboarding_home_fab_button">To enter measurements manually, tap this button</string>
+    <string name="onboarding_home_fab_button_active">Then select the desired measurement type</string>
     <string name="onboarding_home_filled_example">This is how the data will look. The line shows the arithmetic average, and the ranges show minimum and maximum values</string>
     <string name="onboarding_estimation_badge">Here the condition assessment for the latest measurement is shown (Normal, High, etc.)</string>
     <string name="onboarding_estimation_delay">Assessments may not appear immediately. Within 15 minutes the app will calculate and add new assessments</string>
@@ -121,7 +125,6 @@
     <string name="onboarding_expand_group">Tap the date heading to expand the list of measurements</string>
     <string name="onboarding_measurement_card">This is a measurement card: it shows the value, note and assessment</string>
     <string name="onboarding_swipe_actions">To edit or delete a measurement, swipe the card to the left</string>
-    <string name="onboarding_add_button">To add measurements manually, tap this button</string>
     <string name="onboarding_report_intro">In this section you can configure and generate a report for analysis</string>
     <string name="onboarding_report_date_range">Choose the required date range for generating the report</string>
     <string name="onboarding_report_format">Here you can change the file format</string>
