@@ -13,15 +13,15 @@
 <div align="center">
 <table width="100%">
   <tr>
-    <th width="50%" align="center">Онбординг и отчет</th>
+    <th width="50%" align="center">Онбординг</th>
     <th width="50%" align="center">Мониторинг данных</th>
   </tr>
   <tr>
     <td align="center">
-      <video src="https://github.com/user-attachments/assets/779bf075-22ac-4f4a-81e3-0634cf3904bd"></video>
+      <video src="https://github.com/user-attachments/assets/2b7ab734-0f35-4d5d-943b-d15902254acc"></video>
     </td>
     <td align="center">
-      <video src="https://github.com/user-attachments/assets/8da13e7b-37f5-4b07-ba20-fee961792652"></video>
+      <video src="https://github.com/user-attachments/assets/6fc4a7a1-20bf-4ee7-8c69-85c25d4df05f"></video>
     </td>
   </tr>
 </table>
