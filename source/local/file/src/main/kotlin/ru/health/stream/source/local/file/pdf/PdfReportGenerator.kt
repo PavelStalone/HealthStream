@@ -1,6 +1,7 @@
 package ru.health.stream.source.local.file.pdf
 
 import android.content.Context
+import android.graphics.fonts.SystemFonts
 import androidx.collection.FloatFloatPair
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -38,6 +39,7 @@ import ru.health.stream.core.chart.core.drawable.CubicLine
 import ru.health.stream.core.chart.core.drawable.Scatter
 import ru.health.stream.core.chart.model.ChartPosition
 import ru.health.stream.core.chart.model.path.DashPathEffect
+import ru.health.stream.core.monitor.logD
 import ru.health.stream.core.monitor.logV
 import ru.health.stream.core.ui.R
 import ru.health.stream.core.ui.model.localized
@@ -77,6 +79,10 @@ internal class PdfReportGenerator(
     private val calculateMeasurementSummaryUseCase: CalculateMeasurementSummaryUseCase,
 ) : ReportGenerator {
 
+    private val testChar by lazy {
+        context.getString(R.string.report_pdf_created_by).first()
+    }
+
     override suspend fun generate(
         user: User?,
         outputStream: OutputStream,
@@ -95,16 +101,33 @@ internal class PdfReportGenerator(
 
         PdfWriter(outputStream).use { writer ->
             PdfDocument(writer).use { pdf ->
+                val availableFonts = SystemFonts.getAvailableFonts()
+
+                val safeFont = availableFonts
+                    .firstOrNull { it.file?.absolutePath?.let(::isFontCompatible) == true }
+                    ?.file?.absolutePath
+                    ?: "/system/fonts/Roboto-Regular.ttf"
+                val regularFont = availableFonts
+                    .filter { it.file?.name?.contains("regular", true) == true }
+                    .firstOrNull { isFontCompatible(it.file!!.absolutePath) }
+                    ?.file?.absolutePath
+                    ?: safeFont
+                val boldItalicFont = availableFonts
+                    .filter { it.file?.name?.contains("bold", true) == true }
+                    .firstOrNull { isFontCompatible(it.file!!.absolutePath) }
+                    ?.file?.absolutePath
+                    ?: safeFont
+
                 val font = requireNotNull(
                     PdfFontFactory.createFont(
-                        context.assets.open("fonts/arial.otf").readBytes(),
+                        regularFont,
                         PdfEncodings.IDENTITY_H,
                         PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
                     )
                 )
                 val fontBold = requireNotNull(
                     PdfFontFactory.createFont(
-                        context.assets.open("fonts/arial_bolditalic.otf").readBytes(),
+                        boldItalicFont,
                         PdfEncodings.IDENTITY_H,
                         PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
                     )
@@ -163,6 +186,19 @@ internal class PdfReportGenerator(
             }
         }
     }
+
+    private fun isFontCompatible(fontPath: String): Boolean = runCatching {
+        logD("isFontCompatible: $fontPath")
+
+        val fontProgram = PdfFontFactory.createFont(fontPath)
+
+        val glyph = requireNotNull(fontProgram.getGlyph(testChar.code))
+        val glyphSym = requireNotNull(fontProgram.getGlyph('₂'.code))
+        require(glyph.code != 0)
+        require(glyphSym.code != 0)
+
+        logD("isFontCompatible: $fontPath - true")
+    }.isSuccess
 
     private fun buildTitlePage(
         user: User?,

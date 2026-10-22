@@ -12,6 +12,17 @@
 #   public *;
 #}
 
+-dontwarn com.itextpdf.eutrustedlistsresources.**
+-dontwarn com.itextpdf.bouncycastle.BouncyCastleFactory
+-dontwarn sharpen.config.**
+
+-keep class com.itextpdf.** {
+    public protected *;
+}
+-keep class com.itextpdf.commons.utils.** { *; }
+
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
