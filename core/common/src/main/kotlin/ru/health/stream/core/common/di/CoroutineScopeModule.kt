@@ -13,10 +13,6 @@ import javax.inject.Singleton
 @Retention(AnnotationRetention.BINARY)
 annotation class ApplicationCoroutineScope
 
-@Qualifier
-@Retention(AnnotationRetention.RUNTIME)
-annotation class IoCoroutineScope
-
 @Module
 @InstallIn(SingletonComponent::class)
 object CoroutineScopeModule {

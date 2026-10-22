@@ -88,7 +88,7 @@ class MainActivity : StarterActivity() {
             HealthStreamTheme {
                 val viewModel = hiltViewModel<LanguageViewModel>()
 
-                val selectedTag by viewModel.selectedTag.collectAsStateWithLifecycle()
+                val language by viewModel.currentLanguage.collectAsStateWithLifecycle()
                 val appParam by appParamRepository.appParamFlow.collectAsStateWithLifecycle(
                     initialValue = null
                 )
@@ -103,7 +103,7 @@ class MainActivity : StarterActivity() {
                     val customizer = remember(snackBarHostState) {
                         ScaffoldCustomizerImpl(snackBarHostState)
                     }
-                    val locale = selectedTag?.let(Locale::forLanguageTag) ?: LocalLocale.current
+                    val locale = language.tag?.let(Locale::forLanguageTag) ?: LocalLocale.current
 
                     val isBottomBarVisible by remember(backStack) {
                         derivedStateOf {
