@@ -4,6 +4,10 @@ plugins {
 
 android {
     namespace = "ru.health.stream.core.monitor"
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {

@@ -27,5 +27,7 @@ inline fun log(
     throwable: Throwable? = null,
     vararg arguments: Any?
 ) {
-    Timber.log(priority, throwable, message, arguments)
+    if (BuildConfig.DEBUG) {
+        Timber.log(priority, throwable, message, arguments)
+    }
 }
